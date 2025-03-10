@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anotações de partidas de CLASSICOS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --primary-color: #007bff;
+            --header-bg: #007bff;
+            --secondary-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --border-color: #dee2e6;
+            --card-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --primary-color: #0056b3;
+            --header-bg: #0056b3;
+            --secondary-color: #218838;
+            --warning-color: #e0a800;
+            --danger-color: #c82333;
+            --border-color: #495057;
+            --card-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 100;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .filters {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filters-title {
+            width: 100%;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .filters input, .filters select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            flex: 1;
+            min-width: 180px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .btn-filter {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-export {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-export:hover, .btn-filter:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .form-title {
+            width: 100%;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--primary-color);
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 280px;
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-row input, .form-row select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px; /* Tamanho ideal para evitar zoom em iOS */
+        }
+
+        .score-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .score-group {
+            flex: 1;
+            min-width: 280px;
+            margin-bottom: 15px;
+        }
+
+        .score-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .score-inputs input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .score-separator {
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        .first-goal-group {
+            flex: 1;
+            min-width: 280px;
+            margin-bottom: 15px;
+        }
+
+        .first-goal-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .add-button-container {
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .add-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-width: 180px;
+            font-size: 16px;
+        }
+
+        .add-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-manager {
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .prediction-manager input {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+
+        .prediction-manager button {
+            background-color: var(--warning-color);
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .add-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .add-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            padding: 15px;
+            background-color: var(--header-bg);
+            color: white;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .notes-list {
+            margin-top: 20px;
+        }
+
+        .note-item {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 4px;
+            align-items: center;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .note-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-buttons-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-btn, .edit-btn {
+            padding: 8px 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+        }
+
+        .edit-btn {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+
+        .delete-btn:hover, .edit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .pagination {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 40px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .pagination button.active {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .export-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .export-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .export-modal {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .export-modal h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .export-options {
+            margin: 20px 0;
+        }
+
+        .export-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .export-option input {
+            margin-right: 10px;
+        }
+
+        .export-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .export-filename {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .export-confirm-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .export-cancel-btn {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .export-progress {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .export-progress-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .export-progress-fill {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .export-status {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-row {
+                display: none;
+            }
+            
+            .note-item {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .note-item span {
+                padding: 5px 0;
+                display: flex;
+                justify-content: space-between;
+            }
+            
+            .note-item span::before {
+                content: attr(data-label);
+                font-weight: bold;
+                margin-right: 10px;
+            }
+            
+            .form-row input, .form-row select {
+                min-width: 100%;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filters input, .filters select {
+                min-width: 100%;
+            }
+            
+            .action-buttons {
+                justify-content: center;
+            }
+            
+            .action-button {
+                flex: 1;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            
+            .export-modal {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .form-group, .score-group, .first-goal-group {
+                min-width: 100%;
+            }
+            
+            .add-button {
+                width: 100%;
+                padding: 16px;
+            }
+            
+            .score-inputs {
+                flex-direction: row;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Tema</button>
+    <div class="container">
+        <h1>Anotações de partidas de CLASSICOS</h1>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filters-title">Filtros:</div>
+            <input type="text" id="filterTeam" placeholder="Filtrar por Time">
+            <select id="filterPrediction">
+                <option value="">Todos os Palpites</option>
+                <option value="Vitória">Vitória</option>
+                <option value="Empate">Empate</option>
+                <option value="Derrota">Derrota</option>
+            </select>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-button btn-filter" onclick="applyFilters()">
+                Filtrar
+            </button>
+            <button class="action-button btn-export" onclick="showExportModal()">
+                Exportar
+            </button>
+        </div>
+
+        <!-- Formulário -->
+        <div class="form-row">
+            <div class="form-title">Adicionar Nova Anotação:</div>
+            <div class="form-group">
+                <label class="form-label">Partida:</label>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <input type="text" id="teamNameA" placeholder="Time A">
+                    <input type="text" id="teamNameB" placeholder="Time B">
+                </div>
+            </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="prediction">Palpite: <button type="button" onclick="togglePredictionManager()" style="float: right; padding: 2px 8px; background: var(--warning-color); border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">+</button></label>
+                <select id="prediction" style="margin-bottom: 5px;">
+                    <option value="">Selecione o palpite</option>
+                </select>
+                <div id="predictionManager" class="prediction-manager" style="display: none; margin-top: 5px;">
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="newPrediction" placeholder="Nova opção" style="flex: 1;">
+                        <button onclick="addPredictionOption()" style="padding: 4px 8px;">+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="score-group">
+                <label class="form-label">Placar Final (FT):</label>
+                <div class="score-inputs">
+                    <input type="number" id="ftScoreHome" placeholder="Casa" min="0">
+                    <span class="score-separator">-</span>
+                    <input type="number" id="ftScoreAway" placeholder="Fora" min="0">
+                </div>
+            </div>
+            
+            <div class="score-group">
+                <label class="form-label">Placar 1º Tempo (HT):</label>
+                <div class="score-inputs">
+                    <input type="number" id="htScoreHome" placeholder="Casa" min="0">
+                    <span class="score-separator">-</span>
+                    <input type="number" id="htScoreAway" placeholder="Fora" min="0">
+                </div>
+            </div>
+            
+            <div class="first-goal-group">
+                <label class="form-label">Primeiro Gol:</label>
+                <div class="first-goal-inputs">
+                    <select id="firstGoalTime">
+                        <option value="">Tempo do 1º Gol</option>
+                        <option value="HT">Primeiro Tempo (HT)</option>
+                        <option value="FT">Segundo Tempo (FT)</option>
+                    </select>
+                    <select id="firstGoalTeam">
+                        <option value="">Quem Marcou</option>
+                        <option value="Casa">Time da Casa</option>
+                        <option value="Fora">Time Visitante</option>
+                        <option value="Nenhum">Nenhum (0-0)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="datetime">Data e Hora:</label>
+                <input type="datetime-local" id="datetime" value="">
+            </div>
+            
+            <div class="add-button-container">
+                <button class="add-button" onclick="addOrUpdateNote()">Adicionar</button>
+            </div>
+        </div>
+
+        <!-- Cabeçalho da Tabela -->
+        <div class="header-row">
+            <span>Time</span>
+            <span>Palpite</span>
+            <span>FT</span>
+            <span>HT</span>
+            <span>1º Gol</span>
+            <span>Data/Hora</span>
+            <span>Ações</span>
+        </div>
+
+        <!-- Lista de Anotações -->
+        <div class="notes-list" id="notesList"></div>
+
+        <!-- Paginação -->
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Modal de Exportação -->
+    <div class="export-overlay" id="exportOverlay">
+        <div class="export-modal">
+            <h2>Exportar Anotações</h2>
+            <div class="export-options">
+                <div class="export-option">
+                    <input type="radio" id="exportAll" name="exportOption" value="all" checked>
+                    <label for="exportAll">Exportar todas as anotações</label>
+                </div>
+                <div class="export-option">
+                    <input type="radio" id="exportFiltered" name="exportOption" value="filtered">
+                    <label for="exportFiltered">Exportar apenas anotações filtradas</label>
+                </div>
+            </div>
+            <div>
+                <label for="filename">Nome do arquivo:</label>
+                <input type="text" id="filename" class="export-filename" value="Anotacoes_Jogo">
+            </div>
+            <div class="export-progress" id="exportProgress">
+                <div class="export-progress-bar">
+                    <div class="export-progress-fill" id="exportProgressFill"></div>
+                </div>
+                <div class="export-status" id="exportStatus">Preparando...</div>
+            </div>
+            <div class="export-buttons">
+                <button class="export-cancel-btn" onclick="hideExportModal()">Cancelar</button>
+                <button class="export-confirm-btn" onclick="performExport()">Exportar Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificação -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Declare variables first to avoid ReferenceError
+        let currentEditNote = null;
+        let notes = [];
+        let filteredNotes = [];
+        let predictionOptions = ["Vitória", "Empate", "Derrota"];
+        const itemsPerPage = 5;
+        let currentPage = 1;
+
+        // Usando localStorage ao invés de armazenamento em memória
+        const storage = {
+            getItem: function(key) {
+                return localStorage.getItem(key);
+            },
+            setItem: function(key, value) {
+                localStorage.setItem(key, value);
+            }
+        };
+
+        // Tema
+        function toggleTheme() {
+            const body = document.body;
+            body.dataset.theme = body.dataset.theme === 'dark' ? '' : 'dark';
+            storage.setItem('theme', body.dataset.theme);
+        }
+
+        // Load theme
+        if (storage.getItem('theme') === 'dark') {
+            document.body.dataset.theme = 'dark';
+        }
+
+        // Storage functions
+        function saveNotesToStorage() {
+            storage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function loadNotesFromStorage() {
+            const storedNotes = storage.getItem('notes');
+            notes = storedNotes ? JSON.parse(storedNotes) : [];
+            filteredNotes = [...notes];
+        }
+
+        // Salvar opções de palpites no localStorage
+        function savePredictionOptions() {
+            storage.setItem('predictionOptions', JSON.stringify(predictionOptions));
+        }
+
+        // Adicionar dados de demonstração se não houver dados existentes
+        function loadDemoData() {
+            if (notes.length === 0) {
+                const demoNotes = [
+                    {
+                        id: 1,
+                        teamName: "Barcelona vs Real Madrid",
+                        prediction: "Vitória",
+                        ftScore: "3-1",
+                        htScore: "1-0",
+                        firstGoal: "HT | Casa",
+                        datetime: new Date().toISOString()
+                    },
+                    {
+                        id: 2,
+                        teamName: "Liverpool vs Manchester United",
+                        prediction: "Empate",
+                        ftScore: "2-2",
+                        htScore: "1-1",
+                        firstGoal: "HT | Fora",
+                        datetime: new Date().toISOString()
+                    },
+                    {
+                        id: 3,
+                        teamName: "Bayern Munich vs Borussia Dortmund",
+                        prediction: "Vitória",
+                        ftScore: "4-2",
+                        htScore: "2-1",
+                        firstGoal: "HT | Casa",
+                        datetime: new Date().toISOString()
+                    }
+                ];
+                notes = demoNotes;
+                filteredNotes = [...notes];
+                saveNotesToStorage();
+            }
+        }
+        
+        // Funções para gerenciar opções de palpites
+        function togglePredictionManager() {
+            const manager = document.getElementById('predictionManager');
+            manager.style.display = manager.style.display === 'none' ? 'block' : 'none';
+            
+            if (manager.style.display === 'block') {
+                renderPredictionOptions();
+            }
+        }
+        
+        function renderPredictionOptions() {
+            const select = document.getElementById('prediction');
+            // Mantém apenas a primeira opção (placeholder)
+            select.innerHTML = '<option value="">Selecione o palpite</option>';
+            
+            // Adiciona as opções atualizadas
+            predictionOptions.forEach(option => {
+                const optElement = document.createElement('option');
+                optElement.value = option;
+                optElement.textContent = option;
+                select.appendChild(optElement);
+            });
+        }
+        
+        function addPredictionOption() {
+            const input = document.getElementById('newPrediction');
+            const value = input.value.trim();
+            
+            if (value && !predictionOptions.includes(value)) {
+                predictionOptions.push(value);
+                input.value = '';
+                renderPredictionOptions();
+                savePredictionOptions();
+                showNotification(`Opção "${value}" adicionada!`, 'success');
+                togglePredictionManager(); // Fecha o gerenciador após adicionar
+            } else if (predictionOptions.includes(value)) {
+                showNotification('Esta opção já existe!', 'error');
+            }
+        }
+        
+        function updatePredictionSelect() {
+            renderPredictionOptions();
+        }
+        
+        function updatePredictionSelect() {
+            const select = document.getElementById('prediction');
+            const currentValue = select.value;
+            
+            // Limpa as opções existentes exceto a primeira (placeholder)
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Adiciona as opções atualizadas
+            predictionOptions.forEach(option => {
+                const optElement = document.createElement('option');
+                optElement.value = option;
+                optElement.textContent = option;
+                select.appendChild(optElement);
+            });
+            
+            // Tenta restaurar o valor selecionado se possível
+            if (predictionOptions.includes(currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
+        // Adicionar/Editar
+        function addOrUpdateNote() {
+            const teamA = document.getElementById('teamNameA').value.trim();
+            const teamB = document.getElementById('teamNameB').value.trim();
+            const teamName = `${teamA} vs ${teamB}`;
+            const prediction = document.getElementById('prediction').value;
+
+            if (!teamA || !teamB) {
+                showNotification('Preencha os nomes dos times!', 'error');
+                return;
+            }
+            const ftScoreHome = document.getElementById('ftScoreHome').value.trim();
+            const ftScoreAway = document.getElementById('ftScoreAway').value.trim();
+            const htScoreHome = document.getElementById('htScoreHome').value.trim();
+            const htScoreAway = document.getElementById('htScoreAway').value.trim();
+            const firstGoalTime = document.getElementById('firstGoalTime').value;
+            const firstGoalTeam = document.getElementById('firstGoalTeam').value;
+            const datetime = document.getElementById('datetime').value;
+
+            if (!teamName || !prediction || !ftScoreHome || !ftScoreAway || !htScoreHome || !htScoreAway || !firstGoalTime || !firstGoalTeam || !datetime) {
+                showNotification('Preencha todos os campos!', 'error');
+                return;
+            }
+
+            // Formata os placares
+            const ftScore = `${ftScoreHome}-${ftScoreAway}`;
+            const htScore = `${htScoreHome}-${htScoreAway}`;
+            // Formata o primeiro gol
+            const firstGoal = `${firstGoalTime} | ${firstGoalTeam}`;
+
+            const note = {
+                id: currentEditNote ? currentEditNote.id : Date.now(),
+                teamName,
+                prediction,
+                ftScore,
+                htScore,
+                firstGoal,
+                datetime: formatDateForStorage(datetime)
+            };
+
+            if (currentEditNote) {
+                const index = notes.findIndex(n => n.id === currentEditNote.id);
+                notes[index] = note;
+                showNotification('Anotação atualizada com sucesso!', 'success');
+            } else {
+                notes.push(note);
+                showNotification('Anotação adicionada com sucesso!', 'success');
+            }
+
+            saveNotesToStorage();
+            clearForm();
+            applyFilters();
+            updatePagination();
+        }
+
+        // Renderizar notas
+        function renderNotes(filtered = null) {
+            const list = document.getElementById('notesList');
+            list.innerHTML = '';
+            
+            const notesToRender = filtered || filteredNotes;
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            notesToRender.slice(start, end).forEach(note => {
+                const div = document.createElement('div');
+                div.className = 'note-item';
+                
+                // Versão para desktop e móvel
+                div.innerHTML = `
+                    <span data-label="Time:">${note.teamName}</span>
+                    <span data-label="Palpite:">${note.prediction}</span>
+                    <span data-label="FT:">${note.ftScore}</span>
+                    <span data-label="HT:">${note.htScore}</span>
+                    <span data-label="1º Gol:">${note.firstGoal}</span>
+                    <span data-label="Data/Hora:">${formatDate(note.datetime)}</span>
+                    <div class="action-buttons-container">
+                        <button class="edit-btn" onclick="editNote(${note.id})">Editar</button>
+                        <button class="delete-btn" onclick="deleteNote(${note.id})">Excluir</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // Editar nota
+        function editNote(id) {
+            currentEditNote = notes.find(note => note.id === id);
+            
+            // Separa os times da string "Time A vs Time B"
+            const [teamA, teamB] = currentEditNote.teamName.split(' vs ');
+            document.getElementById('teamNameA').value = teamA;
+            document.getElementById('teamNameB').value = teamB;
+            document.getElementById('prediction').value = currentEditNote.prediction;
+            
+            // Processa os placares separados
+            if (currentEditNote.ftScore.includes('-')) {
+                const [ftHome, ftAway] = currentEditNote.ftScore.split('-');
+                document.getElementById('ftScoreHome').value = ftHome;
+                document.getElementById('ftScoreAway').value = ftAway;
+            }
+            
+            if (currentEditNote.htScore.includes('-')) {
+                const [htHome, htAway] = currentEditNote.htScore.split('-');
+                document.getElementById('htScoreHome').value = htHome;
+                document.getElementById('htScoreAway').value = htAway;
+            }
+            
+            // Processa o primeiro gol
+            if (currentEditNote.firstGoal.includes('|')) {
+                const [firstGoalTime, firstGoalTeam] = currentEditNote.firstGoal.split('|').map(part => part.trim());
+                document.getElementById('firstGoalTime').value = firstGoalTime;
+                document.getElementById('firstGoalTeam').value = firstGoalTeam;
+            } else {
+                // Fallback para dados antigos
+                document.getElementById('firstGoalTime').value = '';
+                document.getElementById('firstGoalTeam').value = '';
+            }
+            
+            document.getElementById('datetime').value = reverseFormatDate(currentEditNote.datetime);
+            
+            // Scroll para o formulário
+            document.querySelector('.form-row').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Excluir nota
+        function deleteNote(id) {
+            if (confirm('Tem certeza que deseja excluir esta anotação?')) {
+                notes = notes.filter(note => note.id !== id);
+                saveNotesToStorage();
+                applyFilters();
+                updatePagination();
+                showNotification('Anotação excluída com sucesso!', 'success');
+            }
+        }
+
+        // Limpar formulário
+        function clearForm() {
+            document.getElementById('teamNameA').value = '';
+            document.getElementById('teamNameB').value = '';
+            document.getElementById('prediction').value = '';
+            document.getElementById('ftScoreHome').value = '';
+            document.getElementById('ftScoreAway').value = '';
+            document.getElementById('htScoreHome').value = '';
+            document.getElementById('htScoreAway').value = '';
+            document.getElementById('firstGoalTime').value = '';
+            document.getElementById('firstGoalTeam').value = '';
+            document.getElementById('datetime').value = new Date().toISOString().slice(0, 16);
+            currentEditNote = null;
+        }
+
+        // Filtros
+        function applyFilters() {
+            const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
+            const predictionFilter = document.getElementById('filterPrediction').value;
+
+            filteredNotes = notes.filter(note => {
+                return (
+                    note.teamName.toLowerCase().includes(teamFilter) &&
+                    (predictionFilter === '' || note.prediction === predictionFilter)
+                );
+            });
+
+            currentPage = 1;
+            renderNotes(filteredNotes);
+            updatePagination(filteredNotes.length);
+            
+            const found = filteredNotes.length;
+            const total = notes.length;
+            
+            if (teamFilter || predictionFilter) {
+                showNotification(`Encontradas ${found} de ${total} anotações`, 'info');
+            }
+        }
+
+        // Modal de Exportação
+        function showExportModal() {
+            document.getElementById('exportOverlay').classList.add('active');
+            document.getElementById('filename').value = `Anotacoes_Jogo_${new Date().toISOString().slice(0, 10)}`;
+        }
+
+        function hideExportModal() {
+            document.getElementById('exportOverlay').classList.remove('active');
+            document.getElementById('exportProgress').style.display = 'none';
+            document.getElementById('exportProgressFill').style.width = '0%';
+            document.getElementById('exportStatus').textContent = 'Preparando...';
+        }
+
+        // Exportar para Excel
+        function performExport() {
+            try {
+                const exportType = document.querySelector('input[name="exportOption"]:checked').value;
+                const filename = document.getElementById('filename').value.trim() || 'Anotacoes_Jogo';
+                
+                const notesToExport = exportType === 'all' ? notes : filteredNotes;
+                
+                if (notesToExport.length === 0) {
+                    showNotification('Nenhuma anotação para exportar!', 'error');
+                    hideExportModal();
+                    return;
+                }
+
+                // Mostrar progresso
+                const progressElement = document.getElementById('exportProgress');
+                const progressFill = document.getElementById('exportProgressFill');
+                const statusElement = document.getElementById('exportStatus');
+                
+                progressElement.style.display = 'block';
+                
+                // Simular progresso
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    progressFill.style.width = `${progress}%`;
+                    statusElement.textContent = `Processando... ${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        statusElement.textContent = 'Exportação concluída!';
+                        
+                        setTimeout(() => {
+                            completeExport(notesToExport, filename);
+                        }, 500);
+                    }
+                }, 100);
+            } catch (error) {
+                showNotification('Erro ao exportar: ' + error.message, 'error');
+                console.error(error);
+                hideExportModal();
+            }
+        }
+
+        function completeExport(notesToExport, filename) {
+            try {
+                const wsData = notesToExport.map(note => ({
+                    Time: note.teamName,
+                    Palpite: note.prediction,
+                    FT: note.ftScore,
+                    HT: note.htScore,
+                    Primeiro_Gol: note.firstGoal,
+                    Data_Hora: formatDate(note.datetime)
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Anotacoes");
+                XLSX.writeFile(wb, `${filename}.xlsx`);
+                
+                hideExportModal();
+                showNotification(`Exportação concluída com sucesso! (${notesToExport.length} registros)`, 'success');
+            } catch (error) {
+                showNotification('Erro ao finalizar exportação: ' + error.message, 'error');
+                console.error(error);
+                hideExportModal();
+            }
+        }
+
+        // Notificações
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            
+            // Definir cor com base no tipo
+            notification.style.backgroundColor = 
+                type === 'success' ? 'var(--secondary-color)' :
+                type === 'error' ? 'var(--danger-color)' :
+                type === 'info' ? 'var(--primary-color)' : 'var(--primary-color)';
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Paginação
+        function updatePagination(total = filteredNotes.length) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            const totalPages = Math.ceil(total / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                return;
+            }
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === currentPage) {
+                    btn.classList.add('active');
+                }
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderNotes();
+                    updatePagination(total);
+                };
+                pagination.appendChild(btn);
+            }
+        }
+
+        // Formatação de datas
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(',', '');
+        }
+
+        function reverseFormatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toISOString().slice(0, 16);
+            } catch (e) {
+                // Fallback para o formato existente
+                if (typeof dateString === 'string' && dateString.includes('/')) {
+                    const [datePart, timePart] = dateString.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    const [hour, minute] = timePart.split(':');
+                    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+                }
+                return new Date().toISOString().slice(0, 16);
+            }
+        }
+
+        function formatDateForStorage(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toISOString();
+            } catch (e) {
+                return new Date().toISOString();
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Definir a data atual no campo de data/hora
+            document.getElementById('datetime').value = new Date().toISOString().slice(0, 16);
+            
+            // Carregar anotações do armazenamento
+            loadNotesFromStorage();
+            
+            // Carregar opções de palpites do armazenamento
+            const storedOptions = storage.getItem('predictionOptions');
+            if (storedOptions) {
+                predictionOptions = JSON.parse(storedOptions);
+                updatePredictionSelect();
+            }
+            
+            // Carregar dados de demonstração se não houver dados
+            loadDemoData();
+            
+            // Renderizar as anotações iniciais
+            renderNotes();
+            
+            // Atualizar o filtro de palpites também
+            updateFilterPredictionOptions();
+            
+            // Inicializar paginação
+            updatePagination();
+        });
+        
+        // Atualizar as opções de filtro de palpite para incluir todas as opções personalizadas
+        function updateFilterPredictionOptions() {
+            const filterSelect = document.getElementById('filterPrediction');
+            
+            // Manter apenas a primeira opção (Todos os Palpites)
+            filterSelect.innerHTML = '<option value="">Todos os Palpites</option>';
+            
+            // Adicionar todas as opções de palpites disponíveis
+            predictionOptions.forEach(option => {
+                const optElement = document.createElement('option');
+                optElement.value = option;
+                optElement.textContent = option;
+                filterSelect.appendChild(optElement);
+            });
+        }
+    </script>
+</body>
+</html>

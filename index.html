@@ -870,6 +870,47 @@
 
             .form-group, .score-group, .first-goal-group {
                 min-width: 100%;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+            }
+
+            .form-group input,
+            .form-group select,
+            .first-goal-group select {
+                width: 100% !important;
+                max-width: 200px !important;
+                text-align: center !important;
+            }
+
+            .input-container {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                width: 100% !important;
+            }
+
+            .form-title {
+                text-align: center !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+                font-size: 1.4em !important;
+            }
+
+            div[style*="flex-direction: column"] {
+                align-items: center !important;
+                width: 100% !important;
+                max-width: 200px !important;
+                margin: 0 auto !important;
+            }
+
+            .form-label {
+                text-align: center !important;
+                width: 100% !important;
+                display: block !important;
             }
             
             .add-button {
@@ -887,6 +928,17 @@
                 width: 100% !important;
                 max-width: 300px !important;
                 margin: 0 auto !important;
+                background: rgba(var(--primary-color-rgb), 0.03) !important;
+                border-radius: 12px !important;
+            }
+
+            #predictionManager {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                width: 100% !important;
+                max-width: 200px !important;
+                margin: 10px auto !important;
             }
             
             .score-inputs {
@@ -949,6 +1001,14 @@
             .ia-button {
                 width: 100%;
             }
+        }
+
+        .team-button.active, .time-button.active {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border-color: var(--primary-color) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(var(--primary-color-rgb), 0.3) !important;
         }
     </style>
 </head>
@@ -1132,7 +1192,7 @@
                                 border: 1px solid var(--border-color);
                                 border-radius: 8px;
                                 background: var(--bg-color);
-                                color: var(--text-color);
+                                color: var (--text-color);
                                 transition: all 0.3s ease;
                             ">
                         </div>
@@ -1154,43 +1214,93 @@
                         display: block;
                         color: var(--primary-color);
                     ">Primeiro Gol:</label>
+                    
                     <div class="first-goal-inputs" style="
                         display: flex;
                         flex-direction: column;
                         gap: 15px;
                         margin-top: 15px;
                     ">
-                        <select id="firstGoalTime" style="
-                            width: 100%;
-                            padding: 14px;
-                            border: 1px solid var(--border-color);
-                            border-radius: 10px;
-                            background: var(--bg-color);
-                            color: var(--text-color);
-                            font-size: 16px;
-                            transition: all 0.3s ease;
-                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-                        ">
-                            <option value="">Tempo do 1º Gol</option>
-                            <option value="HT">HT</option>
-                            <option value="FT">FT</option>
-                        </select>
-                        <select id="firstGoalTeam" style="
-                            width: 100%;
-                            padding: 14px;
-                            border: 1px solid var(--border-color);
-                            border-radius: 10px;
-                            background: var(--bg-color);
-                            color: var(--text-color);
-                            font-size: 16px;
-                            transition: all 0.3s ease;
-                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-                        ">
-                            <option value="">Quem Marcou</option>
-                            <option value="Casa">Casa</option>
-                            <option value="Fora">Fora</option>
-                            <option value="Nenhum">Nenhum</option>
-                        </select>
+                        <!-- Botões para Tempo do Primeiro Gol (HT ou FT) -->
+                        <div class="goal-time-buttons">
+                            <label class="form-label" style="font-size: 0.9em;">Tempo:</label>
+                            <div class="button-group" style="
+                                display: flex;
+                                gap: 10px;
+                                margin-top: 8px;
+                            ">
+                                <button type="button" class="time-button" data-value="HT" onclick="selectFirstGoalTime(this)" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    border: 1px solid var(--border-color);
+                                    background: var(--bg-color);
+                                    color: var(--text-color);
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    transition: all 0.3s ease;
+                                ">1º Tempo</button>
+                                <button type="button" class="time-button" data-value="FT" onclick="selectFirstGoalTime(this)" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    border: 1px solid var(--border-color);
+                                    background: var(--bg-color);
+                                    color: var(--text-color);
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    transition: all 0.3s ease;
+                                ">2º Tempo</button>
+                            </div>
+                        </div>
+
+                        <!-- Botões para Quem Marcou o Primeiro Gol -->
+                        <div class="goal-team-buttons">
+                            <label class="form-label" style="font-size: 0.9em;">Quem Marcou:</label>
+                            <div class="button-group" style="
+                                display: flex;
+                                gap: 10px;
+                                margin-top: 8px;
+                            ">
+                                <button type="button" class="team-button" data-value="Casa" onclick="selectFirstGoalTeam(this)" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    border: 1px solid var(--border-color);
+                                    background: var(--bg-color);
+                                    color: var(--text-color);
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    transition: all 0.3s ease;
+                                ">Casa</button>
+                                <button type="button" class="team-button" data-value="Fora" onclick="selectFirstGoalTeam(this)" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    border: 1px solid var(--border-color);
+                                    background: var(--bg-color);
+                                    color: var(--text-color);
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    transition: all 0.3s ease;
+                                ">Fora</button>
+                                <button type="button" class="team-button" data-value="Nenhum" onclick="selectFirstGoalTeam(this)" style="
+                                    flex: 1;
+                                    padding: 12px;
+                                    border: 1px solid var(--border-color);
+                                    background: var(--bg-color);
+                                    color: var(--text-color);
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    transition: all 0.3s ease;
+                                ">Nenhum</button>
+                            </div>
+                        </div>
+
+                        <!-- Campos ocultos para armazenar os valores selecionados -->
+                        <input type="hidden" id="firstGoalTime" value="">
+                        <input type="hidden" id="firstGoalTeam" value="">
                     </div>
                 </div>
                 
@@ -1646,6 +1756,29 @@
             
             // Scroll para o formulário
             document.querySelector('.form-row').scrollIntoView({ behavior: 'smooth' });
+            
+            // Atualizar os botões de primeiro gol
+            if (currentEditNote.firstGoal && currentEditNote.firstGoal.includes('|')) {
+                const [firstGoalTime, firstGoalTeam] = currentEditNote.firstGoal.split('|').map(part => part.trim());
+                
+                // Resetar todos os botões
+                document.querySelectorAll('.time-button, .team-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Ativar botões corretos
+                document.querySelectorAll('.time-button').forEach(btn => {
+                    if (btn.getAttribute('data-value') === firstGoalTime) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                document.querySelectorAll('.team-button').forEach(btn => {
+                    if (btn.getAttribute('data-value') === firstGoalTeam) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
         }
 
         // Excluir nota
@@ -1689,6 +1822,11 @@
             document.getElementById('firstGoalTeam').value = '';
             document.getElementById('datetime').value = new Date().toISOString().slice(0, 16);
             currentEditNote = null;
+            
+            // Resetar todos os botões de primeiro gol
+            document.querySelectorAll('.time-button, .team-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
         }
 
         // Filtros
@@ -2764,6 +2902,33 @@
                     }
                 }
             };
+        }
+        
+        // Funções para selecionar o primeiro gol com botões
+        function selectFirstGoalTime(button) {
+            // Remove a classe ativa de todos os botões de tempo
+            document.querySelectorAll('.time-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Adiciona classe ativa ao botão clicado
+            button.classList.add('active');
+            
+            // Atualiza o valor no campo hidden
+            document.getElementById('firstGoalTime').value = button.getAttribute('data-value');
+        }
+        
+        function selectFirstGoalTeam(button) {
+            // Remove a classe ativa de todos os botões de equipe
+            document.querySelectorAll('.team-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Adiciona classe ativa ao botão clicado
+            button.classList.add('active');
+            
+            // Atualiza o valor no campo hidden
+            document.getElementById('firstGoalTeam').value = button.getAttribute('data-value');
         }
     </script>
 </body>

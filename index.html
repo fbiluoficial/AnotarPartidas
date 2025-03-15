@@ -10,26 +10,30 @@
     <style>
         :root {
             --bg-color: #ffffff;
-            --text-color: #333333;
-            --primary-color: #007bff;
-            --header-bg: #007bff;
-            --secondary-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --border-color: #dee2e6;
-            --card-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            --text-color: #2a2a2a;
+            --primary-color: #4a90e2;
+            --primary-color-rgb: 74, 144, 226;
+            --header-bg: linear-gradient(135deg, #4a90e2, #357abd);
+            --secondary-color: #50E3C2;
+            --secondary-color-rgb: 80, 227, 194;
+            --warning-color: #F7B731;
+            --danger-color: #FC5C65;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --form-bg: rgba(255, 255, 255, 0.95);
         }
 
         [data-theme="dark"] {
-            --bg-color: #1a1a1a;
+            --bg-color: #121212;
             --text-color: #e0e0e0;
-            --primary-color: #0056b3;
-            --header-bg: #0056b3;
-            --secondary-color: #218838;
-            --warning-color: #e0a800;
-            --danger-color: #c82333;
-            --border-color: #495057;
-            --card-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            --primary-color: #5C9CE6;
+            --header-bg: linear-gradient(135deg, #5C9CE6, #4882c2);
+            --secondary-color: #64D2A8;
+            --warning-color: #FFA94D;
+            --danger-color: #FF6B6B;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --form-bg: rgba(18, 18, 18, 0.95);
         }
 
         body {
@@ -103,16 +107,26 @@
         }
 
         .action-button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             min-width: 120px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.25);
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.35);
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
         }
 
         .btn-filter {
@@ -133,43 +147,130 @@
 
         .form-row {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin: 30px 0;
             border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.02);
+            padding: 35px;
+            border-radius: 24px;
+            background: var(--form-bg);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(var(--primary-color-rgb), 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px 4px 0 0;
+        }
+
+        .input-container {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .score-section {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        .form-row:hover {
+            box-shadow: 0 12px 40px rgba(var(--primary-color-rgb), 0.15);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
         }
 
         .form-title {
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.3em;
             color: var(--primary-color);
+            letter-spacing: 0.5px;
         }
 
         .form-group {
             flex: 1;
             min-width: 280px;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
         }
 
         .form-label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: var(--text-color);
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            opacity: 0.9;
         }
 
         .form-row input, .form-row select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background-color: var(--bg-color);
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background-color: rgba(255,255,255,0.05);
             color: var(--text-color);
-            font-size: 16px; /* Tamanho ideal para evitar zoom em iOS */
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .form-row input:focus, .form-row select:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(var(--primary-color-rgb), 0.2),
+                       inset 0 2px 4px rgba(0,0,0,0.05);
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: rgba(var(--primary-color-rgb), 0.05);
+        }
+
+        [data-theme="dark"] .form-row input,
+        [data-theme="dark"] .form-row select {
+            background-color: rgba(0,0,0,0.2);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        [data-theme="dark"] .form-row input:focus,
+        [data-theme="dark"] .form-row select:focus {
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .form-title {
+            width: 100%;
+            margin-bottom: 25px;
+            font-weight: bold;
+            font-size: 1.4em;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.1);
+        }
+
+        .form-label {
+            font-size: 0.95em;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .score-container {
@@ -221,22 +322,50 @@
         }
 
         .add-button {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 15px 30px;
+            padding: 16px 32px;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
-            min-width: 180px;
+            min-width: 200px;
             font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.3);
+        }
+
+        .add-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
         }
 
         .add-button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.4);
+        }
+
+        .add-button:hover::before {
+            left: 100%;
+        }
+
+        .add-button:active {
+            transform: translateY(-1px);
         }
 
         .prediction-manager {
@@ -772,72 +901,224 @@
             </button>
         </div>
 
-        <!-- Formulário -->
+        <!-- Container do Formulário -->
         <div class="form-row">
-            <div class="form-title">Adicionar Nova Anotação:</div>
-            <div class="form-group">
-                <label class="form-label">Partida:</label>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <input type="text" id="teamNameA" placeholder="Time A">
-                    <input type="text" id="teamNameB" placeholder="Time B">
-                </div>
-            </div>
-            </div>
+            <h2 class="form-title" style="text-align: center; color: var(--primary-color); font-size: 1.8em; margin-bottom: 30px;">
+                Cadastro de Nova Partida
+            </h2>
             
-            <div class="form-group">
-                <label class="form-label" for="prediction">Palpite: <button type="button" onclick="togglePredictionManager()" style="float: right; padding: 2px 8px; background: var(--warning-color); border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">+</button></label>
-                <select id="prediction" style="margin-bottom: 5px;">
-                    <option value="">Selecione o palpite</option>
-                </select>
-                <div id="predictionManager" class="prediction-manager" style="display: none; margin-top: 5px;">
-                    <div style="display: flex; gap: 5px;">
-                        <input type="text" id="newPrediction" placeholder="Nova opção" style="flex: 1;">
-                        <button onclick="addPredictionOption()" style="padding: 4px 8px;">+</button>
+            <!-- Container dos campos de entrada -->
+            <div class="input-container" style="background: rgba(var(--primary-color-rgb), 0.05); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                <div class="form-group">
+                    <label class="form-label">Partida:</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="teamNameA" placeholder="Time A">
+                        <input type="text" id="teamNameB" placeholder="Time B">
                     </div>
                 </div>
-            </div>
             
-            <div class="score-group">
-                <label class="form-label">Placar Final (FT):</label>
-                <div class="score-inputs">
-                    <input type="number" id="ftScoreHome" placeholder="Casa" min="0">
-                    <span class="score-separator">-</span>
-                    <input type="number" id="ftScoreAway" placeholder="Fora" min="0">
-                </div>
-            </div>
-            
-            <div class="score-group">
-                <label class="form-label">Placar 1º Tempo (HT):</label>
-                <div class="score-inputs">
-                    <input type="number" id="htScoreHome" placeholder="Casa" min="0">
-                    <span class="score-separator">-</span>
-                    <input type="number" id="htScoreAway" placeholder="Fora" min="0">
-                </div>
-            </div>
-            
-            <div class="first-goal-group">
-                <label class="form-label">Primeiro Gol:</label>
-                <div class="first-goal-inputs">
-                    <select id="firstGoalTime">
-                        <option value="">Tempo do 1º Gol</option>
-                        <option value="HT">HT</option>
-                        <option value="FT">FT</option>
+                <div class="form-group">
+                    <label class="form-label" for="prediction">Palpite: <button type="button" onclick="togglePredictionManager()" style="float: right; padding: 2px 8px; background: var(--warning-color); border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">+</button></label>
+                    <select id="prediction" style="margin-bottom: 5px; color: var(--text-color); background-color: black;">
+                        <option value="">Selecione o palpite</option>
                     </select>
-                    <select id="firstGoalTeam">
-                        <option value="">Quem Marcou</option>
-                        <option value="Casa">Casa</option>
-                        <option value="Fora">Fora</option>
-                        <option value="Nenhum">Nenhum</option>
-                    </select>
+                    <div id="predictionManager" class="prediction-manager" style="display: none; margin-top: 5px;">
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="newPrediction" placeholder="Nova opção" style="flex: 1;">
+                            <button onclick="addPredictionOption()" style="padding: 4px 8px;">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-section" style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 25px;
+                    margin: 25px 0;
+                    padding: 25px;
+                    background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.05), rgba(var(--secondary-color-rgb), 0.05));
+                    border-radius: 20px;
+                    position: relative;
+                    overflow: hidden;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid var(--border-color);
+                    box-shadow: 0 8px 32px rgba(var(--primary-color-rgb), 0.1);
+                ">
+                    <div class="score-group" style="
+                        padding: 20px;
+                        background: rgba(var(--primary-color-rgb), 0.03);
+                        border-radius: 16px;
+                        transition: all 0.3s ease;
+                        border: 1px solid var(--border-color);
+                    ">
+                        <label class="form-label" style="
+                            font-size: 1.1em;
+                            margin-bottom: 15px;
+                            display: block;
+                        ">Placar Final (FT):</label>
+                        <div class="score-inputs" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 15px;
+                            margin-top: 15px;
+                            background: var(--bg-color);
+                            padding: 15px;
+                            border-radius: 12px;
+                            border: 1px solid var(--border-color);
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        ">
+                            <input type="number" id="ftScoreHome" placeholder="Casa" min="0" style="
+                                flex: 1;
+                                min-width: 0;
+                                padding: 12px;
+                                font-size: 18px;
+                                text-align: center;
+                                border: 1px solid var(--border-color);
+                                border-radius: 8px;
+                                background: var(--bg-color);
+                                color: var(--text-color);
+                                transition: all 0.3s ease;
+                            ">
+                            <span class="score-separator" style="
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: var(--primary-color);
+                                padding: 0 10px;
+                            ">×</span>
+                            <input type="number" id="ftScoreAway" placeholder="Fora" min="0" style="
+                                flex: 1;
+                                min-width: 0;
+                                padding: 12px;
+                                font-size: 18px;
+                                text-align: center;
+                                border: 1px solid var(--border-color);
+                                border-radius: 8px;
+                                background: var(--bg-color);
+                                color: var(--text-color);
+                                transition: all 0.3s ease;
+                            ">
+                        </div>
+                    </div>
+                    
+                    <div class="score-group" style="
+                        padding: 20px;
+                        background: rgba(var(--primary-color-rgb), 0.03);
+                        border-radius: 16px;
+                        transition: all 0.3s ease;
+                        border: 1px solid var(--border-color);
+                    ">
+                        <label class="form-label" style="
+                            font-size: 1.1em;
+                            margin-bottom: 15px;
+                            display: block;
+                        ">Placar 1º Tempo (HT):</label>
+                        <div class="score-inputs" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 15px;
+                            margin-top: 15px;
+                            background: var(--bg-color);
+                            padding: 15px;
+                            border-radius: 12px;
+                            border: 1px solid var(--border-color);
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        ">
+                            <input type="number" id="htScoreHome" placeholder="Casa" min="0" style="
+                                flex: 1;
+                                min-width: 0;
+                                padding: 12px;
+                                font-size: 18px;
+                                text-align: center;
+                                border: 1px solid var(--border-color);
+                                border-radius: 8px;
+                                background: var(--bg-color);
+                                color: var(--text-color);
+                                transition: all 0.3s ease;
+                            ">
+                            <span class="score-separator" style="
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: var(--primary-color);
+                                padding: 0 10px;
+                            ">×</span>
+                            <input type="number" id="htScoreAway" placeholder="Fora" min="0" style="
+                                flex: 1;
+                                min-width: 0;
+                                padding: 12px;
+                                font-size: 18px;
+                                text-align: center;
+                                border: 1px solid var(--border-color);
+                                border-radius: 8px;
+                                background: var(--bg-color);
+                                color: var(--text-color);
+                                transition: all 0.3s ease;
+                            ">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="first-goal-group" style="
+                    margin: 25px 0;
+                    padding: 20px;
+                    background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.03), rgba(var(--secondary-color-rgb), 0.03));
+                    border-radius: 16px;
+                    border: 1px solid var(--border-color);
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.1);
+                ">
+                    <label class="form-label" style="
+                        font-size: 1.1em;
+                        margin-bottom: 15px;
+                        display: block;
+                        color: var(--primary-color);
+                    ">Primeiro Gol:</label>
+                    <div class="first-goal-inputs" style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 15px;
+                        margin-top: 15px;
+                    ">
+                        <select id="firstGoalTime" style="
+                            width: 100%;
+                            padding: 14px;
+                            border: 1px solid var(--border-color);
+                            border-radius: 10px;
+                            background: var(--bg-color);
+                            color: var(--text-color);
+                            font-size: 16px;
+                            transition: all 0.3s ease;
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        ">
+                            <option value="">Tempo do 1º Gol</option>
+                            <option value="HT">HT</option>
+                            <option value="FT">FT</option>
+                        </select>
+                        <select id="firstGoalTeam" style="
+                            width: 100%;
+                            padding: 14px;
+                            border: 1px solid var(--border-color);
+                            border-radius: 10px;
+                            background: var(--bg-color);
+                            color: var(--text-color);
+                            font-size: 16px;
+                            transition: all 0.3s ease;
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        ">
+                            <option value="">Quem Marcou</option>
+                            <option value="Casa">Casa</option>
+                            <option value="Fora">Fora</option>
+                            <option value="Nenhum">Nenhum</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="datetime">Data e Hora:</label>
+                    <input type="datetime-local" id="datetime" value="">
                 </div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="datetime">Data e Hora:</label>
-                <input type="datetime-local" id="datetime" value="">
-            </div>
-            
-            <div class="add-button-container">
+            <div class="add-button-container" style="margin-top: 25px;">
                 <button class="add-button" onclick="addOrUpdateNote()">Adicionar</button>
             </div>
         </div>
@@ -854,8 +1135,40 @@
         </div>
 
         <!-- Lista de Anotações -->
-        <h2 style="margin-top: 30px; margin-bottom: 15px; color: var(--primary-color);">Histórico de Partidas</h2>
+        <h2 style="margin-top: 30px; margin-bottom: 15px; color: var(--primary-color); text-align: center;">
+            Histórico de Partidas
+            (<span id="totalCount" style="font-size: 1.2em; font-weight: bold; color: var(--secondary-color);">0</span> total,
+            <span id="acertosCount" style="font-size: 1.2em; font-weight: bold; color: #06f03c;">0</span> acertos -
+            <span id="acertosPercent" style="font-size: 1.5em; font-weight: bold; color: #eeeeee;">0%</span>)
+        </h2>
         <div class="notes-list" id="notesList"></div>
+
+        <script>
+            // Função para atualizar os contadores
+            function updateCounters() {
+                const totalSpan = document.getElementById('totalCount');
+                const acertosSpan = document.getElementById('acertosCount');
+                const percentSpan = document.getElementById('acertosPercent');
+                
+                let total = notes.length;
+                let acertos = notes.filter(note => {
+                    return checkPredictionResult(note.prediction, note.ftScore) === 'Green';
+                }).length;
+                
+                let percentual = total > 0 ? ((acertos / total) * 100).toFixed(1) : 0;
+                
+                totalSpan.textContent = total;
+                acertosSpan.textContent = acertos;
+                percentSpan.textContent = percentual + '%';
+            }
+
+            // Adicionar chamada da função após renderizar notas
+            const originalRenderNotes = renderNotes;
+            renderNotes = function(filtered = null) {
+                originalRenderNotes(filtered);
+                updateCounters();
+            };
+        </script>
 
         <!-- Paginação -->
         <div class="pagination" id="pagination"></div>
@@ -958,8 +1271,8 @@
         let currentEditNote = null;
         let notes = [];
         let filteredNotes = [];
-        let predictionOptions = ["Vitória", "Empate", "Derrota"];
-        const itemsPerPage = 5;
+        let predictionOptions = ["Vitória", "Empate", "Derrota", "BTTS"];
+        const itemsPerPage = 50;
         let currentPage = 1;
 
         // Usando localStorage ao invés de armazenamento em memória
@@ -1007,7 +1320,7 @@
                     {
                         id: 1,
                         teamName: "Barcelona vs Real Madrid",
-                        prediction: "Vitória",
+                        prediction: "BTTS",
                         ftScore: "3-1",
                         htScore: "1-0",
                         firstGoal: "HT | Casa",
@@ -1016,7 +1329,7 @@
                     {
                         id: 2,
                         teamName: "Liverpool vs Manchester United",
-                        prediction: "Empate",
+                        prediction: "BTTS",
                         ftScore: "2-2",
                         htScore: "1-1",
                         firstGoal: "HT | Fora",
@@ -1025,7 +1338,7 @@
                     {
                         id: 3,
                         teamName: "Bayern Munich vs Borussia Dortmund",
-                        prediction: "Vitória",
+                        prediction: "BTTS",
                         ftScore: "4-2",
                         htScore: "2-1",
                         firstGoal: "HT | Casa",
@@ -1088,6 +1401,13 @@
             if (!ftScore || !ftScore.includes('-')) return '';
             
             const [home, away] = ftScore.split('-').map(Number);
+
+            // Tratamento especial para BTTS (Ambas marcam)
+            if (prediction === 'BTTS') {
+                return (home > 0 && away > 0) ? 'Green' : 'Red';
+            }
+            
+            // Para outros palpites
             let result = '';
             
             // Determinar o resultado real
@@ -1168,7 +1488,15 @@
             const list = document.getElementById('notesList');
             list.innerHTML = '';
             
-            const notesToRender = filtered || filteredNotes;
+            let notesToRender = filtered || filteredNotes;
+            
+            // Ordenar notas por data em ordem decrescente (mais recentes primeiro)
+            notesToRender = [...notesToRender].sort((a, b) => {
+                const dateA = new Date(a.datetime);
+                const dateB = new Date(b.datetime);
+                return dateB - dateA;
+            });
+            
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
 
@@ -1494,7 +1822,23 @@
             
             // Inicializar paginação
             updatePagination();
+            
+            // Atualizar contadores
+            updateCounters();
         });
+
+        // Adicionar chamadas do updateCounters nas funções que modificam os dados
+        const originalAddOrUpdateNote = addOrUpdateNote;
+        addOrUpdateNote = function() {
+            originalAddOrUpdateNote();
+            updateCounters();
+        };
+
+        const originalDeleteNote = deleteNote;
+        deleteNote = function(id) {
+            originalDeleteNote(id);
+            updateCounters();
+        };
         
         // Atualizar as opções de filtro de palpite para incluir todas as opções personalizadas
         function updateFilterPredictionOptions() {

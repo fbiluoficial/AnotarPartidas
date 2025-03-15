@@ -54,6 +54,15 @@
             box-shadow: var(--card-shadow);
         }
 
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                margin: 10px;
+                width: auto;
+                border-radius: 4px;
+            }
+        }
+
         h1 {
             text-align: center;
             margin-bottom: 30px;
@@ -867,25 +876,55 @@
                 width: 100%;
                 padding: 16px;
             }
+
+            .score-section {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+                padding: 15px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                width: 100% !important;
+                max-width: 300px !important;
+                margin: 0 auto !important;
+            }
             
             .score-inputs {
-                flex-direction: row;
+                flex-direction: column !important;
                 width: 100%;
                 padding: 10px !important;
-                gap: 8px !important;
+                gap: 12px !important;
+                align-items: center !important;
+                margin: 0 auto !important;
+                max-width: 200px !important;
             }
 
             .score-inputs input {
                 font-size: 14px !important;
                 padding: 8px !important;
+                width: 100% !important;
+                text-align: center !important;
+            }
+
+            .score-group {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                text-align: center !important;
+                padding: 15px !important;
             }
 
             .score-separator {
-                font-size: 18px !important;
+                display: none !important;
             }
 
             .form-label {
                 font-size: 0.9em !important;
+                margin-bottom: 10px !important;
+            }
+
+            .score-group {
+                padding: 12px !important;
             }
 
             .ia-modal {

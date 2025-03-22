@@ -138,45 +138,57 @@ function addOrUpdateNote() {
     const firstGoalTeam = document.getElementById('firstGoalTeam').value;
     const datetime = document.getElementById('datetime').value;
     
-    const note = {
+    // Validação dos campos obrigatórios
+    if (!teamNameA || !teamNameB || !prediction || !datetime) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+    }
+    
+    const gameData = {
         teamName: `${teamNameA} vs ${teamNameB}`,
         prediction,
-        ftScore: `${ftScoreHome}-${ftScoreAway}`,
-        htScore: `${htScoreHome}-${htScoreAway}`,
-        firstGoal: `${firstGoalTime} | ${firstGoalTeam}`,
-        datetime
+        ftScore: ftScoreHome && ftScoreAway ? `${ftScoreHome}-${ftScoreAway}` : 'Aguardando',
+        htScore: htScoreHome && htScoreAway ? `${htScoreHome}-${htScoreAway}` : 'Aguardando',
+        firstGoal: firstGoalTime && firstGoalTeam ? `${firstGoalTime} | ${firstGoalTeam}` : 'Não iniciado',
+        datetime,
+        status: 'active'
     };
     
     if (editingNoteIndex >= 0) {
         // Atualizar nota existente
-        notes[editingNoteIndex] = note;
+        notes[editingNoteIndex] = gameData;
         editingNoteIndex = -1;
         document.querySelector('.add-button').textContent = 'Adicionar';
     } else {
         // Adicionar nova nota
-        notes.push(note);
+        notes.push(gameData);
     }
     
     saveNotesToStorage();
     renderNotes();
     updateCounters();
     
+    // Limpar formulário e estados
+    resetForm();
+}
+
+// Função auxiliar para resetar o formulário
+function resetForm() {
+    // Limpar campos do formulário
+    const formFields = [
+        'teamNameA', 'teamNameB', 'prediction',
+        'ftScoreHome', 'ftScoreAway', 'htScoreHome', 'htScoreAway',
+        'firstGoalTime', 'firstGoalTeam', 'datetime'
+    ];
+    
+    formFields.forEach(field => {
+        document.getElementById(field).value = '';
+    });
+    
     // Remover classes ativas dos botões
     document.querySelectorAll('.time-button, .team-button').forEach(btn => {
         btn.classList.remove('active');
     });
-    
-    // Limpar campos do formulário
-    document.getElementById('teamNameA').value = '';
-    document.getElementById('teamNameB').value = '';
-    document.getElementById('prediction').value = '';
-    document.getElementById('ftScoreHome').value = '';
-    document.getElementById('ftScoreAway').value = '';
-    document.getElementById('htScoreHome').value = '';
-    document.getElementById('htScoreAway').value = '';
-    document.getElementById('firstGoalTime').value = '';
-    document.getElementById('firstGoalTeam').value = '';
-    document.getElementById('datetime').value = '';
 }
 
 // Função para renderizar as anotações
@@ -184,24 +196,18 @@ function renderNotes(filteredNotes = notes) {
     const notesList = document.getElementById('notesList');
     notesList.innerHTML = '';
     
-    filteredNotes.forEach((note, index) => {
-        const noteItem = document.createElement('div');
-        noteItem.className = 'note-item';
+    filteredNotes.forEach(note => {
+        const gameData = {
+            match: note.teamName,
+            btts: note.prediction,
+            ft: note.ftScore,
+            ht: note.htScore,
+            firstGoalMinute: note.firstGoal.split('|')[1].trim(),
+            dateTime: note.datetime
+        };
         
-        noteItem.innerHTML = `
-            <span>${note.teamName}</span>
-            <span>${note.prediction}</span>
-            <span>${note.ftScore}</span>
-            <span>${note.htScore}</span>
-            <span>${note.firstGoal}</span>
-            <span>${note.datetime}</span>
-            <span class="action-buttons-container">
-                <button class="edit-btn" onclick="editNote(${index})">Editar</button>
-                <button class="delete-btn" onclick="deleteNote(${index})">Excluir</button>
-            </span>
-        `;
-        
-        notesList.appendChild(noteItem);
+        const card = createGameCard(gameData);
+        notesList.appendChild(card);
     });
 }
 
@@ -319,6 +325,138 @@ function updateCounters() {
     atualizarElementoComCor('vitoriasCasaHT', stats.vitoriasCasaHT);
     atualizarElementoComCor('vitoriasForaHT', stats.vitoriasForaHT);
     atualizarElementoComCor('acertosGolsFT', stats.acertosGolsFT);
+}
+
+// Função para criar um card de jogo
+function createGameCard(gameData) {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    
+    card.innerHTML = `
+        <div class="game-card-header">
+            <h2 class="game-title">${gameData.match}</h2>
+        </div>
+        <div class="game-card-body">
+            <div class="game-info-grid">
+                <div class="game-info-item">
+                    <span class="info-label">BTTS:</span>
+                    <span class="info-value">${gameData.btts}</span>
+                </div>
+                <div class="game-info-item">
+                    <span class="info-label">FT:</span>
+                    <span class="info-value">${gameData.ft}</span>
+                </div>
+                <div class="game-info-item">
+                    <span class="info-label">HT:</span>
+                    <span class="info-value">${gameData.ht}</span>
+                </div>
+                <div class="game-info-item">
+                    <span class="info-label">1º GOL MIN:</span>
+                    <span class="info-value">${gameData.firstGoalMinute}</span>
+                </div>
+                <div class="game-info-item date-time">
+                    <span class="info-label">Data/Hora:</span>
+                    <span class="info-value">${formatDateTime(gameData.dateTime)}</span>
+                </div>
+            </div>
+        </div>
+        <div class="game-card-footer">
+            <button class="edit-btn" onclick="handleEditGameCard(this)">Editar</button>
+            <button class="delete-btn" onclick="handleDeleteGameCard(this)">Excluir</button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Função para controlar a visibilidade da lista de notas
+function toggleNotesList() {
+    const notesList = document.getElementById('notesList');
+    const toggleBtn = document.getElementById('toggleNotes');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const toggleText = toggleBtn.querySelector('span:last-child');
+    const isMinimized = notesList.classList.toggle('minimized');
+    
+    // Atualiza o ícone e texto do botão
+    toggleIcon.style.transform = isMinimized ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleText.textContent = isMinimized ? 'Maximizar' : 'Minimizar';
+    
+    // Salva o estado no localStorage
+    localStorage.setItem('notesListMinimized', isMinimized);
+}
+
+// Função para restaurar o estado da lista de notas
+function restoreNotesListState() {
+    const isMinimized = localStorage.getItem('notesListMinimized') === 'true';
+    const notesList = document.getElementById('notesList');
+    const toggleBtn = document.getElementById('toggleNotes');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const toggleText = toggleBtn.querySelector('span:last-child');
+    
+    if (isMinimized) {
+        notesList.classList.add('minimized');
+        toggleIcon.style.transform = 'rotate(-90deg)';
+        toggleText.textContent = 'Maximizar';
+    }
+}
+
+// Função para formatar data e hora
+function formatDateTime(dateTime) {
+    const date = new Date(dateTime);
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Função para adicionar um novo card
+function addGameCard(gameData) {
+    const notesList = document.getElementById('notesList');
+    const card = createGameCard(gameData);
+    notesList.appendChild(card);
+    
+    // Adiciona aos dados existentes
+    notes.push(gameData);
+    saveNotesToStorage();
+    updateCounters();
+}
+
+// Função para editar um card
+function handleEditGameCard(button) {
+    const card = button.closest('.game-card');
+    const index = Array.from(card.parentElement.children).indexOf(card);
+    const gameData = notes[index];
+    
+    // Preenche o formulário com os dados atuais
+    document.getElementById('teamNameA').value = gameData.match.split(' vs ')[0];
+    document.getElementById('teamNameB').value = gameData.match.split(' vs ')[1];
+    document.getElementById('prediction').value = gameData.btts;
+    document.getElementById('ftScoreHome').value = gameData.ft.split('-')[0];
+    document.getElementById('ftScoreAway').value = gameData.ft.split('-')[1];
+    document.getElementById('htScoreHome').value = gameData.ht.split('-')[0];
+    document.getElementById('htScoreAway').value = gameData.ht.split('-')[1];
+    document.getElementById('firstGoalTime').value = gameData.firstGoalMinute;
+    document.getElementById('datetime').value = gameData.dateTime;
+    
+    // Marca o índice para atualização
+    editingNoteIndex = index;
+    document.querySelector('.add-button').textContent = 'Atualizar';
+}
+
+// Função para excluir um card
+function handleDeleteGameCard(button) {
+    const card = button.closest('.game-card');
+    const index = Array.from(card.parentElement.children).indexOf(card);
+    
+    if (confirm('Tem certeza que deseja excluir este registro?')) {
+        notes.splice(index, 1);
+        saveNotesToStorage();
+        renderNotes();
+        updateCounters();
+    }
 }
 
 // Função para carregar dados de demonstração
@@ -1203,6 +1341,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualizar contadores
     updateCounters();
+    
+    // Restaurar estado da lista de notas
+    restoreNotesListState();
     
     // Load theme
     if (localStorage.getItem('theme') === 'dark') {

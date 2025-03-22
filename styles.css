@@ -410,31 +410,80 @@ h1 {
 
 .header-row {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 15px;
-    padding: 15px;
+    grid-template-columns: 2fr 1fr 0.8fr 0.8fr 1fr 1.2fr 1fr;
+    gap: 10px;
+    padding: 10px;
     background-color: var(--header-bg);
     color: white;
     border-radius: 4px;
-    margin-bottom: 15px;
-    font-weight: bold;
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.95em;
 }
 
 .notes-list {
-    margin-top: 20px;
+    margin-top: 15px;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 2000px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.notes-list.minimized {
+    max-height: 0;
+    opacity: 0;
+}
+
+.toggle-notes-btn {
+    transition: transform 0.3s ease;
+}
+
+.toggle-notes-btn.minimized #toggleIcon {
+    transform: rotate(-90deg);
 }
 
 .note-item {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 15px;
-    padding: 15px;
+    grid-template-columns: 2fr 1fr 0.8fr 0.8fr 1fr 1.2fr 1fr;
+    gap: 10px;
+    padding: 10px;
     background-color: rgba(0, 0, 0, 0.02);
     border-radius: 4px;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
+    font-size: 0.9em;
+}
+
+/* Alinhamento de texto para cada coluna */
+.header-row > span:nth-child(1),
+.note-item > span:nth-child(1) {
+    text-align: left;
+}
+
+.header-row > span:nth-child(2),
+.note-item > span:nth-child(2) {
+    text-align: center;
+}
+
+.header-row > span:nth-child(3),
+.header-row > span:nth-child(4),
+.note-item > span:nth-child(3),
+.note-item > span:nth-child(4) {
+    text-align: center;
+    font-family: 'Consolas', monospace;
+}
+
+.header-row > span:nth-child(5),
+.note-item > span:nth-child(5) {
+    text-align: center;
+}
+
+.header-row > span:nth-child(6),
+.note-item > span:nth-child(6) {
+    text-align: center;
+    font-size: 0.85em;
 }
 
 .note-item:hover {
@@ -444,21 +493,124 @@ h1 {
 
 .action-buttons-container {
     display: flex;
-    gap: 8px;
+    gap: 4px;
+    justify-content: flex-end;
 }
 
 .delete-btn, .edit-btn, .duplicate-btn {
-    padding: 8px 12px;
+    padding: 6px 8px;
     cursor: pointer;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     color: white;
     transition: all 0.3s ease;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 0.85em;
+    min-width: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .delete-btn {
     background-color: var(--danger-color);
+}
+
+/* Estilos para o Card de Resultado do Jogo */
+.game-card {
+    width: 100%;
+    max-width: 420px;
+    margin: 15px auto;
+    background: var(--bg-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(var(--primary-color-rgb), 0.15);
+}
+
+.game-card-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.game-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.game-info-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(var(--primary-color-rgb), 0.05);
+    border-radius: 8px;
+}
+
+.game-info-item .info-label {
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-right: 8px;
+}
+
+.game-info-item .info-value {
+    color: var(--text-color);
+}
+
+.game-info-item.date-time {
+    grid-column: 1 / -1;
+    justify-content: center;
+}
+
+.game-card-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.game-card-footer button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.game-card-footer .edit-btn {
+    background: var(--warning-color);
+    color: var(--bg-color);
+}
+
+.game-card-footer .delete-btn {
+    background: var(--danger-color);
+    color: var(--bg-color);
+}
+
+.game-card-footer button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.game-card-footer button:active {
+    transform: translateY(0);
 }
 
 .edit-btn {
@@ -473,7 +625,7 @@ h1 {
 
 .delete-btn:hover, .edit-btn:hover, .duplicate-btn:hover {
     opacity: 0.9;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .pagination {

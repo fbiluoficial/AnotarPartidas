@@ -362,12 +362,17 @@ function calcularEstatisticas() {
     const percentForaHT = ((vitoriasForaHT / total) * 100).toFixed(1);
     const percentGols = ((jogosComGols / totalJogosComGols) * 100).toFixed(1);
 
+    // Calcular total de vitórias FT
+    const totalVitoriasFT = vitoriasCasaFT + vitoriasForaFT;
+    const percentTotalVitoriasFT = ((totalVitoriasFT / total) * 100).toFixed(1);
+
     return {
         vitoriasCasaFT: `${vitoriasCasaFT}/${total} (${percentCasaFT}%)`,
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
         vitoriasCasaHT: `${vitoriasCasaHT}/${total} (${percentCasaHT}%)`,
         vitoriasForaHT: `${vitoriasForaHT}/${total} (${percentForaHT}%)`,
-        acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`
+        acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
+        totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`
     };
 }
 
@@ -431,6 +436,7 @@ function updateCounters() {
     atualizarElementoComProgresso('vitoriasCasaHT', stats.vitoriasCasaHT);
     atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
     atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
+    atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
 }
 
 // Função para criar um card de jogo

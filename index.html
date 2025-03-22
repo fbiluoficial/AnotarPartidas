@@ -330,6 +330,35 @@
             <span id="acertosPercent" style="font-size: 1.5em; font-weight: bold; color: #eeeeee;">0%</span>)
         </h2>
         
+        <!-- Container de Cards -->
+        <div class="cards-container" style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                    margin: 20px 0;
+                    position: relative;
+                ">
+                    <button id="toggleNotes" class="toggle-notes-btn" onclick="toggleNotesList()" style="
+                        position: absolute;
+                        top: -40px;
+                        right: 0;
+                        background: transparent;
+                        border: none;
+                        color: var(--primary-color);
+                        cursor: pointer;
+                        padding: 5px;
+                        display: flex;
+                        align-items: center;
+                        font-size: 0.9em;
+                    ">
+                        <span id="toggleIcon">▼</span>
+                        <span style="margin-left: 5px;">Minimizar</span>
+                    </button>
+                    <div id="notesList" class="notes-list">
+                <!-- Cards serão inseridos aqui dinamicamente -->
+            </div>
+        </div>
+        
         <!-- Estatísticas -->
         <h2 style="margin-top: 30px; margin-bottom: 15px; color: var(--primary-color); text-align: center;">
             Estatísticas Detalhadas

@@ -365,76 +365,80 @@
         </h2>
         
         <!-- Container de Estatísticas -->
-        <div class="stats-container" style="
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(var(--primary-color-rgb), 0.05);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        ">
-            <!-- Estatísticas FT (Tempo Final) -->
-            <div class="stats-section" style="margin-bottom: 15px;">
-                <div class="stats-header" style="
-                    color: var(--primary-color);
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                    text-align: center;
-                ">Estatísticas Tempo Final (FT)</div>
-                <div class="stats-row" style="
-                    display: flex;
-                    justify-content: space-around;
-                    padding: 10px;
-                    background: var(--bg-color);
-                    border-radius: 8px;
-                ">
-                    <div class="stats-item">
-                        <span class="stats-label" style="color: var(--text-color); font-weight: bold;">Vitórias Casa:</span>
-                        <span id="vitoriasCasaFT" style="color: #06f03c; margin-left: 5px;">0/0 (0%)</span>
-                    </div>
-                    <div class="stats-item">
-                        <span class="stats-label" style="color: var(--text-color); font-weight: bold;">Vitórias Fora:</span>
-                        <span id="vitoriasForaFT" style="color: #06f03c; margin-left: 5px;">0/0 (0%)</span>
+        <div class="stats-grid">
+            <!-- Card Vitórias FT -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>Estatísticas Tempo Final (FT)</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-grid-inner">
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Casa</span>
+                                <span id="vitoriasCasaFT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Fora</span>
+                                <span id="vitoriasForaFT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Estatísticas HT (Primeiro Tempo) -->
-            <div class="stats-section" style="margin-bottom: 15px;">
-                <div class="stats-header" style="
-                    color: var(--primary-color);
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                    text-align: center;
-                ">Estatísticas Primeiro Tempo (HT)</div>
-                <div class="stats-row" style="
-                    display: flex;
-                    justify-content: space-around;
-                    padding: 10px;
-                    background: var(--bg-color);
-                    border-radius: 8px;
-                ">
-                    <div class="stats-item">
-                        <span class="stats-label" style="color: var(--text-color); font-weight: bold;">Vitórias Casa:</span>
-                        <span id="vitoriasCasaHT" style="color: #06f03c; margin-left: 5px;">0/0 (0%)</span>
-                    </div>
-                    <div class="stats-item">
-                        <span class="stats-label" style="color: var(--text-color); font-weight: bold;">Vitórias Fora:</span>
-                        <span id="vitoriasForaHT" style="color: #06f03c; margin-left: 5px;">0/0 (0%)</span>
+            <!-- Card Vitórias HT -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>Estatísticas Primeiro Tempo (HT)</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-grid-inner">
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Casa</span>
+                                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Fora</span>
+                                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Estatísticas de Gols -->
-            <div class="stats-row" style="
-                display: flex;
-                justify-content: center;
-                padding: 10px;
-                background: var(--bg-color);
-                border-radius: 8px;
-            ">
-                <div class="stats-item">
-                    <span class="stats-label" style="color: var(--text-color); font-weight: bold;">Acerto +0,5 Gol FT:</span>
-                    <span id="acertosGolsFT" style="color: #06f03c; margin-left: 5px;">0/0 (0%)</span>
+
+            <!-- Card Outras Estatísticas -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>Outras Estatísticas</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-item">
+                        <div class="stats-value-container">
+                            <span class="stats-label">Acerto +0,5 Gol FT</span>
+                            <span id="acertosGolsFT" class="stats-value">0/0 (0%)</span>
+                        </div>
+                        <div class="stats-progress-bar">
+                            <div class="stats-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -11,13 +11,15 @@ function applyFilters() {
     const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
     const predictionFilter = document.getElementById('filterPrediction').value;
     
-    const filteredNotes = notes.filter(note => {
+    const notasParaFiltrar = notes.filter(note => {
         const teamMatch = note.teamName.toLowerCase().includes(teamFilter);
         const predictionMatch = predictionFilter === '' || note.prediction === predictionFilter;
         return teamMatch && predictionMatch;
     });
     
-    renderNotes(filteredNotes);
+    // Resetar para primeira página ao filtrar
+    currentPage = 1;
+    renderNotes(notasParaFiltrar);
     updateCounters(); // Atualizar contadores após aplicar filtros
 }
 
@@ -159,13 +161,20 @@ function addOrUpdateNote() {
         notes[editingNoteIndex] = gameData;
         editingNoteIndex = -1;
         document.querySelector('.add-button').textContent = 'Adicionar';
+        
+        // Manter na página atual após edição
+        renderNotes(notes);
     } else {
         // Adicionar nova nota
         notes.push(gameData);
+        
+        // Ir para a última página ao adicionar nova nota
+        const totalPages = Math.ceil(notes.length / ITEMS_PER_PAGE);
+        currentPage = totalPages;
+        renderNotes(notes);
     }
     
     saveNotesToStorage();
-    renderNotes();
     updateCounters();
     
     // Limpar formulário e estados
@@ -191,12 +200,30 @@ function resetForm() {
     });
 }
 
+// Configurações de paginação
+const ITEMS_PER_PAGE = 200;
+let currentPage = 1;
+
 // Função para renderizar as anotações
 function renderNotes(filteredNotes = notes) {
     const notesList = document.getElementById('notesList');
+    const pagination = document.getElementById('pagination');
     notesList.innerHTML = '';
     
-    filteredNotes.forEach(note => {
+    // Calcular total de páginas
+    const totalPages = Math.ceil(filteredNotes.length / ITEMS_PER_PAGE);
+    
+    // Garantir que a página atual é válida
+    currentPage = Math.min(Math.max(1, currentPage), totalPages);
+    
+    // Calcular índices para a página atual
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredNotes.length);
+    
+    // Renderizar apenas as notas da página atual
+    const notesForPage = filteredNotes.slice(startIndex, endIndex);
+    
+    notesForPage.forEach(note => {
         const gameData = {
             match: note.teamName,
             btts: note.prediction,
@@ -209,6 +236,53 @@ function renderNotes(filteredNotes = notes) {
         const card = createGameCard(gameData);
         notesList.appendChild(card);
     });
+    
+    // Atualizar controles de paginação
+    updatePagination(filteredNotes.length, currentPage, totalPages);
+}
+
+// Função para atualizar controles de paginação
+function updatePagination(totalItems, currentPage, totalPages) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    
+    if (totalPages <= 1) {
+        return;
+    }
+    
+    const paginationControls = document.createElement('div');
+    paginationControls.className = 'pagination-controls';
+    
+    // Botão Anterior
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '← Anterior';
+    prevButton.className = 'pagination-btn';
+    prevButton.disabled = currentPage === 1;
+    prevButton.onclick = () => changePage(currentPage - 1);
+    
+    // Botão Próximo
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'Próximo →';
+    nextButton.className = 'pagination-btn';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.onclick = () => changePage(currentPage + 1);
+    
+    // Indicador de página
+    const pageInfo = document.createElement('span');
+    pageInfo.className = 'page-info';
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    
+    // Adicionar elementos ao controle de paginação
+    paginationControls.appendChild(prevButton);
+    paginationControls.appendChild(pageInfo);
+    paginationControls.appendChild(nextButton);
+    pagination.appendChild(paginationControls);
+}
+
+// Função para mudar de página
+function changePage(newPage) {
+    currentPage = newPage;
+    renderNotes(notes);
 }
 
 // Função para salvar anotações no armazenamento local
@@ -311,26 +385,59 @@ function updateCounters() {
     // Atualizar estatísticas adicionais
     const stats = calcularEstatisticas();
     
-    // Função auxiliar para atualizar elemento com cor baseada na porcentagem
-    const atualizarElementoComCor = (elementId, valor) => {
+    // Função auxiliar para atualizar elemento e barra de progresso
+    const atualizarElementoComProgresso = (elementId, valor) => {
         const elemento = document.getElementById(elementId);
+        if (!elemento) return;
+
+        // Atualizar texto
         elemento.textContent = valor;
-        const porcentagem = extrairPorcentagem(valor);
-        elemento.style.color = porcentagem >= 90 ? '#06f03c' : '#ffffff';
+        
+        // Atualizar barra de progresso
+        const container = elemento.closest('.stats-item');
+        if (container) {
+            const progressBar = container.querySelector('.stats-progress-fill');
+            if (progressBar) {
+                const porcentagem = extrairPorcentagem(valor);
+                progressBar.style.width = `${porcentagem}%`;
+                
+                // Atualizar cores baseadas na porcentagem
+                if (porcentagem >= 90) {
+                    elemento.style.color = '#06f03c';
+                    progressBar.style.background = 'linear-gradient(90deg, #06f03c, #00ff44)';
+                } else if (porcentagem >= 70) {
+                    elemento.style.color = '#ffd700';
+                    progressBar.style.background = 'linear-gradient(90deg, #ffd700, #ffc800)';
+                } else {
+                    elemento.style.color = '#ffffff';
+                    progressBar.style.background = 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))';
+                }
+            }
+        }
     };
 
-    // Atualizar cada estatística com a cor apropriada
-    atualizarElementoComCor('vitoriasCasaFT', stats.vitoriasCasaFT);
-    atualizarElementoComCor('vitoriasForaFT', stats.vitoriasForaFT);
-    atualizarElementoComCor('vitoriasCasaHT', stats.vitoriasCasaHT);
-    atualizarElementoComCor('vitoriasForaHT', stats.vitoriasForaHT);
-    atualizarElementoComCor('acertosGolsFT', stats.acertosGolsFT);
+    // Atualizar cada estatística com barra de progresso
+    atualizarElementoComProgresso('vitoriasCasaFT', stats.vitoriasCasaFT);
+    atualizarElementoComProgresso('vitoriasForaFT', stats.vitoriasForaFT);
+    atualizarElementoComProgresso('vitoriasCasaHT', stats.vitoriasCasaHT);
+    atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
+    atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
 }
 
 // Função para criar um card de jogo
+function checkBTTS(ftScore) {
+    if (!ftScore || !ftScore.includes('-') || ftScore === 'Aguardando') return false;
+    const [homeGoals, awayGoals] = ftScore.split('-').map(Number);
+    return homeGoals > 0 && awayGoals > 0;
+}
+
 function createGameCard(gameData) {
     const card = document.createElement('div');
     card.className = 'game-card';
+    
+    const hasBTTS = checkBTTS(gameData.ft);
+    const bttsClass = hasBTTS ? 'btts-green' : 'btts-red';
+    const bttsText = hasBTTS ? 'GREEN' : 'RED';
     
     card.innerHTML = `
         <div class="game-card-header">
@@ -340,7 +447,7 @@ function createGameCard(gameData) {
             <div class="game-info-grid">
                 <div class="game-info-item">
                     <span class="info-label">BTTS:</span>
-                    <span class="info-value">${gameData.btts}</span>
+                    <span class="info-value btts-result ${bttsClass}">${bttsText}</span>
                 </div>
                 <div class="game-info-item">
                     <span class="info-label">FT:</span>
@@ -454,7 +561,16 @@ function handleDeleteGameCard(button) {
     if (confirm('Tem certeza que deseja excluir este registro?')) {
         notes.splice(index, 1);
         saveNotesToStorage();
-        renderNotes();
+        
+        // Calcular total de páginas após exclusão
+        const totalPages = Math.ceil(notes.length / ITEMS_PER_PAGE);
+        
+        // Se a página atual ficou vazia e não é a primeira página, voltar uma página
+        if (currentPage > totalPages) {
+            currentPage = Math.max(1, totalPages);
+        }
+        
+        renderNotes(notes);
         updateCounters();
     }
 }

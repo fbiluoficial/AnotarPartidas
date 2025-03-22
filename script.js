@@ -11,11 +11,14 @@ function applyFilters() {
     const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
     const predictionFilter = document.getElementById('filterPrediction').value;
     
-    const notasParaFiltrar = notes.filter(note => {
+    let notasParaFiltrar = notes.filter(note => {
         const teamMatch = note.teamName.toLowerCase().includes(teamFilter);
         const predictionMatch = predictionFilter === '' || note.prediction === predictionFilter;
         return teamMatch && predictionMatch;
     });
+    
+    // Manter a ordenação por data nas notas filtradas
+    notasParaFiltrar = sortNotesByDate(notasParaFiltrar);
     
     // Resetar para primeira página ao filtrar
     currentPage = 1;
@@ -161,20 +164,20 @@ function addOrUpdateNote() {
         notes[editingNoteIndex] = gameData;
         editingNoteIndex = -1;
         document.querySelector('.add-button').textContent = 'Adicionar';
-        
-        // Manter na página atual após edição
-        renderNotes(notes);
     } else {
         // Adicionar nova nota
         notes.push(gameData);
-        
-        // Ir para a última página ao adicionar nova nota
-        const totalPages = Math.ceil(notes.length / ITEMS_PER_PAGE);
-        currentPage = totalPages;
-        renderNotes(notes);
     }
     
+    // Ordenar notas por data após adicionar/atualizar
+    notes = sortNotesByDate(notes);
+    
+    // Sempre ir para a primeira página após adicionar/atualizar
+    // já que as notas mais recentes aparecerão no topo
+    currentPage = 1;
+    
     saveNotesToStorage();
+    renderNotes(notes);
     updateCounters();
     
     // Limpar formulário e estados
@@ -290,11 +293,17 @@ function saveNotesToStorage() {
     localStorage.setItem('notes', JSON.stringify(notes));
 }
 
+// Função para ordenar notas por data (mais recente primeiro)
+function sortNotesByDate(notesArray) {
+    return notesArray.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+}
+
 // Função para carregar anotações do armazenamento local
 function loadNotesFromStorage() {
     const storedNotes = localStorage.getItem('notes');
     if (storedNotes) {
         notes = JSON.parse(storedNotes);
+        notes = sortNotesByDate(notes); // Ordenar notas por data
         updateCounters(); // Atualizar contadores após carregar notas
     }
 }

@@ -135,10 +135,10 @@ function addOrUpdateNote() {
     const teamNameA = document.getElementById('teamNameA').value;
     const teamNameB = document.getElementById('teamNameB').value;
     const prediction = document.getElementById('prediction').value;
-    const ftScoreHome = document.getElementById('ftScoreHome').value;
-    const ftScoreAway = document.getElementById('ftScoreAway').value;
-    const htScoreHome = document.getElementById('htScoreHome').value;
-    const htScoreAway = document.getElementById('htScoreAway').value;
+    const ftScoreHome = document.getElementById('ftScoreHome').textContent;
+    const ftScoreAway = document.getElementById('ftScoreAway').textContent;
+    const htScoreHome = document.getElementById('htScoreHome').textContent;
+    const htScoreAway = document.getElementById('htScoreAway').textContent;
     const firstGoalTime = document.getElementById('firstGoalTime').value;
     const firstGoalTeam = document.getElementById('firstGoalTeam').value;
     const datetime = document.getElementById('datetime').value;
@@ -366,13 +366,31 @@ function calcularEstatisticas() {
     const totalVitoriasFT = vitoriasCasaFT + vitoriasForaFT;
     const percentTotalVitoriasFT = ((totalVitoriasFT / total) * 100).toFixed(1);
 
+    // Contadores BTTS
+    let bttsSim = 0;
+    let bttsTotal = 0;
+
+    notes.forEach(note => {
+        if (note.ftScore && note.ftScore !== 'Aguardando') {
+            bttsTotal++;
+            if (checkBTTS(note.ftScore)) {
+                bttsSim++;
+            }
+        }
+    });
+
+    const percentBTTSSim = bttsTotal > 0 ? ((bttsSim / bttsTotal) * 100).toFixed(1) : 0;
+    const percentBTTSNao = bttsTotal > 0 ? (((bttsTotal - bttsSim) / bttsTotal) * 100).toFixed(1) : 0;
+
     return {
         vitoriasCasaFT: `${vitoriasCasaFT}/${total} (${percentCasaFT}%)`,
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
         vitoriasCasaHT: `${vitoriasCasaHT}/${total} (${percentCasaHT}%)`,
         vitoriasForaHT: `${vitoriasForaHT}/${total} (${percentForaHT}%)`,
         acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
-        totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`
+        totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
+        bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
+        bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`
     };
 }
 
@@ -385,19 +403,54 @@ function extrairPorcentagem(estatistica) {
 // Função para atualizar contadores
 function updateCounters() {
     const totalCount = document.getElementById('totalCount');
-    const acertosCount = document.getElementById('acertosCount');
-    const acertosPercent = document.getElementById('acertosPercent');
-    
     const total = notes.length;
-    const acertos = notes.filter(note => note.prediction === 'Vitória').length;
-    const percent = total > 0 ? ((acertos / total) * 100).toFixed(1) : 0;
-    
     totalCount.textContent = total;
-    acertosCount.textContent = acertos;
-    acertosPercent.textContent = `${percent}%`;
 
     // Atualizar estatísticas adicionais
     const stats = calcularEstatisticas();
+
+    // Calcular score de performance para cada card
+    const statsCards = Array.from(document.querySelectorAll('.stats-card'));
+    const cardScores = statsCards.map(card => {
+        const progressBars = card.querySelectorAll('.stats-progress-fill');
+        let totalScore = 0;
+        let totalMetrics = 0;
+
+        progressBars.forEach(bar => {
+            const width = parseFloat(bar.style.width) || 0;
+            if (width > 0) {
+                totalScore += width;
+                totalMetrics++;
+            }
+        });
+
+        return {
+            card,
+            score: totalMetrics > 0 ? totalScore / totalMetrics : 0
+        };
+    });
+
+    // Ordenar cards por score
+    cardScores.sort((a, b) => b.score - a.score);
+
+    // Reorganizar cards no DOM com animação
+    const statsGrid = document.querySelector('.stats-grid');
+    
+    // Adicionar classe de animação
+    statsCards.forEach(card => card.classList.add('reordering'));
+    
+    // Pequeno delay para a animação ser visível
+    setTimeout(() => {
+        // Reordenar os cards
+        cardScores.forEach(({ card }) => {
+            statsGrid.appendChild(card);
+        });
+        
+        // Remover classe de animação após um breve delay
+        setTimeout(() => {
+            statsCards.forEach(card => card.classList.remove('reordering'));
+        }, 300);
+    }, 50);
     
     // Função auxiliar para atualizar elemento e barra de progresso
     const atualizarElementoComProgresso = (elementId, valor) => {
@@ -437,6 +490,8 @@ function updateCounters() {
     atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
     atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
     atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
+    atualizarElementoComProgresso('bttsSim', stats.bttsSim);
+    atualizarElementoComProgresso('bttsNao', stats.bttsNao);
 }
 
 // Função para criar um card de jogo
@@ -569,6 +624,14 @@ function handleEditGameCard(button) {
 }
 
 // Função para excluir um card
+// Função para atualizar o placar
+function updateScore(elementId, delta) {
+    const el = document.getElementById(elementId);
+    let val = parseInt(el.textContent || '0');
+    val = Math.max(0, val + delta);
+    el.textContent = val.toString();
+}
+
 function handleDeleteGameCard(button) {
     const card = button.closest('.game-card');
     const index = Array.from(card.parentElement.children).indexOf(card);
@@ -635,44 +698,6 @@ function updateFilterPredictionOptions() {
         <option value="Derrota">Derrota</option>
         <option value="BTTS">BTTS</option>
     `;
-}
-
-// Função para adicionar nova opção de palpite
-function addPredictionOption() {
-    const newPrediction = document.getElementById('newPrediction').value;
-    if (newPrediction) {
-        predictionOptions.push(newPrediction);
-        updatePredictionSelect();
-        savePredictionOptionsToStorage();
-        document.getElementById('newPrediction').value = '';
-    }
-}
-
-// Função para atualizar o select de palpites
-function updatePredictionSelect() {
-    const predictionSelect = document.getElementById('prediction');
-    predictionSelect.innerHTML = '<option value="">Selecione o palpite</option>';
-    
-    // Garantir que BTTS esteja nas opções
-    if (!predictionOptions.includes('BTTS')) {
-        predictionOptions.push('BTTS');
-    }
-    
-    predictionOptions.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option;
-        optionElement.textContent = option;
-        // Selecionar BTTS por padrão em novos registros
-        if (option === 'BTTS') {
-            optionElement.selected = true;
-        }
-        predictionSelect.appendChild(optionElement);
-    });
-}
-
-// Função para salvar opções de palpites no armazenamento local
-function savePredictionOptionsToStorage() {
-    localStorage.setItem('predictionOptions', JSON.stringify(predictionOptions));
 }
 
 // Função para verificar o resultado do palpite
@@ -1450,13 +1475,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Carregar anotações do armazenamento
     loadNotesFromStorage();
-    
-    // Carregar opções de palpites do armazenamento
-    const storedOptions = localStorage.getItem('predictionOptions');
-    if (storedOptions) {
-        predictionOptions = JSON.parse(storedOptions);
-        updatePredictionSelect();
-    }
     
     // Carregar dados de demonstração se não houver dados
     loadDemoData();

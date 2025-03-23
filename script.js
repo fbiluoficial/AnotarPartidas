@@ -192,11 +192,11 @@ function resetForm() {
         'ftScoreHome', 'ftScoreAway', 'htScoreHome', 'htScoreAway',
         'firstGoalTime', 'firstGoalTeam', 'datetime'
     ];
-    
     formFields.forEach(field => {
-        document.getElementById(field).value = '';
+        document.getElementById(field).value = field === 'prediction' ? 'BTTS' : '';
     });
     
+    // Remover classes ativas dos botões
     // Remover classes ativas dos botões
     document.querySelectorAll('.time-button, .team-button').forEach(btn => {
         btn.classList.remove('active');
@@ -1433,6 +1433,18 @@ function deleteNote(index) {
     }
 }
 
+// Função para inicializar o select de prediction
+function initializePredictionSelect() {
+    const predictionSelect = document.getElementById('prediction');
+    predictionSelect.innerHTML = `
+        <option value="BTTS">BTTS</option>
+        <option value="Vitória">Vitória</option>
+        <option value="Empate">Empate</option>
+        <option value="Derrota">Derrota</option>
+    `;
+    predictionSelect.value = 'BTTS';
+}
+
 // Navegação entre tabs do modal de IA
 document.addEventListener('DOMContentLoaded', function() {
     // Setup das abas da IA
@@ -1475,6 +1487,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Carregar anotações do armazenamento
     loadNotesFromStorage();
+    
+    // Inicializar select de prediction com BTTS como padrão
+    initializePredictionSelect();
     
     // Carregar dados de demonstração se não houver dados
     loadDemoData();

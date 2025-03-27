@@ -295,7 +295,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    width: 95vw;
     margin: 0 auto;
     background: var(--bg-color);
     padding: 20px;
@@ -421,7 +421,7 @@ h1 {
 }
 
 .input-container {
-    width: 100%;
+    width: 100%; /* Alterado para 95% da largura horizontal */
     background: rgba(var(--primary-color-rgb), 0.05);
     padding: 15px;
     border-radius: 12px;
@@ -429,6 +429,15 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.score-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    width: 100%;
+    margin: 20px auto;
+    padding: 15px;
 }
 
 .form-row:hover {

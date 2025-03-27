@@ -9,26 +9,10 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button class="theme-toggle" onclick="toggleTheme()">Tema</button>
     <div class="container">
-        <h1>Anotações de partidas de CLASSICOS</h1>
-
-        <!-- Filtros -->
-        <div class="filters">
-            <div class="filters-title">Filtros:</div>
-            <input type="text" id="filterTeam" placeholder="Filtrar por Time">
-            <select id="filterPrediction">
-                <option value="">Todos os Palpites</option>
-                <option value="Vitória">Vitória</option>
-                <option value="Empate">Empate</option>
-                <option value="Derrota">Derrota</option>
-            </select>
-        </div>
-        
+        <!-- Botão para abrir/fechar menu de filtros -->
         <div class="action-buttons">
-            <button class="action-button btn-filter" onclick="applyFilters()">
-                Filtrar
-            </button>
+            <button id="toggleFilterMenuBtn" class="action-button">Filtros ☰</button>
             <button class="action-button btn-export" onclick="showExportModal()">
                 Exportar
             </button>
@@ -37,406 +21,123 @@
             </button>
         </div>
 
-        <!-- Container do Formulário -->
-        <div class="form-row">
-            <h2 class="form-title" style="text-align: center; color: var(--primary-color); font-size: 1.8em; margin-bottom: 30px;">
-                Cadastro de Nova Partida
-            </h2>
-            
-            <!-- Container dos campos de entrada -->
-            <div class="input-container" style="background: rgba(var(--primary-color-rgb), 0.05); padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                <div class="form-group">
-                    <label class="form-label">Partida:</label>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <input type="text" id="teamNameA" placeholder="Time A">
-                        <input type="text" id="teamNameB" placeholder="Time B">
-                    </div>
-                </div>
-            
-                <div class="form-group">
-                    <label class="form-label" for="prediction">Palpite: <button type="button" onclick="togglePredictionManager()" style="float: right; padding: 2px 8px; background: var(--warning-color); border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">+</button></label>
-                    <select id="prediction" style="margin-bottom: 5px; color: var(--text-color); background-color: black;">
-                        <option value="">Selecione o palpite</option>
+        <!-- Menu de Filtros (inicialmente oculto) -->
+        <div id="filterMenuContainer" class="filter-menu">
+            <div class="filters">
+                <div class="filters-title">Filtros:</div>
+                <input type="text" id="filterTeam" placeholder="Filtrar por Time">
+                <select id="filterPrediction">
+                    <option value="">Todos os Palpites</option>
+                    <option value="Vitória">Vitória</option>
+                    <option value="Empate">Empate</option>
+                    <option value="Derrota">Derrota</option>
+                </select>
+                <button class="action-button btn-filter" onclick="applyFilters()">
+                    Aplicar Filtros
+                </button>
+            </div>
+        </div>
+        
+        <!-- Container do Formulário Reestruturado -->
+        <div class="form-container"> <!-- Renomeado de form-row para form-container -->
+            <h2 class="form-title">Cadastro de Nova Partida</h2>
+
+            <div class="form-section">
+                <label class="form-label">Partida:</label>
+                <input type="text" id="teamNameA" placeholder="Time A">
+                <input type="text" id="teamNameB" placeholder="Time B">
+            </div>
+
+            <div class="form-section form-section-palpite">
+                <label class="form-label" for="prediction">Palpite:</label>
+                <div class="palpite-input-group">
+                    <select id="prediction">
+                        <!-- Opções serão carregadas pelo JS -->
                     </select>
-                </div>
-                
-                <div class="score-section">
-                    <!-- Placar Final (FT) -->
-                    <div class="score-card" style="
-                        background: var(--card-bg, #1e1e1e);
-                        border-radius: 12px;
-                        padding: 15px;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-                    ">
-                        <div class="card-header" style="
-                            background: linear-gradient(90deg, #009cff, #00f0ff);
-                            padding: 8px;
-                            border-radius: 6px;
-                            text-align: center;
-                            margin-bottom: 15px;
-                        ">
-                            <span style="
-                                font-size: 14px;
-                                font-weight: 600;
-                                color: #1a1a1a;
-                                text-transform: uppercase;
-                                letter-spacing: 1px;
-                            ">FT - Final</span>
-                        </div>
-                        <div class="score-row" style="
-                            display: grid;
-                            grid-template-columns: 1fr 30px 1fr;
-                            align-items: center;
-                            gap: 10px;
-                            margin-bottom: 10px;
-                        ">
-                            <div class="score-col" style="
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                            ">
-                                <div class="team-label" style="
-                                    font-size: 12px;
-                                    color: #e0e0e0;
-                                    text-transform: uppercase;
-                                    margin-bottom: 5px;
-                                ">Casa</div>
-                                <div class="score-value" id="ftScoreHome" style="
-                                    font-size: 28px;
-                                    font-weight: 700;
-                                    margin: 8px 0;
-                                ">0</div>
-                                <div class="controls" style="display: flex; gap: 5px;">
-                                    <button class="control-btn" onclick="updateScore('ftScoreHome', 1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">+</button>
-                                    <button class="control-btn" onclick="updateScore('ftScoreHome', -1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">−</button>
-                                </div>
-                            </div>
-                            <div class="separator" style="
-                                font-size: 20px;
-                                color: #666;
-                                text-align: center;
-                            ">X</div>
-                            <div class="score-col" style="
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                            ">
-                                <div class="team-label" style="
-                                    font-size: 12px;
-                                    color: #e0e0e0;
-                                    text-transform: uppercase;
-                                    margin-bottom: 5px;
-                                ">Fora</div>
-                                <div class="score-value" id="ftScoreAway" style="
-                                    font-size: 28px;
-                                    font-weight: 700;
-                                    margin: 8px 0;
-                                ">0</div>
-                                <div class="controls" style="display: flex; gap: 5px;">
-                                    <button class="control-btn" onclick="updateScore('ftScoreAway', 1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">+</button>
-                                    <button class="control-btn" onclick="updateScore('ftScoreAway', -1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">−</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Placar 1º Tempo (HT) -->
-                    <div class="score-card" style="
-                        background: var(--card-bg, #1e1e1e);
-                        border-radius: 12px;
-                        padding: 15px;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-                    ">
-                        <div class="card-header" style="
-                            background: linear-gradient(90deg, #009cff, #00f0ff);
-                            padding: 8px;
-                            border-radius: 6px;
-                            text-align: center;
-                            margin-bottom: 15px;
-                        ">
-                            <span style="
-                                font-size: 14px;
-                                font-weight: 600;
-                                color: #1a1a1a;
-                                text-transform: uppercase;
-                                letter-spacing: 1px;
-                            ">HT - 1º Tempo</span>
-                        </div>
-                        <div class="score-row" style="
-                            display: grid;
-                            grid-template-columns: 1fr 30px 1fr;
-                            align-items: center;
-                            gap: 10px;
-                            margin-bottom: 10px;
-                        ">
-                            <div class="score-col" style="
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                            ">
-                                <div class="team-label" style="
-                                    font-size: 12px;
-                                    color: #e0e0e0;
-                                    text-transform: uppercase;
-                                    margin-bottom: 5px;
-                                ">Casa</div>
-                                <div class="score-value" id="htScoreHome" style="
-                                    font-size: 28px;
-                                    font-weight: 700;
-                                    margin: 8px 0;
-                                ">0</div>
-                                <div class="controls" style="display: flex; gap: 5px;">
-                                    <button class="control-btn" onclick="updateScore('htScoreHome', 1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">+</button>
-                                    <button class="control-btn" onclick="updateScore('htScoreHome', -1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">−</button>
-                                </div>
-                            </div>
-                            <div class="separator" style="
-                                font-size: 20px;
-                                color: #666;
-                                text-align: center;
-                            ">X</div>
-                            <div class="score-col" style="
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                            ">
-                                <div class="team-label" style="
-                                    font-size: 12px;
-                                    color: #e0e0e0;
-                                    text-transform: uppercase;
-                                    margin-bottom: 5px;
-                                ">Fora</div>
-                                <div class="score-value" id="htScoreAway" style="
-                                    font-size: 28px;
-                                    font-weight: 700;
-                                    margin: 8px 0;
-                                ">0</div>
-                                <div class="controls" style="display: flex; gap: 5px;">
-                                    <button class="control-btn" onclick="updateScore('htScoreAway', 1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">+</button>
-                                    <button class="control-btn" onclick="updateScore('htScoreAway', -1)" style="
-                                        background: var(--btn-bg, #333);
-                                        color: var(--accent, #00f0ff);
-                                        border: none;
-                                        border-radius: 50%;
-                                        width: 30px;
-                                        height: 30px;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 16px;
-                                        cursor: pointer;
-                                        transition: 0.2s;
-                                    ">−</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="first-goal-group" style="
-                    margin: 25px 0;
-                    padding: 20px;
-                    background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.03), rgba(var(--secondary-color-rgb), 0.03));
-                    border-radius: 16px;
-                    border: 1px solid var(--border-color);
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.1);
-                ">
-                    <label class="form-label" style="
-                        font-size: 1.1em;
-                        margin-bottom: 15px;
-                        display: block;
-                        color: var(--primary-color);
-                    ">Primeiro Gol:</label>
-                    
-                    <div class="first-goal-inputs" style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 15px;
-                        margin-top: 15px;
-                    ">
-                        <!-- Botões para Tempo do Primeiro Gol (HT ou FT) -->
-                        <div class="goal-time-buttons">
-                            <label class="form-label" style="font-size: 0.9em;">Tempo:</label>
-                            <div class="button-group" style="
-                                display: flex;
-                                gap: 10px;
-                                margin-top: 8px;
-                            ">
-                                <button type="button" class="time-button" data-value="HT" onclick="selectFirstGoalTime(this)" style="
-                                    flex: 1;
-                                    padding: 12px;
-                                    border: 1px solid var(--border-color);
-                                    background: var(--bg-color);
-                                    color: var(--text-color);
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: bold;
-                                    transition: all 0.3s ease;
-                                ">1º Tempo</button>
-                                <button type="button" class="time-button" data-value="FT" onclick="selectFirstGoalTime(this)" style="
-                                    flex: 1;
-                                    padding: 12px;
-                                    border: 1px solid var(--border-color);
-                                    background: var(--bg-color);
-                                    color: var(--text-color);
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: bold;
-                                    transition: all 0.3s ease;
-                                ">2º Tempo</button>
-                            </div>
-                        </div>
-
-                        <!-- Botões para Quem Marcou o Primeiro Gol -->
-                        <div class="goal-team-buttons">
-                            <label class="form-label" style="font-size: 0.9em;">Quem Marcou:</label>
-                            <div class="button-group" style="
-                                display: flex;
-                                gap: 10px;
-                                margin-top: 8px;
-                            ">
-                                <button type="button" class="team-button" data-value="Casa" onclick="selectFirstGoalTeam(this)" style="
-                                    flex: 1;
-                                    padding: 12px;
-                                    border: 1px solid var(--border-color);
-                                    background: var(--bg-color);
-                                    color: var(--text-color);
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: bold;
-                                    transition: all 0.3s ease;
-                                ">Casa</button>
-                                <button type="button" class="team-button" data-value="Fora" onclick="selectFirstGoalTeam(this)" style="
-                                    flex: 1;
-                                    padding: 12px;
-                                    border: 1px solid var(--border-color);
-                                    background: var(--bg-color);
-                                    color: var(--text-color);
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: bold;
-                                    transition: all 0.3s ease;
-                                ">Fora</button>
-                                <button type="button" class="team-button" data-value="Nenhum" onclick="selectFirstGoalTeam(this)" style="
-                                    flex: 1;
-                                    padding: 12px;
-                                    border: 1px solid var(--border-color);
-                                    background: var(--bg-color);
-                                    color: var(--text-color);
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    font-weight: bold;
-                                    transition: all 0.3s ease;
-                                ">Nenhum</button>
-                            </div>
-                        </div>
-
-                        <!-- Campos ocultos para armazenar os valores selecionados -->
-                        <input type="hidden" id="firstGoalTime" value="">
-                        <input type="hidden" id="firstGoalTeam" value="">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="datetime">Data e Hora:</label>
-                    <input type="datetime-local" id="datetime" value="">
+                    <button type="button" class="btn-manage-predictions" onclick="togglePredictionManager()">+</button>
                 </div>
             </div>
-            
-            <div class="add-button-container" style="margin-top: 25px;">
-                <button class="add-button" onclick="addOrUpdateNote()">Adicionar</button>
+
+            <!-- Seção de Placar FT -->
+            <div class="form-section score-section score-section-ft">
+                <div class="score-header">FT - FINAL</div>
+                <div class="score-controls">
+                    <div class="score-team">
+                        <label>CASA</label>
+                        <div class="score-input">
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreHome', -1)">-</button>
+                            <span class="score-value" id="ftScoreHome">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('ftScoreHome', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="score-separator">X</div>
+                    <div class="score-team">
+                        <label>FORA</label>
+                        <div class="score-input">
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreAway', -1)">-</button>
+                            <span class="score-value" id="ftScoreAway">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('ftScoreAway', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Placar HT -->
+            <div class="form-section score-section score-section-ht">
+                <div class="score-header">HT - 1º TEMPO</div>
+                <div class="score-controls">
+                    <div class="score-team">
+                        <label>CASA</label>
+                        <div class="score-input">
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('htScoreHome', -1)">-</button>
+                            <span class="score-value" id="htScoreHome">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('htScoreHome', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="score-separator">X</div>
+                    <div class="score-team">
+                        <label>FORA</label>
+                        <div class="score-input">
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('htScoreAway', -1)">-</button>
+                            <span class="score-value" id="htScoreAway">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('htScoreAway', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Primeiro Gol -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Primeiro Gol</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <label>Tempo:</label>
+                        <div class="button-group">
+                            <button type="button" class="time-button" data-value="HT" onclick="selectFirstGoalTime(this)">1º Tempo</button>
+                            <button type="button" class="time-button" data-value="FT" onclick="selectFirstGoalTime(this)">2º Tempo</button>
+                        </div>
+                    </div>
+                    <div class="first-goal-group">
+                        <label>Quem Marcou:</label>
+                        <div class="button-group">
+                            <button type="button" class="team-button" data-value="Casa" onclick="selectFirstGoalTeam(this)">Casa</button>
+                            <button type="button" class="team-button" data-value="Fora" onclick="selectFirstGoalTeam(this)">Fora</button>
+                            <button type="button" class="team-button" data-value="Nenhum" onclick="selectFirstGoalTeam(this)">Nenhum</button>
+                        </div>
+                    </div>
+                    <!-- Campos ocultos para armazenar os valores selecionados -->
+                    <input type="hidden" id="firstGoalTime" value="">
+                    <input type="hidden" id="firstGoalTeam" value="">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="datetime">Data e Hora:</label>
+                <input type="datetime-local" id="datetime" value="">
+            </div>
+
+            <div class="add-button-container">
+                <button class="add-button" onclick="addOrUpdateNote()">ADICIONAR</button>
             </div>
         </div>
 

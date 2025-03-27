@@ -1,11 +1,3 @@
-// Função para alternar o tema
-function toggleTheme() {
-    const currentTheme = document.body.dataset.theme;
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.body.dataset.theme = newTheme;
-    localStorage.setItem('theme', newTheme);
-}
-
 // Função para aplicar filtros
 function applyFilters() {
     const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
@@ -24,6 +16,12 @@ function applyFilters() {
     currentPage = 1;
     renderNotes(notasParaFiltrar);
     updateCounters(); // Atualizar contadores após aplicar filtros
+
+    // Opcional: Fechar o menu de filtros após aplicar
+    const filterMenu = document.getElementById('filterMenuContainer');
+    if (filterMenu && filterMenu.classList.contains('visible')) {
+        filterMenu.classList.remove('visible');
+    }
 }
 
 // Função para mostrar o modal de exportação
@@ -186,21 +184,28 @@ function addOrUpdateNote() {
 
 // Função auxiliar para resetar o formulário
 function resetForm() {
-    // Limpar campos do formulário
-    const formFields = [
-        'teamNameA', 'teamNameB', 'prediction',
-        'ftScoreHome', 'ftScoreAway', 'htScoreHome', 'htScoreAway',
-        'firstGoalTime', 'firstGoalTeam', 'datetime'
-    ];
-    formFields.forEach(field => {
-        document.getElementById(field).value = field === 'prediction' ? 'BTTS' : '';
-    });
-    
-    // Remover classes ativas dos botões
-    // Remover classes ativas dos botões
+    // Limpar campos de input e select
+    document.getElementById('teamNameA').value = '';
+    document.getElementById('teamNameB').value = '';
+    document.getElementById('prediction').value = 'BTTS'; // Ou o valor padrão desejado
+    document.getElementById('datetime').value = new Date().toISOString().slice(0, 16); // Resetar para data/hora atual
+
+    // Resetar placares para '0'
+    document.getElementById('ftScoreHome').textContent = '0';
+    document.getElementById('ftScoreAway').textContent = '0';
+    document.getElementById('htScoreHome').textContent = '0';
+    document.getElementById('htScoreAway').textContent = '0';
+
+    // Limpar seleção de primeiro gol (inputs hidden e botões)
+    document.getElementById('firstGoalTime').value = '';
+    document.getElementById('firstGoalTeam').value = '';
     document.querySelectorAll('.time-button, .team-button').forEach(btn => {
         btn.classList.remove('active');
     });
+
+    // Resetar estado de edição
+    editingNoteIndex = -1;
+    document.querySelector('.add-button').textContent = 'Adicionar';
 }
 
 // Configurações de paginação
@@ -1383,12 +1388,13 @@ function editNote(index) {
     // Separar os placares
     const [ftScoreHome, ftScoreAway] = note.ftScore.split('-');
     const [htScoreHome, htScoreAway] = note.htScore.split('-');
-    
-    document.getElementById('ftScoreHome').value = ftScoreHome;
-    document.getElementById('ftScoreAway').value = ftScoreAway;
-    document.getElementById('htScoreHome').value = htScoreHome;
-    document.getElementById('htScoreAway').value = htScoreAway;
-    
+
+    // Corrigido para usar textContent para os spans de placar
+    document.getElementById('ftScoreHome').textContent = ftScoreHome;
+    document.getElementById('ftScoreAway').textContent = ftScoreAway;
+    document.getElementById('htScoreHome').textContent = htScoreHome;
+    document.getElementById('htScoreAway').textContent = htScoreAway;
+
     // Separar informações do primeiro gol
     const [firstGoalTime, firstGoalTeam] = note.firstGoal.split(' | ');
     
@@ -1418,9 +1424,9 @@ function editNote(index) {
     // Mudar o texto do botão de adicionar
     const addButton = document.querySelector('.add-button');
     addButton.textContent = 'Atualizar';
-    
-    // Rolar até o formulário
-    document.querySelector('.form-row').scrollIntoView({ behavior: 'smooth' });
+
+    // Rolar até o formulário (corrigido para .form-container)
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
 }
 
 // Função para deletar uma nota
@@ -1445,7 +1451,15 @@ function initializePredictionSelect() {
     predictionSelect.value = 'BTTS';
 }
 
-// Navegação entre tabs do modal de IA
+// Função para controlar a visibilidade do menu de filtros
+function toggleFilterMenu() {
+    const filterMenu = document.getElementById('filterMenuContainer');
+    if (filterMenu) {
+        filterMenu.classList.toggle('visible');
+    }
+}
+
+// Navegação entre tabs do modal de IA e Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     // Setup das abas da IA
     const tabs = document.querySelectorAll('.ia-tab');
@@ -1512,5 +1526,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load theme
     if (localStorage.getItem('theme') === 'dark') {
         document.body.dataset.theme = 'dark';
+    }
+
+    // Adicionar event listener para o botão do menu de filtros
+    const toggleFilterBtn = document.getElementById('toggleFilterMenuBtn');
+    if (toggleFilterBtn) {
+        toggleFilterBtn.addEventListener('click', toggleFilterMenu);
     }
 });

@@ -1,3 +1,6 @@
+// Variáveis globais
+let notes = [];
+
 // Função para aplicar filtros
 function applyFilters() {
     const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
@@ -12,8 +15,6 @@ function applyFilters() {
     // Manter a ordenação por data nas notas filtradas
     notasParaFiltrar = sortNotesByDate(notasParaFiltrar);
     
-    // Resetar para primeira página ao filtrar
-    currentPage = 1;
     renderNotes(notasParaFiltrar);
     updateCounters(); // Atualizar contadores após aplicar filtros
 
@@ -170,10 +171,6 @@ function addOrUpdateNote() {
     // Ordenar notas por data após adicionar/atualizar
     notes = sortNotesByDate(notes);
     
-    // Sempre ir para a primeira página após adicionar/atualizar
-    // já que as notas mais recentes aparecerão no topo
-    currentPage = 1;
-    
     saveNotesToStorage();
     renderNotes(notes);
     updateCounters();
@@ -208,89 +205,46 @@ function resetForm() {
     document.querySelector('.add-button').textContent = 'Adicionar';
 }
 
-// Configurações de paginação
-const ITEMS_PER_PAGE = 200;
-let currentPage = 1;
-
 // Função para renderizar as anotações
 function renderNotes(filteredNotes = notes) {
+    console.log('Iniciando renderização de notas');
     const notesList = document.getElementById('notesList');
-    const pagination = document.getElementById('pagination');
-    notesList.innerHTML = '';
-    
-    // Calcular total de páginas
-    const totalPages = Math.ceil(filteredNotes.length / ITEMS_PER_PAGE);
-    
-    // Garantir que a página atual é válida
-    currentPage = Math.min(Math.max(1, currentPage), totalPages);
-    
-    // Calcular índices para a página atual
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredNotes.length);
-    
-    // Renderizar apenas as notas da página atual
-    const notesForPage = filteredNotes.slice(startIndex, endIndex);
-    
-    notesForPage.forEach(note => {
-        const gameData = {
-            match: note.teamName,
-            btts: note.prediction,
-            ft: note.ftScore,
-            ht: note.htScore,
-            firstGoalMinute: note.firstGoal.split('|')[1].trim(),
-            dateTime: note.datetime
-        };
-        
-        const card = createGameCard(gameData);
-        notesList.appendChild(card);
-    });
-    
-    // Atualizar controles de paginação
-    updatePagination(filteredNotes.length, currentPage, totalPages);
-}
 
-// Função para atualizar controles de paginação
-function updatePagination(totalItems, currentPage, totalPages) {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-    
-    if (totalPages <= 1) {
+    if (!notesList) {
+        console.error('Elemento notesList não encontrado');
         return;
     }
-    
-    const paginationControls = document.createElement('div');
-    paginationControls.className = 'pagination-controls';
-    
-    // Botão Anterior
-    const prevButton = document.createElement('button');
-    prevButton.textContent = '← Anterior';
-    prevButton.className = 'pagination-btn';
-    prevButton.disabled = currentPage === 1;
-    prevButton.onclick = () => changePage(currentPage - 1);
-    
-    // Botão Próximo
-    const nextButton = document.createElement('button');
-    nextButton.textContent = 'Próximo →';
-    nextButton.className = 'pagination-btn';
-    nextButton.disabled = currentPage === totalPages;
-    nextButton.onclick = () => changePage(currentPage + 1);
-    
-    // Indicador de página
-    const pageInfo = document.createElement('span');
-    pageInfo.className = 'page-info';
-    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
-    
-    // Adicionar elementos ao controle de paginação
-    paginationControls.appendChild(prevButton);
-    paginationControls.appendChild(pageInfo);
-    paginationControls.appendChild(nextButton);
-    pagination.appendChild(paginationControls);
-}
 
-// Função para mudar de página
-function changePage(newPage) {
-    currentPage = newPage;
-    renderNotes(notes);
+    // Verifica se há notas para renderizar
+    if (!filteredNotes || filteredNotes.length === 0) {
+        console.log('Nenhuma nota para renderizar');
+        notesList.innerHTML = '<div class="no-notes">Nenhuma partida registrada</div>';
+        return;
+    }
+
+    console.log(`Renderizando ${filteredNotes.length} notas`);
+    notesList.innerHTML = '';
+    
+    // Renderizar todas as notas
+    filteredNotes.forEach((note, index) => {
+        try {
+            const gameData = {
+                match: note.teamName,
+                btts: note.prediction,
+                ft: note.ftScore,
+                ht: note.htScore,
+                firstGoalMinute: note.firstGoal.split('|')[1].trim(),
+                dateTime: note.datetime
+            };
+            
+            const card = createGameCard(gameData);
+            notesList.appendChild(card);
+        } catch (error) {
+            console.error(`Erro ao renderizar nota ${index}:`, error);
+        }
+    });
+
+    console.log('Renderização de notas concluída');
 }
 
 // Função para salvar anotações no armazenamento local
@@ -305,11 +259,28 @@ function sortNotesByDate(notesArray) {
 
 // Função para carregar anotações do armazenamento local
 function loadNotesFromStorage() {
+    console.log('Iniciando carregamento de notas do localStorage');
     const storedNotes = localStorage.getItem('notes');
-    if (storedNotes) {
-        notes = JSON.parse(storedNotes);
-        notes = sortNotesByDate(notes); // Ordenar notas por data
-        updateCounters(); // Atualizar contadores após carregar notas
+    
+    try {
+        if (storedNotes) {
+            notes = JSON.parse(storedNotes);
+            console.log(`${notes.length} notas carregadas do localStorage`);
+            
+            // Ordenar notas por data
+            notes = sortNotesByDate(notes);
+
+            // Atualizar contadores
+            updateCounters();
+        } else {
+            console.log('Nenhuma nota encontrada no localStorage');
+            notes = [];
+            localStorage.setItem('notes', '[]');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar notas:', error);
+        notes = [];
+        localStorage.setItem('notes', '[]');
     }
 }
 
@@ -553,32 +524,61 @@ function createGameCard(gameData) {
 
 // Função para controlar a visibilidade da lista de notas
 function toggleNotesList() {
+    console.log('Alternando visibilidade da lista de notas');
     const notesList = document.getElementById('notesList');
     const toggleBtn = document.getElementById('toggleNotes');
     const toggleIcon = document.getElementById('toggleIcon');
     const toggleText = toggleBtn.querySelector('span:last-child');
+
+    if (!notesList) {
+        console.error('Elemento notesList não encontrado');
+        return;
+    }
+
     const isMinimized = notesList.classList.toggle('minimized');
+    console.log('Estado minimizado:', isMinimized);
     
-    // Atualiza o ícone e texto do botão
+    // Atualiza o ícone e texto do botão com animação
     toggleIcon.style.transform = isMinimized ? 'rotate(-90deg)' : 'rotate(0deg)';
     toggleText.textContent = isMinimized ? 'Maximizar' : 'Minimizar';
     
+    // Força re-renderização das notas se estiver maximizando
+    if (!isMinimized) {
+        console.log('Re-renderizando notas após maximizar');
+        renderNotes(notes);
+    }
+    
     // Salva o estado no localStorage
     localStorage.setItem('notesListMinimized', isMinimized);
+    console.log('Estado salvo no localStorage:', isMinimized);
 }
 
 // Função para restaurar o estado da lista de notas
 function restoreNotesListState() {
+    console.log('Restaurando estado da lista de notas');
     const isMinimized = localStorage.getItem('notesListMinimized') === 'true';
     const notesList = document.getElementById('notesList');
     const toggleBtn = document.getElementById('toggleNotes');
     const toggleIcon = document.getElementById('toggleIcon');
     const toggleText = toggleBtn.querySelector('span:last-child');
     
+    if (!notesList || !toggleBtn || !toggleIcon || !toggleText) {
+        console.error('Elementos necessários não encontrados');
+        return;
+    }
+
+    console.log('Estado minimizado anterior:', isMinimized);
+    
     if (isMinimized) {
         notesList.classList.add('minimized');
         toggleIcon.style.transform = 'rotate(-90deg)';
         toggleText.textContent = 'Maximizar';
+    } else {
+        notesList.classList.remove('minimized');
+        toggleIcon.style.transform = 'rotate(0deg)';
+        toggleText.textContent = 'Minimizar';
+        // Garante que as notas sejam renderizadas se não estiver minimizado
+        renderNotes(notes);
     }
 }
 
@@ -644,15 +644,6 @@ function handleDeleteGameCard(button) {
     if (confirm('Tem certeza que deseja excluir este registro?')) {
         notes.splice(index, 1);
         saveNotesToStorage();
-        
-        // Calcular total de páginas após exclusão
-        const totalPages = Math.ceil(notes.length / ITEMS_PER_PAGE);
-        
-        // Se a página atual ficou vazia e não é a primeira página, voltar uma página
-        if (currentPage > totalPages) {
-            currentPage = Math.max(1, totalPages);
-        }
-        
         renderNotes(notes);
         updateCounters();
     }
@@ -1461,6 +1452,12 @@ function toggleFilterMenu() {
 
 // Navegação entre tabs do modal de IA e Inicialização
 document.addEventListener('DOMContentLoaded', function() {
+    // Remover qualquer elemento de paginação existente
+    const paginationElement = document.querySelector('.pagination');
+    if (paginationElement) {
+        paginationElement.remove();
+    }
+    
     // Setup das abas da IA
     const tabs = document.querySelectorAll('.ia-tab');
     tabs.forEach(tab => {
@@ -1495,7 +1492,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
     
-    // Inicialização
     // Definir a data atual no campo de data/hora
     document.getElementById('datetime').value = new Date().toISOString().slice(0, 16);
     
@@ -1510,12 +1506,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Renderizar as anotações iniciais
     renderNotes();
+
+    // Observar mudanças no DOM para remover paginação se for recriada
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                // Verifica se o nó adicionado é um elemento e tem a classe 'pagination'
+                if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('pagination')) {
+                    console.log('Elemento de paginação detectado e removido dinamicamente.');
+                    node.remove();
+                }
+            });
+        });
+    });
+
+    // Observa o body e seus descendentes
+    observer.observe(document.body, {
+        childList: true, // Observa adição/remoção de filhos diretos
+        subtree: true    // Observa todos os descendentes
+    });
     
     // Atualizar o filtro de palpites também
     updateFilterPredictionOptions();
-    
-    // Inicializar paginação
-    updatePagination();
     
     // Atualizar contadores
     updateCounters();

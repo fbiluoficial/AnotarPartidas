@@ -1414,3 +1414,149 @@ h1 {
 }
 
 /* --- Fim dos Estilos para o Menu de Filtros --- */
+
+/* --- Estilos das Abas do Modal de Exportação/Importação --- */
+.modal-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.modal-tab {
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 1em;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.modal-tab.active {
+    color: var(--primary-color);
+}
+
+.modal-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary-color);
+}
+
+/* Conteúdo das abas */
+.modal-content {
+    display: none;
+}
+
+.modal-content.active {
+    display: block;
+}
+
+/* Estilos específicos para importação */
+.import-instructions {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    border-radius: 5px;
+}
+
+.import-instructions .warning {
+    color: var(--warning-color);
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.import-form {
+    margin: 20px 0;
+}
+
+.import-file-input {
+    display: none;
+}
+
+.import-file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+}
+
+.import-file-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.import-status {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.import-report {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.import-report h3 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.import-report p {
+    margin: 5px 0;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.import-error {
+    background-color: rgba(255, 0, 0, 0.1);
+    color: #ff5252;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.import-error h3 {
+    color: #ff5252;
+    margin-bottom: 10px;
+}
+
+/* Responsividade para o modal de importação/exportação */
+@media (max-width: 768px) {
+    .modal-tabs {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .modal-tab {
+        width: 100%;
+        text-align: center;
+    }
+
+    .modal-tab.active::after {
+        bottom: -2px;
+    }
+
+    .import-file-label {
+        padding: 15px;
+        font-size: 0.9em;
+    }
+
+    .import-report, .import-error {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+}

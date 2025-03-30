@@ -1,7 +1,7 @@
 // Variáveis globais
 let notes = [];
 
-// Função para aplicar filtros.
+// Função para aplicar filtros
 function applyFilters() {
     const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
     const predictionFilter = document.getElementById('filterPrediction').value;
@@ -324,13 +324,23 @@ function addOrUpdateNote() {
         return;
     }
 
+    // Determinar o valor de firstGoal
+    let firstGoalValue;
+    if (firstGoalTeam === 'Nenhum') {
+        firstGoalValue = 'N/A | Nenhum';
+    } else if (firstGoalTime && firstGoalTeam) {
+        firstGoalValue = `${firstGoalTime} | ${firstGoalTeam}`;
+    } else {
+        firstGoalValue = 'Aguardando';
+    }
+
     const gameData = {
         // id será adicionado/mantido abaixo
         teamName: `${teamNameA} vs ${teamNameB}`,
         prediction,
         ftScore: ftScoreHome && ftScoreAway ? `${ftScoreHome}-${ftScoreAway}` : 'Aguardando',
         htScore: htScoreHome && htScoreAway ? `${htScoreHome}-${htScoreAway}` : 'Aguardando',
-        firstGoal: firstGoalTime && firstGoalTeam ? `${firstGoalTime} | ${firstGoalTeam}` : 'Não iniciado',
+        firstGoal: firstGoalValue,
         datetime,
         status: 'active'
     };
@@ -407,19 +417,28 @@ function renderNotes(filteredNotes = notes) {
     // Renderizar todas as notas
     filteredNotes.forEach((note, index) => {
         try {
+            // Extrair informação do primeiro gol de forma segura
+            let displayValue = '-';
+            if (note.firstGoal === 'Aguardando') {
+                displayValue = 'Aguardando';
+            } else if (note.firstGoal && note.firstGoal.includes('|')) {
+                const parts = note.firstGoal.split('|');
+                displayValue = parts.length > 1 ? parts[1].trim() : '-';
+            }
+
             const gameData = {
                 match: note.teamName,
-                btts: note.prediction,
+                prediction: note.prediction,
                 ft: note.ftScore,
                 ht: note.htScore,
-                firstGoalMinute: note.firstGoal.split('|')[1].trim(),
+                firstGoalMinute: displayValue,
                 dateTime: note.datetime
             };
             
             const card = createGameCard(gameData);
             notesList.appendChild(card);
         } catch (error) {
-            console.error(`Erro ao renderizar nota ${index}:`, error);
+            console.error(`Erro ao renderizar nota ${index}:`, error, note);
         }
     });
 
@@ -698,7 +717,7 @@ function createGameCard(gameData) {
                     <span class="info-value">${gameData.ht}</span>
                 </div>
                 <div class="game-info-item">
-                    <span class="info-label">1º GOL MIN:</span>
+                    <span class="info-label">1º GOL:</span>
                     <span class="info-value">${gameData.firstGoalMinute}</span>
                 </div>
                 <div class="game-info-item date-time">
@@ -823,12 +842,37 @@ function handleEditGameCard(button) {
 }
 
 // Função para excluir um card
+// Função para verificar placares e atualizar estado da seção de tempo
+function checkScoresAndUpdateTimeSection() {
+    const ftHome = document.getElementById('ftScoreHome').textContent;
+    const ftAway = document.getElementById('ftScoreAway').textContent;
+    const htHome = document.getElementById('htScoreHome').textContent;
+    const htAway = document.getElementById('htScoreAway').textContent;
+    const selectedTeam = document.getElementById('firstGoalTeam').value;
+
+    const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
+    const timeButtons = document.querySelector('.first-goal-group:first-child');
+
+    if (selectedTeam === 'Nenhum' && isZeroZero) {
+        timeButtons.classList.add('disabled-section');
+        document.querySelectorAll('.time-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById('firstGoalTime').value = '';
+    } else if (selectedTeam === 'Nenhum') {
+        timeButtons.classList.remove('disabled-section');
+    }
+}
+
 // Função para atualizar o placar
 function updateScore(elementId, delta) {
     const el = document.getElementById(elementId);
     let val = parseInt(el.textContent || '0');
     val = Math.max(0, val + delta);
     el.textContent = val.toString();
+
+    // Verifica os placares após cada atualização
+    checkScoresAndUpdateTimeSection();
 }
 
 function handleDeleteGameCard(button) {
@@ -1554,7 +1598,30 @@ function selectFirstGoalTeam(button) {
     button.classList.add('active');
     
     // Atualiza o valor no campo hidden
-    document.getElementById('firstGoalTeam').value = button.getAttribute('data-value');
+    const selectedTeam = button.getAttribute('data-value');
+    document.getElementById('firstGoalTeam').value = selectedTeam;
+
+    // Verifica se é "Nenhum" e os placares são 0-0
+    const ftHome = document.getElementById('ftScoreHome').textContent;
+    const ftAway = document.getElementById('ftScoreAway').textContent;
+    const htHome = document.getElementById('htScoreHome').textContent;
+    const htAway = document.getElementById('htScoreAway').textContent;
+
+    const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
+    const timeButtons = document.querySelector('.first-goal-group:first-child');
+
+    if (selectedTeam === 'Nenhum' && isZeroZero) {
+        // Desabilita a seção de tempo
+        timeButtons.classList.add('disabled-section');
+        // Limpa a seleção de tempo
+        document.querySelectorAll('.time-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById('firstGoalTime').value = '';
+    } else {
+        // Habilita a seção de tempo
+        timeButtons.classList.remove('disabled-section');
+    }
 }
 
 // Variável global para armazenar o índice da nota sendo editada

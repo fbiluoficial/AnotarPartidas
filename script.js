@@ -28,11 +28,64 @@ function applyFilters() {
 // Função para mostrar o modal de exportação
 function showExportModal() {
     document.getElementById('exportOverlay').classList.add('active');
+    // Ativar a aba de exportação por padrão
+    switchModalTab('export');
 }
 
 // Função para esconder o modal de exportação
 function hideExportModal() {
     document.getElementById('exportOverlay').classList.remove('active');
+    // Limpar status de importação ao fechar
+    document.getElementById('importStatus').innerHTML = '';
+    document.getElementById('importFile').value = '';
+}
+
+// Função para alternar entre as abas do modal
+function switchModalTab(tabName) {
+    // Remover classe active de todas as abas e conteúdos
+    document.querySelectorAll('.modal-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.modal-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Ativar a aba selecionada
+    const selectedTab = document.querySelector(`.modal-tab[onclick="switchModalTab('${tabName}')"]`);
+    const selectedContent = document.getElementById(`${tabName}Tab`);
+    
+    if (selectedTab && selectedContent) {
+        selectedTab.classList.add('active');
+        selectedContent.classList.add('active');
+    }
+}
+
+// Função para lidar com o botão de importação
+function handleImportButton() {
+    const fileInput = document.getElementById('importFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        document.getElementById('importStatus').innerHTML = `
+            <div class="import-error">
+                <h3>Erro</h3>
+                <p>Por favor, selecione um arquivo Excel (.xlsx) para importar.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (!file.name.endsWith('.xlsx')) {
+        document.getElementById('importStatus').innerHTML = `
+            <div class="import-error">
+                <h3>Erro</h3>
+                <p>O arquivo deve ser no formato Excel (.xlsx).</p>
+            </div>
+        `;
+        return;
+    }
+    
+    performImport(file);
 }
 
 // Função para realizar a exportação
@@ -41,14 +94,137 @@ function performExport() {
     const filename = document.getElementById('filename').value || 'Anotacoes_Jogo';
     
     const dataToExport = exportOption === 'all' ? notes : filteredNotes;
-    
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Garantir que o ID seja a primeira coluna no Excel
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport, {
+        header: ['id', 'teamName', 'prediction', 'ftScore', 'htScore', 'firstGoal', 'datetime', 'status']
+    });
+
+    // Adicionar aviso sobre a coluna ID
+    XLSX.utils.sheet_add_aoa(worksheet, [
+        ['ATENÇÃO: NÃO MODIFIQUE A COLUNA ID!'],
+        ['Esta coluna é usada para identificação interna dos registros.']
+    ], { origin: -1 });
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Anotacoes');
     
     XLSX.writeFile(workbook, `${filename}.xlsx`);
     
     hideExportModal();
+}
+
+// Função para realizar a importação
+function performImport(file) {
+    const reader = new FileReader();
+    const statusDiv = document.getElementById('importStatus');
+    
+    reader.onload = function(e) {
+        try {
+            statusDiv.innerHTML = 'Processando arquivo...';
+            
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const importedNotes = XLSX.utils.sheet_to_json(worksheet);
+
+            // Criar mapa das notas atuais
+            const currentNotesMap = new Map(notes.map(note => [note.id, note]));
+            const importedIds = new Set();
+            const mergedNotes = [];
+            let updatedCount = 0;
+            let newCount = 0;
+            let skippedCount = 0;
+            let invalidCount = 0;
+            let deletedCount = 0;
+
+            // Processar notas importadas
+            importedNotes.forEach(importedNote => {
+                // Pular linhas de aviso
+                if (importedNote.id === 'ATENÇÃO: NÃO MODIFIQUE A COLUNA ID!') {
+                    return;
+                }
+
+                // Validar nota importada
+                if (!importedNote.id || !importedNote.teamName || !importedNote.datetime) {
+                    console.warn('Nota inválida encontrada:', importedNote);
+                    invalidCount++;
+                    return;
+                }
+
+                importedIds.add(importedNote.id);
+
+                // Verificar se a nota está marcada como excluída
+                if (importedNote.status === 'deleted') {
+                    if (currentNotesMap.has(importedNote.id)) {
+                        deletedCount++;
+                        currentNotesMap.delete(importedNote.id);
+                    }
+                    return;
+                }
+
+                if (currentNotesMap.has(importedNote.id)) {
+                    // Atualizar nota existente
+                    Object.assign(currentNotesMap.get(importedNote.id), importedNote);
+                    updatedCount++;
+                } else {
+                    // Adicionar nova nota
+                    mergedNotes.push(importedNote);
+                    newCount++;
+                }
+            });
+
+            // Manter notas que não foram importadas
+            notes.forEach(note => {
+                if (!importedIds.has(note.id)) {
+                    mergedNotes.push(note);
+                    skippedCount++;
+                } else if (currentNotesMap.has(note.id)) {
+                    mergedNotes.push(currentNotesMap.get(note.id));
+                }
+            });
+
+            // Atualizar notas
+            notes = sortNotesByDate(mergedNotes);
+            saveNotesToStorage();
+            renderNotes();
+            updateCounters();
+
+            // Exibir relatório
+            statusDiv.innerHTML = `
+                <div class="import-report">
+                    <h3>Importação Concluída</h3>
+                    <p>✅ ${updatedCount} notas atualizadas</p>
+                    <p>➕ ${newCount} notas novas adicionadas</p>
+                    <p>📝 ${skippedCount} notas mantidas sem alteração</p>
+                    ${deletedCount > 0 ? `<p>🗑️ ${deletedCount} notas excluídas sincronizadas</p>` : ''}
+                    ${invalidCount > 0 ? `<p>⚠️ ${invalidCount} notas inválidas ignoradas</p>` : ''}
+                    <p>Total: ${mergedNotes.length} notas após importação</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Erro na importação:', error);
+            statusDiv.innerHTML = `
+                <div class="import-error">
+                    <h3>Erro na Importação</h3>
+                    <p>❌ ${error.message}</p>
+                    <p>Por favor, verifique se o arquivo está no formato correto.</p>
+                </div>
+            `;
+        }
+    };
+
+    reader.onerror = function() {
+        statusDiv.innerHTML = `
+            <div class="import-error">
+                <h3>Erro na Leitura do Arquivo</h3>
+                <p>❌ Não foi possível ler o arquivo.</p>
+            </div>
+        `;
+    };
+
+    statusDiv.innerHTML = 'Lendo arquivo...';
+    reader.readAsArrayBuffer(file);
 }
 
 // Função para mostrar o modal de IA
@@ -141,14 +317,15 @@ function addOrUpdateNote() {
     const firstGoalTime = document.getElementById('firstGoalTime').value;
     const firstGoalTeam = document.getElementById('firstGoalTeam').value;
     const datetime = document.getElementById('datetime').value;
-    
+
     // Validação dos campos obrigatórios
     if (!teamNameA || !teamNameB || !prediction || !datetime) {
         alert('Por favor, preencha todos os campos obrigatórios.');
         return;
     }
-    
+
     const gameData = {
+        // id será adicionado/mantido abaixo
         teamName: `${teamNameA} vs ${teamNameB}`,
         prediction,
         ftScore: ftScoreHome && ftScoreAway ? `${ftScoreHome}-${ftScoreAway}` : 'Aguardando',
@@ -157,17 +334,19 @@ function addOrUpdateNote() {
         datetime,
         status: 'active'
     };
-    
+
     if (editingNoteIndex >= 0) {
-        // Atualizar nota existente
+        // Atualizar nota existente - Manter o ID original
+        gameData.id = notes[editingNoteIndex].id; // Preserva o ID existente
         notes[editingNoteIndex] = gameData;
         editingNoteIndex = -1;
         document.querySelector('.add-button').textContent = 'Adicionar';
     } else {
-        // Adicionar nova nota
+        // Adicionar nova nota - Gerar novo ID
+        gameData.id = crypto.randomUUID(); // Gera um novo ID único
         notes.push(gameData);
     }
-    
+
     // Ordenar notas por data após adicionar/atualizar
     notes = sortNotesByDate(notes);
     
@@ -266,6 +445,21 @@ function loadNotesFromStorage() {
         if (storedNotes) {
             notes = JSON.parse(storedNotes);
             console.log(`${notes.length} notas carregadas do localStorage`);
+            
+            // Verificar e adicionar IDs para notas que não possuem
+            let needsSave = false;
+            notes = notes.map(note => {
+                if (!note.id) {
+                    note.id = crypto.randomUUID();
+                    needsSave = true;
+                }
+                return note;
+            });
+
+            if (needsSave) {
+                console.log('Adicionando IDs únicos para notas existentes');
+                localStorage.setItem('notes', JSON.stringify(notes));
+            }
             
             // Ordenar notas por data
             notes = sortNotesByDate(notes);
@@ -642,6 +836,9 @@ function handleDeleteGameCard(button) {
     const index = Array.from(card.parentElement.children).indexOf(card);
     
     if (confirm('Tem certeza que deseja excluir este registro?')) {
+        // Marcar a nota como excluída em vez de removê-la
+        notes[index].status = 'deleted';
+        // Remover da visualização
         notes.splice(index, 1);
         saveNotesToStorage();
         renderNotes(notes);
@@ -1544,5 +1741,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleFilterBtn = document.getElementById('toggleFilterMenuBtn');
     if (toggleFilterBtn) {
         toggleFilterBtn.addEventListener('click', toggleFilterMenu);
+    }
+
+    // Setup do input de arquivo de importação
+    const importFileInput = document.getElementById('importFile');
+    const importFileLabel = document.querySelector('.import-file-label');
+    
+    if (importFileInput && importFileLabel) {
+        importFileInput.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || 'Nenhum arquivo selecionado';
+            importFileLabel.textContent = fileName;
+            // Limpar status anterior
+            document.getElementById('importStatus').innerHTML = '';
+        });
     }
 });

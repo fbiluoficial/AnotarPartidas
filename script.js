@@ -1,7 +1,7 @@
 // Variáveis globais
 let notes = [];
 
-// Função para aplicar filtros
+// Função para aplicar filtros.
 function applyFilters() {
     const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
     const predictionFilter = document.getElementById('filterPrediction').value;

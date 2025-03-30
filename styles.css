@@ -1415,6 +1415,15 @@ h1 {
 
 /* --- Fim dos Estilos para o Menu de Filtros --- */
 
+/* Estilo para seção desabilitada */
+.disabled-section {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+    transition: all 0.3s ease;
+}
+
 /* --- Estilos das Abas do Modal de Exportação/Importação --- */
 .modal-tabs {
     display: flex;

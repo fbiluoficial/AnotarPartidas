@@ -40,7 +40,7 @@
         
         <!-- Container do Formulário Reestruturado -->
         <div class="form-container"> <!-- Renomeado de form-row para form-container -->
-            <h2 class="form-title">Cadastro de Nova Partida</h2>
+            <h2 class="form-title">Cadastro de Nova Partida!</h2>
 
             <div class="form-section">
                 <label class="form-label">Partida:</label>
@@ -306,33 +306,59 @@
 
     </div>
 
-    <!-- Modal de Exportação -->
+    <!-- Modal de Exportação/Importação -->
     <div class="export-overlay" id="exportOverlay">
         <div class="export-modal">
-            <h2>Exportar Anotações</h2>
-            <div class="export-options">
-                <div class="export-option">
-                    <input type="radio" id="exportAll" name="exportOption" value="all" checked>
-                    <label for="exportAll">Exportar todas as anotações</label>
+            <div class="modal-tabs">
+                <button class="modal-tab active" onclick="switchModalTab('export')">Exportar</button>
+                <button class="modal-tab" onclick="switchModalTab('import')">Importar</button>
+            </div>
+
+            <!-- Aba de Exportação -->
+            <div id="exportTab" class="modal-content active">
+                <h2>Exportar Anotações</h2>
+                <div class="export-options">
+                    <div class="export-option">
+                        <input type="radio" id="exportAll" name="exportOption" value="all" checked>
+                        <label for="exportAll">Exportar todas as anotações</label>
+                    </div>
+                    <div class="export-option">
+                        <input type="radio" id="exportFiltered" name="exportOption" value="filtered">
+                        <label for="exportFiltered">Exportar apenas anotações filtradas</label>
+                    </div>
                 </div>
-                <div class="export-option">
-                    <input type="radio" id="exportFiltered" name="exportOption" value="filtered">
-                    <label for="exportFiltered">Exportar apenas anotações filtradas</label>
+                <div>
+                    <label for="filename">Nome do arquivo:</label>
+                    <input type="text" id="filename" class="export-filename" value="Anotacoes_Jogo">
+                </div>
+                <div class="export-progress" id="exportProgress">
+                    <div class="export-progress-bar">
+                        <div class="export-progress-fill" id="exportProgressFill"></div>
+                    </div>
+                    <div class="export-status" id="exportStatus">Preparando...</div>
+                </div>
+                <div class="export-buttons">
+                    <button class="export-cancel-btn" onclick="hideExportModal()">Cancelar</button>
+                    <button class="export-confirm-btn" onclick="performExport()">Exportar Excel</button>
                 </div>
             </div>
-            <div>
-                <label for="filename">Nome do arquivo:</label>
-                <input type="text" id="filename" class="export-filename" value="Anotacoes_Jogo">
-            </div>
-            <div class="export-progress" id="exportProgress">
-                <div class="export-progress-bar">
-                    <div class="export-progress-fill" id="exportProgressFill"></div>
+
+            <!-- Aba de Importação -->
+            <div id="importTab" class="modal-content">
+                <h2>Importar Anotações</h2>
+                <div class="import-instructions">
+                    <p>Selecione um arquivo Excel exportado anteriormente.</p>
+                    <p class="warning">⚠️ Importante: Não modifique a coluna ID do arquivo Excel!</p>
                 </div>
-                <div class="export-status" id="exportStatus">Preparando...</div>
-            </div>
-            <div class="export-buttons">
-                <button class="export-cancel-btn" onclick="hideExportModal()">Cancelar</button>
-                <button class="export-confirm-btn" onclick="performExport()">Exportar Excel</button>
+                <div class="import-form">
+                    <input type="file" id="importFile" accept=".xlsx" class="import-file-input">
+                    <label for="importFile" class="import-file-label">Escolher arquivo</label>
+                </div>
+                <div id="importStatus" class="import-status"></div>
+                <div class="import-buttons">
+                    <button class="export-cancel-btn" onclick="hideExportModal()">Cancelar</button>
+                    <button class="export-confirm-btn" onclick="handleImportButton()">Importar</button>
+                </div>
             </div>
         </div>
     </div>

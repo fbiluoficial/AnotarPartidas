@@ -515,6 +515,7 @@ function calcularEstatisticas() {
     // Contadores HT
     let vitoriasCasaHT = 0;
     let vitoriasForaHT = 0;
+    let empatesHT = 0; // Adicionado contador para empates HT
     
     // Contadores de gols
     let jogosComGols = 0;
@@ -541,6 +542,7 @@ function calcularEstatisticas() {
             // Contagem de vitórias HT
             if (golsCasaHT > golsForaHT) vitoriasCasaHT++;
             if (golsForaHT > golsCasaHT) vitoriasForaHT++;
+            if (golsCasaHT === golsForaHT) empatesHT++; // Incrementa em caso de empate HT
         }
     });
 
@@ -549,6 +551,7 @@ function calcularEstatisticas() {
     const percentForaFT = ((vitoriasForaFT / total) * 100).toFixed(1);
     const percentCasaHT = ((vitoriasCasaHT / total) * 100).toFixed(1);
     const percentForaHT = ((vitoriasForaHT / total) * 100).toFixed(1);
+    const percentEmpatesHT = ((empatesHT / total) * 100).toFixed(1); // Calcula porcentagem de empates HT
     const percentGols = ((jogosComGols / totalJogosComGols) * 100).toFixed(1);
 
     // Calcular total de vitórias FT
@@ -576,6 +579,7 @@ function calcularEstatisticas() {
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
         vitoriasCasaHT: `${vitoriasCasaHT}/${total} (${percentCasaHT}%)`,
         vitoriasForaHT: `${vitoriasForaHT}/${total} (${percentForaHT}%)`,
+        empatesHT: `${empatesHT}/${total} (${percentEmpatesHT}%)`, // Adiciona estatística de empates HT
         acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
         totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
         bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
@@ -677,6 +681,7 @@ function updateCounters() {
     atualizarElementoComProgresso('vitoriasForaFT', stats.vitoriasForaFT);
     atualizarElementoComProgresso('vitoriasCasaHT', stats.vitoriasCasaHT);
     atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
+    atualizarElementoComProgresso('empatesHT', stats.empatesHT); // Adicionado atualização para Empates HT
     atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
     atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
     atualizarElementoComProgresso('bttsSim', stats.bttsSim);

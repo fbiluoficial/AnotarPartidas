@@ -692,48 +692,63 @@ function checkBTTS(ftScore) {
 
 function createGameCard(gameData) {
     const card = document.createElement('div');
-    card.className = 'game-card';
-    
+    // Adiciona as classes base do novo design, mantendo 'game-card' para possível compatibilidade
+    card.className = 'bg-card-bg rounded-lg shadow-md p-3 game-card';
+
     const hasBTTS = checkBTTS(gameData.ft);
-    const bttsClass = hasBTTS ? 'btts-green' : 'btts-red';
+    // Define as classes CSS que serão criadas no styles.css
+    const bttsClass = hasBTTS ? 'btts-green-badge' : 'btts-red-text';
     const bttsText = hasBTTS ? 'GREEN' : 'RED';
-    
+
+    // Formata a data para DD/MM/YYYY (extrai da função existente)
+    const formattedDate = formatDateTime(gameData.dateTime).split(' ')[0];
+
+    // Extrai apenas quem marcou o primeiro gol para exibição simplificada
+    let firstGoalDisplay = 'N/A'; // Valor padrão
+    if (gameData.firstGoalMinute && gameData.firstGoalMinute !== 'Nenhum' && gameData.firstGoalMinute !== 'Aguardando') {
+        const parts = gameData.firstGoalMinute.split('|');
+        firstGoalDisplay = parts.length > 1 ? parts[1].trim() : gameData.firstGoalMinute.trim();
+    } else if (gameData.firstGoalMinute === 'Aguardando') {
+        firstGoalDisplay = 'Aguardando';
+    }
+
+    // Nova estrutura HTML do card
     card.innerHTML = `
-        <div class="game-card-header">
-            <h2 class="game-title">${gameData.match}</h2>
+        <div class="flex justify-between items-center mb-2">
+            <h2 class="text-base font-semibold">${gameData.match}</h2>
+            <span class="text-xs text-gray-400">${formattedDate}</span>
         </div>
-        <div class="game-card-body">
-            <div class="game-info-grid">
-                <div class="game-info-item">
-                    <span class="info-label">BTTS:</span>
-                    <span class="info-value btts-result ${bttsClass}">${bttsText}</span>
-                </div>
-                <div class="game-info-item">
-                    <span class="info-label">FT:</span>
-                    <span class="info-value">${gameData.ft}</span>
-                </div>
-                <div class="game-info-item">
-                    <span class="info-label">HT:</span>
-                    <span class="info-value">${gameData.ht}</span>
-                </div>
-                <div class="game-info-item">
-                    <span class="info-label">1º GOL:</span>
-                    <span class="info-value">${gameData.firstGoalMinute}</span>
-                </div>
-                <div class="game-info-item date-time">
-                    <span class="info-label">Data/Hora:</span>
-                    <span class="info-value">${formatDateTime(gameData.dateTime)}</span>
-                </div>
+        <div class="grid grid-cols-2 gap-1 stat-grid text-xs mb-2">
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">BTTS</span>
+                <span class="${bttsClass}">${bttsText}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">FT</span>
+                <span class="font-semibold">${gameData.ft}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">HT</span>
+                <span class="font-semibold">${gameData.ht}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">1º GOL</span>
+                <span class="font-semibold">${firstGoalDisplay}</span>
             </div>
         </div>
-        <div class="game-card-footer">
-            <button class="edit-btn" onclick="handleEditGameCard(this)">Editar</button>
-            <button class="delete-btn" onclick="handleDeleteGameCard(this)">Excluir</button>
+        <div class="flex gap-2">
+            <button class="flex-1 bg-edit-btn hover:bg-edit-btn-hover text-white text-[0.65rem] py-1 px-2 rounded transition" onclick="handleEditGameCard(this)">
+                Editar
+            </button>
+            <button class="flex-1 bg-delete-btn hover:bg-delete-btn-hover text-white text-[0.65rem] py-1 px-2 rounded transition" onclick="handleDeleteGameCard(this)">
+                Excluir
+            </button>
         </div>
     `;
     
     return card;
 }
+// Chave extra removida
 
 // Função para controlar a visibilidade da lista de notas
 function toggleNotesList() {

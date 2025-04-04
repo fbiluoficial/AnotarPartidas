@@ -1316,6 +1316,19 @@ h1 {
     gap: 8px;
 }
 
+/* Estilos para form-group.mt-2 similar ao first-goal-group */
+.form-group.mt-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.mt-2 label {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--text-color, #e0e0e0);
+}
+
 .first-goal-group label {
     font-size: 0.8em;
     font-weight: bold;

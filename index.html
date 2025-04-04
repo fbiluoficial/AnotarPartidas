@@ -131,6 +131,15 @@
                 </div>
             </div>
 
+            <div class="form-group mt-2">
+                <label class="first-goal-header block text-sm font-medium text-gray-300 mb-1">Resultado Over 1.5 FT (se HT > 0.5)?</label>
+                <div class="flex items-center space-x-4">
+                    <label><input type="radio" name="over15FtOutcome" value="yes"> Sim</label>
+                    <label><input type="radio" name="over15FtOutcome" value="no"> Não</label>
+                    <label><input type="radio" name="over15FtOutcome" value="na" checked> N/A</label>
+                </div>
+            </div>
+
             <div class="form-section">
                 <label class="form-label" for="datetime">Data e Hora:</label>
                 <input type="datetime-local" id="datetime" value="">
@@ -238,6 +247,15 @@
                                                     <div class="stats-value-container">
                                                         <span class="stats-label">Empates HT</span>
                                                         <span id="empatesHT" class="stats-value">0/0 (0%)</span>
+                                                    </div>
+                                                    <div class="stats-progress-bar">
+                                                        <div class="stats-progress-fill" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="stats-item">
+                                                    <div class="stats-value-container">
+                                                        <span class="stats-label">Predição: Over 0.5 HT -&gt; Over 1.5 FT</span>
+                                                        <span id="predicaoOver05HTOver15FT" class="stats-value">0/0 (0%)</span>
                                                     </div>
                                                     <div class="stats-progress-bar">
                                                         <div class="stats-progress-fill" style="width: 0%"></div>

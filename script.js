@@ -515,6 +515,8 @@ function calcularEstatisticas() {
     // Contadores HT
     let vitoriasCasaHT = 0;
     let vitoriasForaHT = 0;
+    let over05HT_over15FT_total = 0;
+    let over05HT_over15FT_sucesso = 0;
     let empatesHT = 0; // Adicionado contador para empates HT
     
     // Contadores de gols
@@ -697,19 +699,15 @@ function checkBTTS(ftScore) {
 
 function createGameCard(gameData) {
     const card = document.createElement('div');
-    // Adiciona as classes base do novo design, mantendo 'game-card' para possível compatibilidade
     card.className = 'bg-card-bg rounded-lg shadow-md p-3 game-card';
 
     const hasBTTS = checkBTTS(gameData.ft);
-    // Define as classes CSS que serão criadas no styles.css
     const bttsClass = hasBTTS ? 'btts-green-badge' : 'btts-red-text';
     const bttsText = hasBTTS ? 'GREEN' : 'RED';
 
-    // Formata a data para DD/MM/YYYY (extrai da função existente)
     const formattedDate = formatDateTime(gameData.dateTime).split(' ')[0];
 
-    // Extrai apenas quem marcou o primeiro gol para exibição simplificada
-    let firstGoalDisplay = 'N/A'; // Valor padrão
+    let firstGoalDisplay = 'N/A';
     if (gameData.firstGoalMinute && gameData.firstGoalMinute !== 'Nenhum' && gameData.firstGoalMinute !== 'Aguardando') {
         const parts = gameData.firstGoalMinute.split('|');
         firstGoalDisplay = parts.length > 1 ? parts[1].trim() : gameData.firstGoalMinute.trim();
@@ -717,7 +715,9 @@ function createGameCard(gameData) {
         firstGoalDisplay = 'Aguardando';
     }
 
-    // Nova estrutura HTML do card
+    // Calcula a predição de HT usando a nova função
+    const htPrediction = checkOverHalfTimePrediction(gameData.ht);
+
     card.innerHTML = `
         <div class="flex justify-between items-center mb-2">
             <h2 class="text-base font-semibold">${gameData.match}</h2>
@@ -737,6 +737,10 @@ function createGameCard(gameData) {
                 <span class="font-semibold">${gameData.ht}</span>
             </div>
             <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">HT Pred.</span>
+                <span class="font-semibold">${htPrediction}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
                 <span class="text-[0.6rem]">1º GOL</span>
                 <span class="font-semibold">${firstGoalDisplay}</span>
             </div>
@@ -750,8 +754,37 @@ function createGameCard(gameData) {
             </button>
         </div>
     `;
-    
     return card;
+}
+
+function checkOverHalfTimePrediction(htScore) {
+    if (typeof htScore !== 'string' || !htScore || htScore === 'Aguardando') {
+        return '-';
+    }
+
+    if (!htScore.includes('-')) {
+        return '-';
+    }
+
+    const scores = htScore.split('-');
+    if (scores.length !== 2) {
+        return '-';
+    }
+
+    const homeGoals = parseInt(scores[0]);
+    const awayGoals = parseInt(scores[1]);
+
+    if (isNaN(homeGoals) || isNaN(awayGoals) || homeGoals < 0 || awayGoals < 0) {
+        return '-';
+    }
+
+    const totalGoalsHT = homeGoals + awayGoals;
+
+    if (totalGoalsHT > 0) {
+        return 'Chance Over 1.5 FT';
+    } else {
+        return '-';
+    }
 }
 // Chave extra removida
 

@@ -1711,14 +1711,39 @@ h1 {
 }
 
 /* Rodapé com Botões */
-.game-card .flex.gap-2 {
-  display: flex;
-  gap: 0.5rem; /* gap-2 */
-  margin-top: 0.5rem; /* Adiciona espaço acima dos botões */
+.buttons-container {
+   display: flex;
+   gap: 0.5rem;
+   margin-top: 0.5rem;
 }
 
-.game-card .flex-1 {
-  flex: 1 1 0%; /* flex-1 */
+.card-button {
+   flex: 1 1 0%;
+   color: var(--text-white);
+   font-size: 0.65rem;
+   padding: 0.25rem 0.5rem;
+   border-radius: 0.25rem;
+   border: none;
+   cursor: pointer;
+   transition: all 0.3s ease;
+}
+
+.edit-button {
+   background-color: var(--edit-btn-bg);
+}
+
+.edit-button:hover {
+   background-color: var(--edit-btn-hover-bg);
+   transform: translateY(-1px);
+}
+
+.delete-button {
+   background-color: var(--delete-btn-bg);
+}
+
+.delete-button:hover {
+   background-color: var(--delete-btn-hover-bg);
+   transform: translateY(-1px);
 }
 
 /* Estilo base para os botões DENTRO do novo card */

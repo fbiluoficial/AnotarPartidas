@@ -131,6 +131,21 @@
                 </div>
             </div>
 
+            <!-- Seção Momento do Primeiro Gol FT -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Momento do 1º Gol FT</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <div class="button-group">
+                            <button type="button" class="time-button" data-value="before75" onclick="selectFirstGoalFTTime(this)">Antes do min 75</button>
+                            <button type="button" class="time-button" data-value="after75" onclick="selectFirstGoalFTTime(this)">Após o min 75</button>
+                        </div>
+                    </div>
+                    <!-- Campo oculto para armazenar o valor selecionado -->
+                    <input type="hidden" id="firstGoalFTTime" value="">
+                </div>
+            </div>
+
             <div class="form-group mt-2">
                 <label class="first-goal-header block text-sm font-medium text-gray-300 mb-1">Resultado Over 1.5 FT (se HT > 0.5)?</label>
                 <div class="flex items-center space-x-4">
@@ -261,6 +276,15 @@
                                                         <div class="stats-progress-fill" style="width: 0%"></div>
                                                     </div>
                                                 </div>
+                                                <div class="stats-item">
+                                                    <div class="stats-value-container">
+                                                        <span class="stats-label">HT 2+ Gols -&gt; FT 0.5+ Gol</span>
+                                                        <span id="predicaoHT2FT05" class="stats-value">0/0 (0%)</span>
+                                                    </div>
+                                                    <div class="stats-progress-bar">
+                                                        <div class="stats-progress-fill" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
                     </div>
                 </div>
             </div>
@@ -315,6 +339,35 @@
                             </div>
                             <div class="stats-progress-bar">
                                 <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                
+                        <!-- Card Outras Estatísticas -->
+                        <div class="stats-card">
+                            <div class="stats-card-header">
+                                <h3>Outras Estatísticas</h3>
+                            </div>
+                            <div class="stats-card-content">
+                                <div class="stats-grid-inner">
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">1º Gol FT Antes do 75'</span>
+                                            <span id="firstGoalBefore75" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">1º Gol FT Após o 75'</span>
+                                            <span id="firstGoalAfter75" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="stats-item">

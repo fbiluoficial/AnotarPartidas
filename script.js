@@ -307,8 +307,8 @@ function generateChart() {
 
 // Função para adicionar ou atualizar uma anotação
 function addOrUpdateNote() {
-    const teamNameA = document.getElementById('teamNameA').value;
-    const teamNameB = document.getElementById('teamNameB').value;
+    const teamNameA = document.getElementById('teamNameA').value.trim();
+    const teamNameB = document.getElementById('teamNameB').value.trim();
     const prediction = document.getElementById('prediction').value;
     const ftScoreHome = document.getElementById('ftScoreHome').textContent;
     const ftScoreAway = document.getElementById('ftScoreAway').textContent;
@@ -335,26 +335,25 @@ function addOrUpdateNote() {
     }
 
     const gameData = {
-        // id será adicionado/mantido abaixo
         teamName: `${teamNameA} vs ${teamNameB}`,
         prediction,
-        ftScore: ftScoreHome && ftScoreAway ? `${ftScoreHome}-${ftScoreAway}` : 'Aguardando',
-        htScore: htScoreHome && htScoreAway ? `${htScoreHome}-${htScoreAway}` : 'Aguardando',
+        ftScore: `${ftScoreHome}-${ftScoreAway}`,
+        htScore: `${htScoreHome}-${htScoreAway}`,
         firstGoal: firstGoalValue,
         datetime,
         status: 'active'
     };
 
-    if (editingNoteIndex >= 0) {
+    if (editingNoteIndex >= 0 && editingNoteIndex < notes.length) {
         // Atualizar nota existente - Manter o ID original
-        gameData.id = notes[editingNoteIndex].id; // Preserva o ID existente
+        gameData.id = notes[editingNoteIndex].id;
         notes[editingNoteIndex] = gameData;
-        editingNoteIndex = -1;
-        document.querySelector('.add-button').textContent = 'Adicionar';
+        console.log('Atualizando nota:', gameData);
     } else {
         // Adicionar nova nota - Gerar novo ID
-        gameData.id = crypto.randomUUID(); // Gera um novo ID único
+        gameData.id = crypto.randomUUID();
         notes.push(gameData);
+        console.log('Adicionando nova nota:', gameData);
     }
 
     // Ordenar notas por data após adicionar/atualizar
@@ -366,6 +365,16 @@ function addOrUpdateNote() {
     
     // Limpar formulário e estados
     resetForm();
+    editingNoteIndex = -1;
+    document.querySelector('.add-button').textContent = 'Adicionar';
+    
+    // Rolar até o card atualizado depois de um breve delay
+    setTimeout(() => {
+        const cards = document.querySelectorAll('.game-card');
+        if (cards.length > 0) {
+            cards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
 }
 
 // Função auxiliar para resetar o formulário
@@ -436,6 +445,9 @@ function renderNotes(filteredNotes = notes) {
             };
             
             const card = createGameCard(gameData);
+            if (!card.classList.contains('game-card')) {
+                console.error('O elemento criado não possui a classe "game-card". Verifique a função createGameCard.');
+            }
             notesList.appendChild(card);
         } catch (error) {
             console.error(`Erro ao renderizar nota ${index}:`, error, note);
@@ -505,7 +517,8 @@ function calcularEstatisticas() {
         vitoriasForaFT: '0/0 (0%)',
         vitoriasCasaHT: '0/0 (0%)',
         vitoriasForaHT: '0/0 (0%)',
-        acertosGolsFT: '0/0 (0%)'
+        acertosGolsFT: '0/0 (0%)',
+        predicaoOver05HTOver15FT: '0/0 (0%)'
     };
 
     // Contadores FT
@@ -535,6 +548,20 @@ function calcularEstatisticas() {
             // Verificação de gols na partida
             totalJogosComGols++;
             if (golsCasaFT + golsForaFT > 0) jogosComGols++;
+
+            // Análise para Over 0.5 HT -> Over 1.5 FT
+            if (note.htScore && note.htScore.includes('-')) {
+                const [golsCasaHT, golsForaHT] = note.htScore.split('-').map(Number);
+                const totalGolsHT = golsCasaHT + golsForaHT;
+                const totalGolsFT = golsCasaFT + golsForaFT;
+
+                if (totalGolsHT > 0) { // Se tiver Over 0.5 no HT
+                    over05HT_over15FT_total++;
+                    if (totalGolsFT > 1) { // Se também tiver Over 1.5 no FT
+                        over05HT_over15FT_sucesso++;
+                    }
+                }
+            }
         }
 
         // Análise HT (Primeiro Tempo)
@@ -585,7 +612,8 @@ function calcularEstatisticas() {
         acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
         totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
         bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
-        bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`
+        bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
+        predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`
     };
 }
 
@@ -688,6 +716,7 @@ function updateCounters() {
     atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
     atualizarElementoComProgresso('bttsSim', stats.bttsSim);
     atualizarElementoComProgresso('bttsNao', stats.bttsNao);
+    atualizarElementoComProgresso('predicaoOver05HTOver15FT', stats.predicaoOver05HTOver15FT);
 }
 
 // Função para criar um card de jogo
@@ -745,11 +774,11 @@ function createGameCard(gameData) {
                 <span class="font-semibold">${firstGoalDisplay}</span>
             </div>
         </div>
-        <div class="flex gap-2">
-            <button class="flex-1 bg-edit-btn hover:bg-edit-btn-hover text-white text-[0.65rem] py-1 px-2 rounded transition" onclick="handleEditGameCard(this)">
+        <div class="buttons-container">
+            <button class="card-button edit-button" onclick="handleEditGameCard(this)">
                 Editar
             </button>
-            <button class="flex-1 bg-delete-btn hover:bg-delete-btn-hover text-white text-[0.65rem] py-1 px-2 rounded transition" onclick="handleDeleteGameCard(this)">
+            <button class="card-button delete-button" onclick="handleDeleteGameCard(this)">
                 Excluir
             </button>
         </div>
@@ -875,23 +904,68 @@ function addGameCard(gameData) {
 // Função para editar um card
 function handleEditGameCard(button) {
     const card = button.closest('.game-card');
-    const index = Array.from(card.parentElement.children).indexOf(card);
+    if (!card) {
+        console.error('Card não encontrado para edição.');
+        return;
+    }
+    
+    const notesList = document.getElementById('notesList');
+    const index = Array.from(notesList.children).indexOf(card);
     const gameData = notes[index];
     
+    if (!gameData) {
+        console.error('Dados do jogo não encontrados para o índice:', index);
+        return;
+    }
+    
     // Preenche o formulário com os dados atuais
-    document.getElementById('teamNameA').value = gameData.match.split(' vs ')[0];
-    document.getElementById('teamNameB').value = gameData.match.split(' vs ')[1];
-    document.getElementById('prediction').value = gameData.btts;
-    document.getElementById('ftScoreHome').value = gameData.ft.split('-')[0];
-    document.getElementById('ftScoreAway').value = gameData.ft.split('-')[1];
-    document.getElementById('htScoreHome').value = gameData.ht.split('-')[0];
-    document.getElementById('htScoreAway').value = gameData.ht.split('-')[1];
-    document.getElementById('firstGoalTime').value = gameData.firstGoalMinute;
-    document.getElementById('datetime').value = gameData.dateTime;
+    const teamNames = gameData.teamName.split(' vs ');
+    document.getElementById('teamNameA').value = teamNames[0] || '';
+    document.getElementById('teamNameB').value = teamNames[1] || '';
+    document.getElementById('prediction').value = gameData.prediction || 'BTTS';
+    
+    // Atualiza os placares (usando textContent para spans)
+    const ftScores = gameData.ftScore.split('-');
+    const htScores = gameData.htScore.split('-');
+    
+    document.getElementById('ftScoreHome').textContent = ftScores[0] || '0';
+    document.getElementById('ftScoreAway').textContent = ftScores[1] || '0';
+    document.getElementById('htScoreHome').textContent = htScores[0] || '0';
+    document.getElementById('htScoreAway').textContent = htScores[1] || '0';
+    
+    // Processa primeiro gol
+    const firstGoalParts = gameData.firstGoal ? gameData.firstGoal.split(' | ') : ['', ''];
+    const firstGoalTime = firstGoalParts[0] || '';
+    const firstGoalTeam = firstGoalParts[1] || '';
+    
+    // Atualiza os botões de primeiro gol
+    document.querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-value') === firstGoalTime) {
+            btn.classList.add('active');
+        }
+    });
+    
+    document.querySelectorAll('.team-button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-value') === firstGoalTeam) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Atualiza os campos hidden
+    document.getElementById('firstGoalTime').value = firstGoalTime;
+    document.getElementById('firstGoalTeam').value = firstGoalTeam;
+    
+    // Atualiza a data
+    document.getElementById('datetime').value = gameData.datetime;
     
     // Marca o índice para atualização
     editingNoteIndex = index;
     document.querySelector('.add-button').textContent = 'Atualizar';
+    
+    // Rola a página até o formulário
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
 }
 
 // Função para excluir um card
@@ -930,7 +1004,16 @@ function updateScore(elementId, delta) {
 
 function handleDeleteGameCard(button) {
     const card = button.closest('.game-card');
+    if (!card) {
+        console.error('Card não encontrado para exclusão.');
+        return;
+    }
     const index = Array.from(card.parentElement.children).indexOf(card);
+    
+    if (index < 0 || index >= notes.length) {
+        console.error('Índice inválido para exclusão:', index);
+        return;
+    }
     
     if (confirm('Tem certeza que deseja excluir este registro?')) {
         // Marcar a nota como excluída em vez de removê-la

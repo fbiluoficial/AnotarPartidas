@@ -305,6 +305,20 @@ function generateChart() {
     }, 2000);
 }
 
+// Função para selecionar o momento do primeiro gol FT
+function selectFirstGoalFTTime(button) {
+    // Remove active class de todos os botões do grupo
+    button.parentElement.querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona active class ao botão selecionado
+    button.classList.add('active');
+    
+    // Atualiza o valor do input hidden
+    document.getElementById('firstGoalFTTime').value = button.dataset.value;
+}
+
 // Função para adicionar ou atualizar uma anotação
 function addOrUpdateNote() {
     const teamNameA = document.getElementById('teamNameA').value.trim();
@@ -340,6 +354,7 @@ function addOrUpdateNote() {
         ftScore: `${ftScoreHome}-${ftScoreAway}`,
         htScore: `${htScoreHome}-${htScoreAway}`,
         firstGoal: firstGoalValue,
+        firstGoalFTTime: document.getElementById('firstGoalFTTime').value,
         datetime,
         status: 'active'
     };
@@ -394,9 +409,16 @@ function resetForm() {
     // Limpar seleção de primeiro gol (inputs hidden e botões)
     document.getElementById('firstGoalTime').value = '';
     document.getElementById('firstGoalTeam').value = '';
+    document.getElementById('firstGoalFTTime').value = '';
     document.querySelectorAll('.time-button, .team-button').forEach(btn => {
         btn.classList.remove('active');
     });
+
+    // Remover a classe disabled-section de todas as seções
+    const timeButtons = document.querySelector('.first-goal-group:first-child');
+    const firstGoalFTSection = document.querySelector('.first-goal-section:nth-of-type(2)');
+    timeButtons.classList.remove('disabled-section');
+    firstGoalFTSection.classList.remove('disabled-section');
 
     // Resetar estado de edição
     editingNoteIndex = -1;
@@ -518,7 +540,10 @@ function calcularEstatisticas() {
         vitoriasCasaHT: '0/0 (0%)',
         vitoriasForaHT: '0/0 (0%)',
         acertosGolsFT: '0/0 (0%)',
-        predicaoOver05HTOver15FT: '0/0 (0%)'
+        predicaoOver05HTOver15FT: '0/0 (0%)',
+        predicaoHT2FT05: '0/0 (0%)',
+        firstGoalBefore75: '0/0 (0%)',
+        firstGoalAfter75: '0/0 (0%)'
     };
 
     // Contadores FT
@@ -530,9 +555,13 @@ function calcularEstatisticas() {
     let vitoriasForaHT = 0;
     let over05HT_over15FT_total = 0;
     let over05HT_over15FT_sucesso = 0;
-    let empatesHT = 0; // Adicionado contador para empates HT
-    
-    // Contadores de gols
+    let empatesHT = 0; // Contador para empates HT
+    let ht2ft05_total = 0; // Contador para HT 2+ -> FT 0.5+
+    let ht2ft05_sucesso = 0;
+    // Contadores de gols e momentos
+    let golsAntes75 = 0;
+    let golsApos75 = 0;
+    let totalGolsFTMomento = 0;
     let jogosComGols = 0;
     let totalJogosComGols = 0;
 
@@ -554,11 +583,21 @@ function calcularEstatisticas() {
                 const [golsCasaHT, golsForaHT] = note.htScore.split('-').map(Number);
                 const totalGolsHT = golsCasaHT + golsForaHT;
                 const totalGolsFT = golsCasaFT + golsForaFT;
+                const golsSegundoTempo = totalGolsFT - totalGolsHT;
 
-                if (totalGolsHT > 0) { // Se tiver Over 0.5 no HT
+                // Análise Over 0.5 HT -> Over 1.5 FT
+                if (totalGolsHT > 0) {
                     over05HT_over15FT_total++;
-                    if (totalGolsFT > 1) { // Se também tiver Over 1.5 no FT
+                    if (totalGolsFT > 1) {
                         over05HT_over15FT_sucesso++;
+                    }
+                }
+
+                // Análise HT 2+ -> FT 0.5+
+                if (totalGolsHT >= 2) {
+                    ht2ft05_total++;
+                    if (golsSegundoTempo >= 1) {
+                        ht2ft05_sucesso++;
                     }
                 }
             }
@@ -603,17 +642,36 @@ function calcularEstatisticas() {
     const percentBTTSSim = bttsTotal > 0 ? ((bttsSim / bttsTotal) * 100).toFixed(1) : 0;
     const percentBTTSNao = bttsTotal > 0 ? (((bttsTotal - bttsSim) / bttsTotal) * 100).toFixed(1) : 0;
 
+    // Contar gols antes/depois do minuto 75
+    notes.forEach(note => {
+        if (note.firstGoalTeam !== 'Nenhum' && note.firstGoalFTTime) {
+            totalGolsFTMomento++;
+            if (note.firstGoalFTTime === 'before75') {
+                golsAntes75++;
+            } else if (note.firstGoalFTTime === 'after75') {
+                golsApos75++;
+            }
+        }
+    });
+
+    // Calcular porcentagens dos momentos dos gols
+    const percentAntes75 = totalGolsFTMomento > 0 ? ((golsAntes75 / totalGolsFTMomento) * 100).toFixed(1) : 0;
+    const percentApos75 = totalGolsFTMomento > 0 ? ((golsApos75 / totalGolsFTMomento) * 100).toFixed(1) : 0;
+
     return {
         vitoriasCasaFT: `${vitoriasCasaFT}/${total} (${percentCasaFT}%)`,
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
         vitoriasCasaHT: `${vitoriasCasaHT}/${total} (${percentCasaHT}%)`,
         vitoriasForaHT: `${vitoriasForaHT}/${total} (${percentForaHT}%)`,
-        empatesHT: `${empatesHT}/${total} (${percentEmpatesHT}%)`, // Adiciona estatística de empates HT
+        empatesHT: `${empatesHT}/${total} (${percentEmpatesHT}%)`,
         acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
         totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
         bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
         bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
-        predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`
+        predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
+        predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
+        firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${percentAntes75}%)`,
+        firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`
     };
 }
 
@@ -629,52 +687,9 @@ function updateCounters() {
     const total = notes.length;
     totalCount.textContent = total;
 
-    // Atualizar estatísticas adicionais
+    // Atualizar estatísticas
     const stats = calcularEstatisticas();
 
-    // Calcular score de performance para cada card
-    const statsCards = Array.from(document.querySelectorAll('.stats-card'));
-    const cardScores = statsCards.map(card => {
-        const progressBars = card.querySelectorAll('.stats-progress-fill');
-        let totalScore = 0;
-        let totalMetrics = 0;
-
-        progressBars.forEach(bar => {
-            const width = parseFloat(bar.style.width) || 0;
-            if (width > 0) {
-                totalScore += width;
-                totalMetrics++;
-            }
-        });
-
-        return {
-            card,
-            score: totalMetrics > 0 ? totalScore / totalMetrics : 0
-        };
-    });
-
-    // Ordenar cards por score
-    cardScores.sort((a, b) => b.score - a.score);
-
-    // Reorganizar cards no DOM com animação
-    const statsGrid = document.querySelector('.stats-grid');
-    
-    // Adicionar classe de animação
-    statsCards.forEach(card => card.classList.add('reordering'));
-    
-    // Pequeno delay para a animação ser visível
-    setTimeout(() => {
-        // Reordenar os cards
-        cardScores.forEach(({ card }) => {
-            statsGrid.appendChild(card);
-        });
-        
-        // Remover classe de animação após um breve delay
-        setTimeout(() => {
-            statsCards.forEach(card => card.classList.remove('reordering'));
-        }, 300);
-    }, 50);
-    
     // Função auxiliar para atualizar elemento e barra de progresso
     const atualizarElementoComProgresso = (elementId, valor) => {
         const elemento = document.getElementById(elementId);
@@ -706,17 +721,56 @@ function updateCounters() {
         }
     };
 
-    // Atualizar cada estatística com barra de progresso
+    // Atualizar todas as estatísticas
     atualizarElementoComProgresso('vitoriasCasaFT', stats.vitoriasCasaFT);
     atualizarElementoComProgresso('vitoriasForaFT', stats.vitoriasForaFT);
     atualizarElementoComProgresso('vitoriasCasaHT', stats.vitoriasCasaHT);
     atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
-    atualizarElementoComProgresso('empatesHT', stats.empatesHT); // Adicionado atualização para Empates HT
+    atualizarElementoComProgresso('empatesHT', stats.empatesHT);
     atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
     atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
     atualizarElementoComProgresso('bttsSim', stats.bttsSim);
     atualizarElementoComProgresso('bttsNao', stats.bttsNao);
     atualizarElementoComProgresso('predicaoOver05HTOver15FT', stats.predicaoOver05HTOver15FT);
+    atualizarElementoComProgresso('predicaoHT2FT05', stats.predicaoHT2FT05);
+    atualizarElementoComProgresso('firstGoalBefore75', stats.firstGoalBefore75);
+    atualizarElementoComProgresso('firstGoalAfter75', stats.firstGoalAfter75);
+
+    // Calcular score de performance para cada card
+    const statsCards = Array.from(document.querySelectorAll('.stats-card'));
+    const cardScores = statsCards.map(card => {
+        const progressBars = card.querySelectorAll('.stats-progress-fill');
+        let totalScore = 0;
+        let totalMetrics = 0;
+
+        progressBars.forEach(bar => {
+            const width = parseFloat(bar.style.width) || 0;
+            if (width > 0) {
+                totalScore += width;
+                totalMetrics++;
+            }
+        });
+
+        return {
+            card,
+            score: totalMetrics > 0 ? totalScore / totalMetrics : 0
+        };
+    });
+
+    // Ordenar e reorganizar cards
+    cardScores.sort((a, b) => b.score - a.score);
+    const statsGrid = document.querySelector('.stats-grid');
+    statsCards.forEach(card => card.classList.add('reordering'));
+    
+    setTimeout(() => {
+        cardScores.forEach(({ card }) => {
+            statsGrid.appendChild(card);
+        });
+        
+        setTimeout(() => {
+            statsCards.forEach(card => card.classList.remove('reordering'));
+        }, 300);
+    }, 50);
 }
 
 // Função para criar um card de jogo
@@ -1745,18 +1799,23 @@ function selectFirstGoalTeam(button) {
 
     const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
     const timeButtons = document.querySelector('.first-goal-group:first-child');
+    const firstGoalFTSection = document.querySelector('.first-goal-section:nth-of-type(2)');
 
-    if (selectedTeam === 'Nenhum' && isZeroZero) {
-        // Desabilita a seção de tempo
+    if (selectedTeam === 'Nenhum') {
+        // Desabilita a seção de tempo do primeiro gol e do momento do gol FT
         timeButtons.classList.add('disabled-section');
-        // Limpa a seleção de tempo
+        firstGoalFTSection.classList.add('disabled-section');
+        
+        // Limpa as seleções
         document.querySelectorAll('.time-button').forEach(btn => {
             btn.classList.remove('active');
         });
         document.getElementById('firstGoalTime').value = '';
+        document.getElementById('firstGoalFTTime').value = '';
     } else {
-        // Habilita a seção de tempo
+        // Habilita ambas as seções
         timeButtons.classList.remove('disabled-section');
+        firstGoalFTSection.classList.remove('disabled-section');
     }
 }
 

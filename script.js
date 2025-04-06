@@ -97,7 +97,7 @@ function performExport() {
 
     // Garantir que o ID seja a primeira coluna no Excel
     const worksheet = XLSX.utils.json_to_sheet(dataToExport, {
-        header: ['id', 'teamName', 'prediction', 'ftScore', 'htScore', 'firstGoal', 'datetime', 'status']
+        header: ['id', 'teamName', 'prediction', 'ftScore', 'htScore', 'firstGoal', 'firstGoalFTTime', 'datetime', 'status']
     });
 
     // Adicionar aviso sobre a coluna ID
@@ -307,8 +307,8 @@ function generateChart() {
 
 // Função para selecionar o momento do primeiro gol FT
 function selectFirstGoalFTTime(button) {
-    // Remove active class de todos os botões do grupo
-    button.parentElement.querySelectorAll('.time-button').forEach(btn => {
+    // Remove active class somente dos botões do grupo específico do Momento do 1º Gol FT
+    button.closest('.first-goal-section').querySelectorAll('.time-button').forEach(btn => {
         btn.classList.remove('active');
     });
     
@@ -354,7 +354,7 @@ function addOrUpdateNote() {
         ftScore: `${ftScoreHome}-${ftScoreAway}`,
         htScore: `${htScoreHome}-${htScoreAway}`,
         firstGoal: firstGoalValue,
-        firstGoalFTTime: document.getElementById('firstGoalFTTime').value,
+        firstGoalFTTime: document.getElementById('firstGoalTeam').value === 'Nenhum' ? '' : document.getElementById('firstGoalFTTime').value,
         datetime,
         status: 'active'
     };
@@ -410,7 +410,19 @@ function resetForm() {
     document.getElementById('firstGoalTime').value = '';
     document.getElementById('firstGoalTeam').value = '';
     document.getElementById('firstGoalFTTime').value = '';
-    document.querySelectorAll('.time-button, .team-button').forEach(btn => {
+
+    // Limpar seleção dos botões do primeiro gol (HT/FT)
+    document.querySelectorAll('.first-goal-group:first-child .time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Limpar seleção dos botões de time
+    document.querySelectorAll('.team-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Limpar seleção dos botões do Momento do 1º Gol FT
+    document.querySelectorAll('.first-goal-section:nth-of-type(2) .time-button').forEach(btn => {
         btn.classList.remove('active');
     });
 
@@ -463,6 +475,7 @@ function renderNotes(filteredNotes = notes) {
                 ft: note.ftScore,
                 ht: note.htScore,
                 firstGoalMinute: displayValue,
+                firstGoalFTTime: note.firstGoalFTTime,
                 dateTime: note.datetime
             };
             
@@ -800,6 +813,14 @@ function createGameCard(gameData) {
 
     // Calcula a predição de HT usando a nova função
     const htPrediction = checkOverHalfTimePrediction(gameData.ht);
+    
+    // Formatar texto do momento do primeiro gol FT
+    let firstGoalFTDisplay = '';
+    if (gameData.firstGoalFTTime === 'before75') {
+        firstGoalFTDisplay = 'Antes do 75\'';
+    } else if (gameData.firstGoalFTTime === 'after75') {
+        firstGoalFTDisplay = 'Após o 75\'';
+    }
 
     card.innerHTML = `
         <div class="flex justify-between items-center mb-2">
@@ -826,6 +847,10 @@ function createGameCard(gameData) {
             <div class="bg-stat-box-bg p-1.5 rounded text-center">
                 <span class="text-[0.6rem]">1º GOL</span>
                 <span class="font-semibold">${firstGoalDisplay}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">Momento 1º Gol FT</span>
+                <span class="font-semibold">${firstGoalFTDisplay}</span>
             </div>
         </div>
         <div class="buttons-container">
@@ -1090,6 +1115,7 @@ function loadDemoData() {
                 ftScore: '2-1',
                 htScore: '1-0',
                 firstGoal: 'HT | Casa',
+                firstGoalFTTime: 'before75',
                 datetime: '2023-01-01T12:00'
             },
             {
@@ -1098,6 +1124,7 @@ function loadDemoData() {
                 ftScore: '1-1',
                 htScore: '0-0',
                 firstGoal: 'FT | Fora',
+                firstGoalFTTime: 'after75',
                 datetime: '2023-01-02T15:00'
             },
             {
@@ -1106,6 +1133,7 @@ function loadDemoData() {
                 ftScore: '2-1',
                 htScore: '1-1',
                 firstGoal: 'HT | Casa',
+                firstGoalFTTime: 'before75',
                 datetime: '2023-01-03T16:30'
             }
         ];
@@ -1848,8 +1876,8 @@ function editNote(index) {
     // Separar informações do primeiro gol
     const [firstGoalTime, firstGoalTeam] = note.firstGoal.split(' | ');
     
-    // Atualizar os botões de primeiro gol
-    document.querySelectorAll('.time-button').forEach(btn => {
+    // Atualizar os botões de primeiro gol HT/FT
+    document.querySelectorAll('.first-goal-group:first-child .time-button').forEach(btn => {
         if (btn.getAttribute('data-value') === firstGoalTime) {
             btn.classList.add('active');
         } else {
@@ -1857,6 +1885,7 @@ function editNote(index) {
         }
     });
     
+    // Atualizar os botões de time
     document.querySelectorAll('.team-button').forEach(btn => {
         if (btn.getAttribute('data-value') === firstGoalTeam) {
             btn.classList.add('active');
@@ -1865,6 +1894,16 @@ function editNote(index) {
         }
     });
     
+    // Atualizar os botões do Momento do 1º Gol FT
+    document.querySelectorAll('.first-goal-section:nth-of-type(2) .time-button').forEach(btn => {
+        if (btn.getAttribute('data-value') === note.firstGoalFTTime) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    document.getElementById('firstGoalFTTime').value = note.firstGoalFTTime || '';
+
     document.getElementById('firstGoalTime').value = firstGoalTime;
     document.getElementById('firstGoalTeam').value = firstGoalTeam;
     

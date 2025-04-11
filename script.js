@@ -556,7 +556,9 @@ function calcularEstatisticas() {
         predicaoOver05HTOver15FT: '0/0 (0%)',
         predicaoHT2FT05: '0/0 (0%)',
         firstGoalBefore75: '0/0 (0%)',
-        firstGoalAfter75: '0/0 (0%)'
+        firstGoalAfter75: '0/0 (0%)',
+        predicaoGols75Ultimas15Antes: '0/0 (0%)',
+        predicaoGols75Ultimas15Depois: '0/0 (0%)'
     };
 
     // Contadores FT
@@ -577,6 +579,14 @@ function calcularEstatisticas() {
     let totalGolsFTMomento = 0;
     let jogosComGols = 0;
     let totalJogosComGols = 0;
+
+    // Análise das últimas 15 partidas
+    let ultimas15 = notes.slice(-15);
+    let gols75Ultimas15 = {
+        antes: 0,
+        depois: 0,
+        total: 0
+    };
 
     notes.forEach(note => {
         // Análise FT (Tempo Final)
@@ -671,6 +681,24 @@ function calcularEstatisticas() {
     const percentAntes75 = totalGolsFTMomento > 0 ? ((golsAntes75 / totalGolsFTMomento) * 100).toFixed(1) : 0;
     const percentApos75 = totalGolsFTMomento > 0 ? ((golsApos75 / totalGolsFTMomento) * 100).toFixed(1) : 0;
 
+    // Análise das últimas 15 partidas
+    ultimas15.forEach(note => {
+        if (note.firstGoalTeam !== 'Nenhum' && note.firstGoalFTTime) {
+            gols75Ultimas15.total++;
+            if (note.firstGoalFTTime === 'before75') {
+                gols75Ultimas15.antes++;
+            } else if (note.firstGoalFTTime === 'after75') {
+                gols75Ultimas15.depois++;
+            }
+        }
+    });
+
+    // Calcular porcentagens para últimas 15
+    const percent75Antes15 = gols75Ultimas15.total > 0 ?
+        ((gols75Ultimas15.antes / gols75Ultimas15.total) * 100).toFixed(1) : 0;
+    const percent75Depois15 = gols75Ultimas15.total > 0 ?
+        ((gols75Ultimas15.depois / gols75Ultimas15.total) * 100).toFixed(1) : 0;
+
     return {
         vitoriasCasaFT: `${vitoriasCasaFT}/${total} (${percentCasaFT}%)`,
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
@@ -684,7 +712,9 @@ function calcularEstatisticas() {
         predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
         predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
         firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${percentAntes75}%)`,
-        firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`
+        firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`,
+        predicaoGols75Ultimas15Antes: `${gols75Ultimas15.antes}/${gols75Ultimas15.total} (${percent75Antes15}%)`,
+        predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${percent75Depois15}%)`
     };
 }
 
@@ -748,6 +778,8 @@ function updateCounters() {
     atualizarElementoComProgresso('predicaoHT2FT05', stats.predicaoHT2FT05);
     atualizarElementoComProgresso('firstGoalBefore75', stats.firstGoalBefore75);
     atualizarElementoComProgresso('firstGoalAfter75', stats.firstGoalAfter75);
+    atualizarElementoComProgresso('predicaoGols75Ultimas15Antes', stats.predicaoGols75Ultimas15Antes);
+    atualizarElementoComProgresso('predicaoGols75Ultimas15Depois', stats.predicaoGols75Ultimas15Depois);
 
     // Calcular score de performance para cada card
     const statsCards = Array.from(document.querySelectorAll('.stats-card'));

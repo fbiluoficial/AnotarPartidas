@@ -63,7 +63,10 @@
                 <div class="score-header">FT - FINAL</div>
                 <div class="score-controls">
                     <div class="score-team">
-                        <label>CASA</label>
+                        <div class="team-info">
+                            <span class="dot dot-casa"></span>
+                            <label>CASA</label>
+                        </div>
                         <div class="score-input">
                             <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreHome', -1)">-</button>
                             <span class="score-value" id="ftScoreHome">0</span>
@@ -72,7 +75,10 @@
                     </div>
                     <div class="score-separator">X</div>
                     <div class="score-team">
-                        <label>FORA</label>
+                        <div class="team-info">
+                            <span class="dot dot-fora"></span>
+                            <label>FORA</label>
+                        </div>
                         <div class="score-input">
                             <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreAway', -1)">-</button>
                             <span class="score-value" id="ftScoreAway">0</span>
@@ -349,6 +355,24 @@
                             </div>
                             <div class="stats-card-content">
                                 <div class="stats-grid-inner">
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">Últimas 15: Gol Antes 75'</span>
+                                            <span id="predicaoGols75Ultimas15Antes" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">Últimas 15: Gol Após 75'</span>
+                                            <span id="predicaoGols75Ultimas15Depois" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
                                     <div class="stats-item">
                                         <div class="stats-value-container">
                                             <span class="stats-label">1º Gol FT Antes do 75'</span>

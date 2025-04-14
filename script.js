@@ -319,6 +319,23 @@ function selectFirstGoalFTTime(button) {
     document.getElementById('firstGoalFTTime').value = button.dataset.value;
 }
 
+// Função para selecionar o momento do primeiro gol HT
+function selectTimeHT(button) {
+    // Remove active class de todos os botões no mesmo grupo
+    button.closest('.first-goal-section').querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona active class ao botão clicado
+    button.classList.add('active');
+    
+    // Atualiza o campo hidden
+    document.getElementById('firstGoalHTTime').value = button.getAttribute('data-value');
+    
+    // Log no console
+    console.log("Intervalo HT selecionado:", button.getAttribute('data-value'));
+}
+
 // Função para adicionar ou atualizar uma anotação
 function addOrUpdateNote() {
     const teamNameA = document.getElementById('teamNameA').value.trim();
@@ -355,6 +372,7 @@ function addOrUpdateNote() {
         htScore: `${htScoreHome}-${htScoreAway}`,
         firstGoal: firstGoalValue,
         firstGoalFTTime: document.getElementById('firstGoalTeam').value === 'Nenhum' ? '' : document.getElementById('firstGoalFTTime').value,
+        firstGoalHTTime: document.getElementById('firstGoalHTTime').value,
         datetime,
         status: 'active'
     };
@@ -422,9 +440,16 @@ function resetForm() {
     });
 
     // Limpar seleção dos botões do Momento do 1º Gol FT
-    document.querySelectorAll('.first-goal-section:nth-of-type(2) .time-button').forEach(btn => {
+    // Limpar seleções dos botões
+    document.querySelectorAll('.time-button, .team-button').forEach(btn => {
         btn.classList.remove('active');
     });
+
+    // Limpar campos ocultos
+    document.getElementById('firstGoalTime').value = '';
+    document.getElementById('firstGoalTeam').value = '';
+    document.getElementById('firstGoalFTTime').value = '';
+    document.getElementById('firstGoalHTTime').value = '';
 
     // Remover a classe disabled-section de todas as seções
     const timeButtons = document.querySelector('.first-goal-group:first-child');
@@ -476,6 +501,7 @@ function renderNotes(filteredNotes = notes) {
                 ht: note.htScore,
                 firstGoalMinute: displayValue,
                 firstGoalFTTime: note.firstGoalFTTime,
+                firstGoalHTTime: note.firstGoalHTTime,
                 dateTime: note.datetime
             };
             
@@ -558,7 +584,10 @@ function calcularEstatisticas() {
         firstGoalBefore75: '0/0 (0%)',
         firstGoalAfter75: '0/0 (0%)',
         predicaoGols75Ultimas15Antes: '0/0 (0%)',
-        predicaoGols75Ultimas15Depois: '0/0 (0%)'
+        predicaoGols75Ultimas15Depois: '0/0 (0%)',
+        golHT_0_14: '0/0 (0%)',
+        golHT_15_29: '0/0 (0%)',
+        golHT_30_45: '0/0 (0%)'
     };
 
     // Contadores FT
@@ -579,6 +608,12 @@ function calcularEstatisticas() {
     let totalGolsFTMomento = 0;
     let jogosComGols = 0;
     let totalJogosComGols = 0;
+
+    // Novos contadores para minutos do gol no HT
+    let golHT_0_14 = 0;
+    let golHT_15_29 = 0;
+    let golHT_30_45 = 0;
+    let totalGolHT = 0;
 
     // Análise das últimas 15 partidas
     let ultimas15 = notes.slice(-15);
@@ -693,6 +728,21 @@ function calcularEstatisticas() {
         }
     });
 
+    // Novos cálculos para minutos do gol no HT
+    notes.forEach(note => {
+        if (note.firstGoalHTTime) {
+            totalGolHT++;
+            if (note.firstGoalHTTime === "0-14") golHT_0_14++;
+            else if (note.firstGoalHTTime === "15-29") golHT_15_29++;
+            else if (note.firstGoalHTTime === "30-45") golHT_30_45++;
+        }
+    });
+
+    // Calcular porcentagens para minutos do gol no HT
+    const percentGolHT_0_14 = totalGolHT > 0 ? ((golHT_0_14 / totalGolHT) * 100).toFixed(1) : 0;
+    const percentGolHT_15_29 = totalGolHT > 0 ? ((golHT_15_29 / totalGolHT) * 100).toFixed(1) : 0;
+    const percentGolHT_30_45 = totalGolHT > 0 ? ((golHT_30_45 / totalGolHT) * 100).toFixed(1) : 0;
+
     // Calcular porcentagens para últimas 15
     const percent75Antes15 = gols75Ultimas15.total > 0 ?
         ((gols75Ultimas15.antes / gols75Ultimas15.total) * 100).toFixed(1) : 0;
@@ -714,7 +764,10 @@ function calcularEstatisticas() {
         firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${percentAntes75}%)`,
         firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`,
         predicaoGols75Ultimas15Antes: `${gols75Ultimas15.antes}/${gols75Ultimas15.total} (${percent75Antes15}%)`,
-        predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${percent75Depois15}%)`
+        predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${percent75Depois15}%)`,
+        golHT_0_14: `${golHT_0_14}/${totalGolHT} (${percentGolHT_0_14}%)`,
+        golHT_15_29: `${golHT_15_29}/${totalGolHT} (${percentGolHT_15_29}%)`,
+        golHT_30_45: `${golHT_30_45}/${totalGolHT} (${percentGolHT_30_45}%)`
     };
 }
 
@@ -780,6 +833,10 @@ function updateCounters() {
     atualizarElementoComProgresso('firstGoalAfter75', stats.firstGoalAfter75);
     atualizarElementoComProgresso('predicaoGols75Ultimas15Antes', stats.predicaoGols75Ultimas15Antes);
     atualizarElementoComProgresso('predicaoGols75Ultimas15Depois', stats.predicaoGols75Ultimas15Depois);
+    // Novas estatísticas de minutos do gol no HT
+    atualizarElementoComProgresso('golHT_0_14', stats.golHT_0_14);
+    atualizarElementoComProgresso('golHT_15_29', stats.golHT_15_29);
+    atualizarElementoComProgresso('golHT_30_45', stats.golHT_30_45);
 
     // Calcular score de performance para cada card
     const statsCards = Array.from(document.querySelectorAll('.stats-card'));
@@ -854,6 +911,9 @@ function createGameCard(gameData) {
         firstGoalFTDisplay = 'Após o 75\'';
     }
 
+    // Formatar texto do momento do primeiro gol HT
+    let firstGoalHTDisplay = gameData.firstGoalHTTime ? `${gameData.firstGoalHTTime} min` : '-';
+
     card.innerHTML = `
         <div class="flex justify-between items-center mb-2">
             <h2 class="text-base font-semibold">${gameData.match}</h2>
@@ -883,6 +943,10 @@ function createGameCard(gameData) {
             <div class="bg-stat-box-bg p-1.5 rounded text-center">
                 <span class="text-[0.6rem]">Momento 1º Gol FT</span>
                 <span class="font-semibold">${firstGoalFTDisplay}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">Momento 1º Gol HT</span>
+                <span class="font-semibold">${firstGoalHTDisplay}</span>
             </div>
         </div>
         <div class="buttons-container">

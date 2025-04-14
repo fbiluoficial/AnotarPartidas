@@ -152,6 +152,22 @@
                 </div>
             </div>
 
+            <!-- Seção Momento do 1º Gol HT -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Momento do 1º Gol (HT)</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <div class="button-group">
+                            <button type="button" class="time-button" data-value="0-14" onclick="selectTimeHT(this)">0-14 min</button>
+                            <button type="button" class="time-button" data-value="15-29" onclick="selectTimeHT(this)">15-29 min</button>
+                            <button type="button" class="time-button" data-value="30-45" onclick="selectTimeHT(this)">30-45 min</button>
+                        </div>
+                    </div>
+                    <!-- Campo oculto para armazenar o valor selecionado -->
+                    <input type="hidden" id="firstGoalHTTime" value="">
+                </div>
+            </div>
+
             <div class="form-group mt-2">
                 <label class="first-goal-header block text-sm font-medium text-gray-300 mb-1">Resultado Over 1.5 FT (se HT > 0.5)?</label>
                 <div class="flex items-center space-x-4">
@@ -215,55 +231,84 @@
                 <div class="stats-card-header">
                     <h3>Estatísticas Tempo Final (FT)</h3>
                 </div>
-                <div class="stats-card-content">
-                    <div class="stats-grid-inner">
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Vitórias Casa</span>
-                                <span id="vitoriasCasaFT" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Vitórias Fora</span>
-                                <span id="vitoriasForaFT" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="stats-card-content">
+    <div class="stats-grid-inner">
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Vitórias Casa</span>
+                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
             </div>
-
-            <!-- Card Vitórias HT -->
-            <div class="stats-card">
-                <div class="stats-card-header">
-                    <h3>Estatísticas Primeiro Tempo (HT)</h3>
-                </div>
-                <div class="stats-card-content">
-                    <div class="stats-grid-inner">
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Vitórias Casa</span>
-                                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Vitórias Fora</span>
-                                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Vitórias Fora</span>
+                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Empates HT</span>
+                <span id="empatesHT" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Predição: Over 0.5 HT -> Over 1.5 FT</span>
+                <span id="predicaoOver05HTOver15FT" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">HT 2+ Gols -> FT 0.5+ Gol</span>
+                <span id="predicaoHT2FT05" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <!-- Novas estatísticas: Minuto do gol no HT -->
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Gol HT 0-14'</span>
+                <span id="golHT_0_14" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Gol HT 15-29'</span>
+                <span id="golHT_15_29" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Gol HT 30-45'</span>
+                <span id="golHT_30_45" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <!-- Fim das novas estatísticas -->
+    </div>
+</div>
                                                 <div class="stats-item">
                                                     <div class="stats-value-container">
                                                         <span class="stats-label">Empates HT</span>

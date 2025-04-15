@@ -58,52 +58,40 @@
                 </div>
             </div>
 
-            <!-- Seção de Placar FT -->
-            <div class="form-section score-section score-section-ft">
-                <div class="score-header">FT - FINAL</div>
-                <div class="score-controls">
-                    <div class="score-team">
-                        <div class="team-info">
+            <!-- Seção de Placar FT e HT organizadas visualmente -->
+            <div class="score-blocks-container">
+                <!-- FT - FINAL -->
+                <div class="score-block">
+                    <div class="score-block-header">FT - FINAL</div>
+                    <div class="score-block-row">
+                        <div class="score-block-team">
                             <span class="dot dot-casa"></span>
-                            <label>CASA</label>
-                        </div>
-                        <div class="score-input">
+                            <span class="score-block-label">CASA</span>
                             <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreHome', -1)">-</button>
                             <span class="score-value" id="ftScoreHome">0</span>
                             <button type="button" class="score-btn score-btn-plus" onclick="updateScore('ftScoreHome', 1)">+</button>
                         </div>
-                    </div>
-                    <div class="score-separator">X</div>
-                    <div class="score-team">
-                        <div class="team-info">
+                        <div class="score-block-team">
                             <span class="dot dot-fora"></span>
-                            <label>FORA</label>
-                        </div>
-                        <div class="score-input">
+                            <span class="score-block-label">FORA</span>
                             <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreAway', -1)">-</button>
                             <span class="score-value" id="ftScoreAway">0</span>
                             <button type="button" class="score-btn score-btn-plus" onclick="updateScore('ftScoreAway', 1)">+</button>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Seção de Placar HT -->
-            <div class="form-section score-section score-section-ht">
-                <div class="score-header">HT - 1º TEMPO</div>
-                <div class="score-controls">
-                    <div class="score-team">
-                        <label>CASA</label>
-                        <div class="score-input">
+                <!-- HT - 1º TEMPO -->
+                <div class="score-block">
+                    <div class="score-block-header">HT - 1º TEMPO</div>
+                    <div class="score-block-row">
+                        <div class="score-block-team">
+                            <span class="score-block-label">CASA</span>
                             <button type="button" class="score-btn score-btn-minus" onclick="updateScore('htScoreHome', -1)">-</button>
                             <span class="score-value" id="htScoreHome">0</span>
                             <button type="button" class="score-btn score-btn-plus" onclick="updateScore('htScoreHome', 1)">+</button>
                         </div>
-                    </div>
-                    <div class="score-separator">X</div>
-                    <div class="score-team">
-                        <label>FORA</label>
-                        <div class="score-input">
+                        <div class="score-block-team">
+                            <span class="score-block-label">FORA</span>
                             <button type="button" class="score-btn score-btn-minus" onclick="updateScore('htScoreAway', -1)">-</button>
                             <span class="score-value" id="htScoreAway">0</span>
                             <button type="button" class="score-btn score-btn-plus" onclick="updateScore('htScoreAway', 1)">+</button>
@@ -111,6 +99,7 @@
                     </div>
                 </div>
             </div>
+
 
             <!-- Seção Primeiro Gol -->
             <div class="form-section first-goal-section">
@@ -231,6 +220,24 @@
                 <div class="stats-card-header">
                     <h3>Estatísticas Tempo Final (FT)</h3>
                 </div>
+                <!-- Predições FT inseridas por IA - início -->
+                <div class="score-blocks-container">
+                  <div class="score-block">
+                    <div style="font-weight:bold;font-size:1.08em;text-align:center;">Predição: Over 0.5 HT -&gt; Over 1.5 FT</div>
+                    <div id="predicaoOver05HTOver15FT" style="color:#06f03c;font-weight:bold;font-size:1.35em;text-align:center;margin:8px 0 2px 0;">0/0 (0%)</div>
+                    <div class="score-progress-bar" style="height:6px;background:#222c44;border-radius:4px;overflow:hidden;margin:0 12px 0 12px;">
+                      <div id="predicaoOver05HTOver15FTBar" style="height:100%;width:0%;background:linear-gradient(90deg,#06f03c,#00ff44);"></div>
+                    </div>
+                  </div>
+                  <div class="score-block">
+                    <div style="font-weight:bold;font-size:1.08em;text-align:center;">HT 2+ Gols -&gt; FT 0.5+ Gol</div>
+                    <div id="predicaoHT2FT05" style="color:#06f03c;font-weight:bold;font-size:1.35em;text-align:center;margin:8px 0 2px 0;">0/0 (0%)</div>
+                    <div class="score-progress-bar" style="height:6px;background:#222c44;border-radius:4px;overflow:hidden;margin:0 12px 0 12px;">
+                      <div id="predicaoHT2FT05Bar" style="height:100%;width:0%;background:linear-gradient(90deg,#06f03c,#00ff44);"></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Predições FT inseridas por IA - fim -->
 <div class="stats-card-content">
     <div class="stats-grid-inner">
         <div class="stats-item">
@@ -251,33 +258,9 @@
                 <div class="stats-progress-fill" style="width: 0%"></div>
             </div>
         </div>
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Empates HT</span>
-                <span id="empatesHT" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Predição: Over 0.5 HT -> Over 1.5 FT</span>
-                <span id="predicaoOver05HTOver15FT" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">HT 2+ Gols -> FT 0.5+ Gol</span>
-                <span id="predicaoHT2FT05" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
+
+
+
         <!-- Novas estatísticas: Minuto do gol no HT -->
         <div class="stats-item">
             <div class="stats-value-container">
@@ -309,33 +292,9 @@
         <!-- Fim das novas estatísticas -->
     </div>
 </div>
-                                                <div class="stats-item">
-                                                    <div class="stats-value-container">
-                                                        <span class="stats-label">Empates HT</span>
-                                                        <span id="empatesHT" class="stats-value">0/0 (0%)</span>
-                                                    </div>
-                                                    <div class="stats-progress-bar">
-                                                        <div class="stats-progress-fill" style="width: 0%"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="stats-item">
-                                                    <div class="stats-value-container">
-                                                        <span class="stats-label">Predição: Over 0.5 HT -&gt; Over 1.5 FT</span>
-                                                        <span id="predicaoOver05HTOver15FT" class="stats-value">0/0 (0%)</span>
-                                                    </div>
-                                                    <div class="stats-progress-bar">
-                                                        <div class="stats-progress-fill" style="width: 0%"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="stats-item">
-                                                    <div class="stats-value-container">
-                                                        <span class="stats-label">HT 2+ Gols -&gt; FT 0.5+ Gol</span>
-                                                        <span id="predicaoHT2FT05" class="stats-value">0/0 (0%)</span>
-                                                    </div>
-                                                    <div class="stats-progress-bar">
-                                                        <div class="stats-progress-fill" style="width: 0%"></div>
-                                                    </div>
-                                                </div>
+
+
+
                     </div>
                 </div>
             </div>

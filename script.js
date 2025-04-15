@@ -786,6 +786,18 @@ function updateCounters() {
     // Atualizar estatísticas
     const stats = calcularEstatisticas();
 
+    // Atualizar blocos de predição customizados
+    if (document.getElementById('predicaoOver05HTOver15FT')) {
+        document.getElementById('predicaoOver05HTOver15FT').textContent = stats.predicaoOver05HTOver15FT;
+        const percent1 = extrairPorcentagem(stats.predicaoOver05HTOver15FT);
+        document.getElementById('predicaoOver05HTOver15FTBar').style.width = percent1 + '%';
+    }
+    if (document.getElementById('predicaoHT2FT05')) {
+        document.getElementById('predicaoHT2FT05').textContent = stats.predicaoHT2FT05;
+        const percent2 = extrairPorcentagem(stats.predicaoHT2FT05);
+        document.getElementById('predicaoHT2FT05Bar').style.width = percent2 + '%';
+    }
+
     // Função auxiliar para atualizar elemento e barra de progresso
     const atualizarElementoComProgresso = (elementId, valor) => {
         const elemento = document.getElementById(elementId);

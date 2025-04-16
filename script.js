@@ -338,6 +338,8 @@ function selectTimeHT(button) {
 
 // Função para adicionar ou atualizar uma anotação
 function addOrUpdateNote() {
+    // Garantir atualização dos contadores após adicionar/editar
+    setTimeout(updateCounters, 100); // Pequeno delay para garantir DOM atualizado
     const teamNameA = document.getElementById('teamNameA').value.trim();
     const teamNameB = document.getElementById('teamNameB').value.trim();
     const prediction = document.getElementById('prediction').value;
@@ -593,6 +595,13 @@ function calcularEstatisticas() {
     // Contadores FT
     let vitoriasCasaFT = 0;
     let vitoriasForaFT = 0;
+
+    // Over 1.5 gols FT
+    let over15Total = 0;
+    let over15Acertos = 0;
+    // Over 1.5 gols FT últimos 10 jogos
+    let over15Ult10Total = 0;
+    let over15Ult10Acertos = 0;
     
     // Contadores HT
     let vitoriasCasaHT = 0;
@@ -635,6 +644,10 @@ function calcularEstatisticas() {
             // Verificação de gols na partida
             totalJogosComGols++;
             if (golsCasaFT + golsForaFT > 0) jogosComGols++;
+
+            // Over 1.5 FT
+            over15Total++;
+            if ((golsCasaFT + golsForaFT) > 1) over15Acertos++;
 
             // Análise para Over 0.5 HT -> Over 1.5 FT
             if (note.htScore && note.htScore.includes('-')) {
@@ -679,6 +692,16 @@ function calcularEstatisticas() {
     const percentForaHT = ((vitoriasForaHT / total) * 100).toFixed(1);
     const percentEmpatesHT = ((empatesHT / total) * 100).toFixed(1); // Calcula porcentagem de empates HT
     const percentGols = ((jogosComGols / totalJogosComGols) * 100).toFixed(1);
+
+    // Over 1.5 FT últimos 10 jogos
+    let ultimos10 = notes.slice(-10);
+    ultimos10.forEach(note => {
+        if (note.ftScore && note.ftScore.includes('-')) {
+            over15Ult10Total++;
+            const [golsCasaFT, golsForaFT] = note.ftScore.split('-').map(Number);
+            if ((golsCasaFT + golsForaFT) > 1) over15Ult10Acertos++;
+        }
+    });
 
     // Calcular total de vitórias FT
     const totalVitoriasFT = vitoriasCasaFT + vitoriasForaFT;
@@ -754,20 +777,21 @@ function calcularEstatisticas() {
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
         vitoriasCasaHT: `${vitoriasCasaHT}/${total} (${percentCasaHT}%)`,
         vitoriasForaHT: `${vitoriasForaHT}/${total} (${percentForaHT}%)`,
-        empatesHT: `${empatesHT}/${total} (${percentEmpatesHT}%)`,
         acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
-        totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
+        over15GolsFT: `${over15Acertos}/${over15Total} (${over15Total > 0 ? ((over15Acertos / over15Total) * 100).toFixed(1) : 0}%)`,
+        over15GolsFTUlt10: `${over15Ult10Acertos}/${over15Ult10Total} (${over15Ult10Total > 0 ? ((over15Ult10Acertos / over15Ult10Total) * 100).toFixed(1) : 0}%)`,
+        predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso / over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
+        predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso / ht2ft05_total) * 100).toFixed(1) : 0}%)`,
+        firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${totalGolsFTMomento > 0 ? ((golsAntes75 / totalGolsFTMomento) * 100).toFixed(1) : 0}%)`,
+        firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${totalGolsFTMomento > 0 ? ((golsApos75 / totalGolsFTMomento) * 100).toFixed(1) : 0}%)`,
+        predicaoGols75Ultimas15Antes: `${gols75Ultimas15.antes}/${gols75Ultimas15.total} (${gols75Ultimas15.total > 0 ? ((gols75Ultimas15.antes / gols75Ultimas15.total) * 100).toFixed(1) : 0}%)`,
+        predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${gols75Ultimas15.total > 0 ? ((gols75Ultimas15.depois / gols75Ultimas15.total) * 100).toFixed(1) : 0}%)`,
+        golHT_0_14: `${golHT_0_14}/${totalGolHT} (${totalGolHT > 0 ? ((golHT_0_14 / totalGolHT) * 100).toFixed(1) : 0}%)`,
+        golHT_15_29: `${golHT_15_29}/${totalGolHT} (${totalGolHT > 0 ? ((golHT_15_29 / totalGolHT) * 100).toFixed(1) : 0}%)`,
+        golHT_30_45: `${golHT_30_45}/${totalGolHT} (${totalGolHT > 0 ? ((golHT_30_45 / totalGolHT) * 100).toFixed(1) : 0}%)`,
+        // Adicionados campos para BTTS
         bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
-        bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
-        predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
-        predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
-        firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${percentAntes75}%)`,
-        firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`,
-        predicaoGols75Ultimas15Antes: `${gols75Ultimas15.antes}/${gols75Ultimas15.total} (${percent75Antes15}%)`,
-        predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${percent75Depois15}%)`,
-        golHT_0_14: `${golHT_0_14}/${totalGolHT} (${percentGolHT_0_14}%)`,
-        golHT_15_29: `${golHT_15_29}/${totalGolHT} (${percentGolHT_15_29}%)`,
-        golHT_30_45: `${golHT_30_45}/${totalGolHT} (${percentGolHT_30_45}%)`
+        bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`
     };
 }
 
@@ -779,6 +803,10 @@ function extrairPorcentagem(estatistica) {
 
 // Função para atualizar contadores
 function updateCounters() {
+    // DEBUG: Mostrar conteúdo de notes e estatísticas BTTS
+    console.log('notes:', notes);
+    const statsPreview = calcularEstatisticas();
+    console.log('BTTS Sim:', statsPreview.bttsSim, 'BTTS Não:', statsPreview.bttsNao);
     const totalCount = document.getElementById('totalCount');
     const total = notes.length;
     totalCount.textContent = total;
@@ -796,6 +824,20 @@ function updateCounters() {
         document.getElementById('predicaoHT2FT05').textContent = stats.predicaoHT2FT05;
         const percent2 = extrairPorcentagem(stats.predicaoHT2FT05);
         document.getElementById('predicaoHT2FT05Bar').style.width = percent2 + '%';
+    }
+    // Atualizar Over 1.5 FT
+    if (document.getElementById('over15GolsFT')) {
+        document.getElementById('over15GolsFT').textContent = stats.over15GolsFT;
+        const percent = extrairPorcentagem(stats.over15GolsFT);
+        const bar = document.getElementById('over15GolsFT').closest('.stats-item').querySelector('.stats-progress-fill');
+        if (bar) bar.style.width = percent + '%';
+    }
+    // Atualizar Over 1.5 FT últimos 10 jogos
+    if (document.getElementById('over15GolsFTUlt10')) {
+        document.getElementById('over15GolsFTUlt10').textContent = stats.over15GolsFTUlt10;
+        const percent = extrairPorcentagem(stats.over15GolsFTUlt10);
+        const bar = document.getElementById('over15GolsFTUlt10').closest('.stats-item').querySelector('.stats-progress-fill');
+        if (bar) bar.style.width = percent + '%';
     }
 
     // Função auxiliar para atualizar elemento e barra de progresso
@@ -837,7 +879,30 @@ function updateCounters() {
     atualizarElementoComProgresso('empatesHT', stats.empatesHT);
     atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
     atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
-    atualizarElementoComProgresso('bttsSim', stats.bttsSim);
+    // Atualizar BTTS Sim com lógica de cor especial
+    const bttsSimElem = document.getElementById('bttsSim');
+    if (bttsSimElem) {
+        bttsSimElem.textContent = stats.bttsSim;
+        const percentBTTS = extrairPorcentagem(stats.bttsSim);
+        // Atualizar barra de progresso
+        const container = bttsSimElem.closest('.stats-item');
+        if (container) {
+            const progressBar = container.querySelector('.stats-progress-fill');
+            if (progressBar) {
+                progressBar.style.width = percentBTTS + '%';
+                if (percentBTTS >= 90) {
+                    bttsSimElem.style.color = '#06f03c';
+                    progressBar.style.background = 'linear-gradient(90deg, #06f03c, #00ff44)';
+                } else if (percentBTTS >= 70) {
+                    bttsSimElem.style.color = '#ffd700';
+                    progressBar.style.background = 'linear-gradient(90deg, #ffd700, #ffc800)';
+                } else {
+                    bttsSimElem.style.color = '#ffffff';
+                    progressBar.style.background = 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))';
+                }
+            }
+        }
+    }
     atualizarElementoComProgresso('bttsNao', stats.bttsNao);
     atualizarElementoComProgresso('predicaoOver05HTOver15FT', stats.predicaoOver05HTOver15FT);
     atualizarElementoComProgresso('predicaoHT2FT05', stats.predicaoHT2FT05);
@@ -1247,7 +1312,7 @@ function loadDemoData() {
         ];
         saveNotesToStorage();
         renderNotes(); // Renderizar as notas
-        updateCounters(); // Atualizar contadores e estatísticas
+        setTimeout(updateCounters, 100); // Atualizar contadores e estatísticas com delay
     }
 }
 
@@ -2028,6 +2093,8 @@ function editNote(index) {
 
 // Função para deletar uma nota
 function deleteNote(index) {
+    // Garantir atualização dos contadores após exclusão
+    setTimeout(updateCounters, 100);
     if (confirm('Tem certeza que deseja excluir esta anotação?')) {
         notes.splice(index, 1);
         saveNotesToStorage();

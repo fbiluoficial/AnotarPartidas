@@ -1,1996 +1,2167 @@
-/* Estilos para o container de cards */
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-    position: relative;
-    transition: all 0.3s ease;
-}
+// Variáveis globais
+let notes = [];
 
-/* Estilos para o botão de toggle */
-.toggle-notes-btn {
-    position: absolute;
-    top: -40px;
-    right: 0;
-    background: transparent;
-    border: none;
-    color: var(--primary-color);
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    font-size: 0.9em;
-    transition: all 0.3s ease;
-}
+// Função para aplicar filtros
+function applyFilters() {
+    const teamFilter = document.getElementById('filterTeam').value.toLowerCase();
+    const predictionFilter = document.getElementById('filterPrediction').value;
+    
+    let notasParaFiltrar = notes.filter(note => {
+        const teamMatch = note.teamName.toLowerCase().includes(teamFilter);
+        const predictionMatch = predictionFilter === '' || note.prediction === predictionFilter;
+        return teamMatch && predictionMatch;
+    });
+    
+    // Manter a ordenação por data nas notas filtradas
+    notasParaFiltrar = sortNotesByDate(notasParaFiltrar);
+    
+    renderNotes(notasParaFiltrar);
+    updateCounters(); // Atualizar contadores após aplicar filtros
 
-#toggleIcon {
-    transition: transform 0.3s ease;
-  }
-  
-  :root {
-    /* Dark Theme Variables (Originalmente em [data-theme="dark"]) */
-    --bg-color: #121212;
-    --text-color: #e0e0e0;
-    --primary-color: #5C9CE6;
-    --primary-color-rgb: 92, 156, 230; /* Ajustado para corresponder a #5C9CE6 */
-    --header-bg: linear-gradient(135deg, #5C9CE6, #4882c2);
-    --secondary-color: #64D2A8;
-    --secondary-color-rgb: 100, 210, 168; /* Ajustado para corresponder a #64D2A8 */
-    --warning-color: #FFA94D;
-    --danger-color: #FF6B6B;
-    --border-color: rgba(255, 255, 255, 0.05);
-    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    --form-bg: rgba(18, 18, 18, 0.95);
-}
-
-/* Estilos do Grid de Estatísticas */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-    padding: 15px;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-    padding: 15px;
-    transition: 0.3s ease;
-}
-
-.stats-card {
-    background: var(--bg-color);
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    overflow: hidden;
-    transition: all 0.5s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
-    opacity: 1;
-}
-
-.stats-card.reordering {
-    transform: scale(0.98);
-    opacity: 0.8;
-}
-
-.stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(var(--primary-color-rgb), 0.2);
-}
-
-/* ====== PLACAR FT/HT CUSTOM ====== */
-.score-blocks-container {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    margin-bottom: 18px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-.score-block {
-    background: #14181f;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-    padding: 12px 0 18px 0;
-    border: none;
-    max-width: 420px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
-}
-.score-progress-bar {
-    height: 6px;
-    background: #222c44;
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 0 12px 0 12px;
-}
-.score-progress-bar > div {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg,#06f03c,#00ff44);
-    transition: width 0.5s cubic-bezier(.4,2.3,.3,1);
-}
-
-@media (max-width: 500px) {
-    .score-blocks-container {
-        padding-left: 0;
-        padding-right: 0;
-        gap: 14px;
-    }
-    .score-block {
-        max-width: 100vw;
-        border-radius: 0;
-        margin: 0;
-        padding-left: 0;
-        padding-right: 0;
-    }
-    .score-block-header {
-        border-radius: 0;
-        font-size: 1.03rem;
-        padding: 9px 0 8px 0;
-    }
-    .score-block-row {
-        flex-direction: column;
-        gap: 10px;
-        padding: 0 0 0 0;
-    }
-    .score-block-team {
-        min-width: unset;
-        width: 100%;
-        justify-content: center;
-        padding: 10px 0;
-        border-radius: 0;
-        font-size: 1em;
-    }
-    .score-btn {
-        width: 38px;
-        height: 38px;
-        font-size: 1.2em;
-        margin: 0 6px;
-    }
-    .score-value {
-        font-size: 1.1em;
-        padding: 2px 12px;
-        min-width: 22px;
+    // Opcional: Fechar o menu de filtros após aplicar
+    const filterMenu = document.getElementById('filterMenuContainer');
+    if (filterMenu && filterMenu.classList.contains('visible')) {
+        filterMenu.classList.remove('visible');
     }
 }
 
-.score-block-header {
-    background: #00cfff;
-    color: #222c44;
-    font-weight: bold;
-    font-size: 1.15rem;
-    border-radius: 12px 12px 0 0;
-    text-align: center;
-    padding: 8px 0 7px 0;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-}
-.score-block-row {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 32px;
-}
-.score-block-team {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #1a2336;
-    padding: 10px 18px;
-    border-radius: 8px;
-    min-width: 130px;
-    justify-content: center;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.06);
-}
-.score-block-label {
-    font-weight: 600;
-    color: #fff;
-    margin: 0 5px 0 2px;
-    font-size: 1.1em;
-}
-.score-btn {
-    background: #222c44;
-    color: #00cfff;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 1.35em;
-    font-weight: bold;
-    margin: 0 7px;
-    transition: background 0.2s, color 0.2s, transform 0.1s;
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.score-btn:hover {
-    background: #00cfff;
-    color: #14213d;
-    transform: scale(1.09);
-}
-.score-value {
-    background: #fff;
-    color: #222c44;
-    border-radius: 7px;
-    padding: 2px 14px;
-    font-size: 1.25em;
-    font-weight: bold;
-    min-width: 26px;
-    text-align: center;
-    margin: 0 2px;
-    display: inline-block;
-}
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 4px;
-}
-.dot-casa {
-    background: #00cfff;
-}
-.dot-fora {
-    background: #ff2d7a;
-}
-/* ====== FIM PLACAR CUSTOM ====== */
-
-/* Estilos para títulos de seção */
-/* Estilo Futurista para o Título */
-.cyber-title {
-    position: relative;
-    padding: 0.8em;
-    margin: 1em auto;
-    background: linear-gradient(
-        135deg,
-        rgba(var(--primary-color-rgb), 0.05) 0%,
-        rgba(var(--secondary-color-rgb), 0.1) 100%
-    );
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(var(--primary-color-rgb), 0.1);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    text-align: center;
-    max-width: max-content;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+// Função para mostrar o modal de exportação
+function showExportModal() {
+    document.getElementById('exportOverlay').classList.add('active');
+    // Ativar a aba de exportação por padrão
+    switchModalTab('export');
 }
 
-.cyber-title::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg,
-        var(--primary-color),
-        var(--secondary-color),
-        #00ff8c,
-        var(--primary-color)
-    );
-    border-radius: 14px;
-    z-index: -1;
-    animation: borderGlow 3s linear infinite;
-    opacity: 0.5;
+// Função para esconder o modal de exportação
+function hideExportModal() {
+    document.getElementById('exportOverlay').classList.remove('active');
+    // Limpar status de importação ao fechar
+    document.getElementById('importStatus').innerHTML = '';
+    document.getElementById('importFile').value = '';
 }
 
-.cyber-title__text {
-    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
-    font-weight: 600;
-    color: var(--text-color);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5);
-    margin-right: 1em;
-}
-
-.cyber-title__tag {
-    display: inline-flex;
-    align-items: center;
-    background: linear-gradient(
-        90deg,
-        rgba(var(--primary-color-rgb), 0.2),
-        rgba(var(--secondary-color-rgb), 0.2)
-    );
-    padding: 0.3em 0.8em;
-    border-radius: 20px;
-    margin-left: 1em;
-    box-shadow: 0 0 15px rgba(var(--primary-color-rgb), 0.2);
-}
-
-.cyber-title__count {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: var(--secondary-color);
-    margin-right: 0.3em;
-    text-shadow: 0 0 8px rgba(var(--secondary-color-rgb), 0.6);
-}
-
-.cyber-title__label {
-    font-size: 0.8em;
-    color: var(--text-color);
-    opacity: 0.8;
-    letter-spacing: 1px;
-}
-
-.cyber-title__glitch {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        45deg,
-        transparent 0%,
-        rgba(var(--primary-color-rgb), 0.1) 50%,
-        transparent 100%
-    );
-    transform: translateX(-100%);
-    animation: glitch 3s infinite;
-}
-
-@keyframes borderGlow {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes glitch {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-/* Media Queries */
-@media (max-width: 768px) {
-    .cyber-title {
-        padding: 0.6em;
-        flex-direction: column;
-        gap: 0.5em;
-    }
-
-    .cyber-title__text {
-        margin-right: 0;
-        margin-bottom: 0.5em;
-    }
-
-    .cyber-title__tag {
-        margin-left: 0;
+// Função para alternar entre as abas do modal
+function switchModalTab(tabName) {
+    // Remover classe active de todas as abas e conteúdos
+    document.querySelectorAll('.modal-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.modal-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Ativar a aba selecionada
+    const selectedTab = document.querySelector(`.modal-tab[onclick="switchModalTab('${tabName}')"]`);
+    const selectedContent = document.getElementById(`${tabName}Tab`);
+    
+    if (selectedTab && selectedContent) {
+        selectedTab.classList.add('active');
+        selectedContent.classList.add('active');
     }
 }
 
-@media (max-width: 480px) {
-    .cyber-title {
-        width: 90%;
-        padding: 0.5em;
-    }
-
-    .cyber-title__text {
-        font-size: clamp(1rem, 4vw, 1.2rem);
-    }
-}
-
-.stats-card-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.stats-card-header h3 {
-    color: white;
-    margin: 0;
-    font-size: 1.1em;
-    text-align: center;
-}
-
-.stats-card-content {
-    padding: 20px;
-    background: rgba(var(--primary-color-rgb), 0.05);
-}
-
-.stats-grid-inner {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-}
-
-.stats-item {
-    background: var(--bg-color);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-}
-
-.stats-value-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.stats-label {
-    color: var(--text-color);
-    font-weight: 600;
-    font-size: 0.9em;
-}
-
-.stats-value {
-    color: #06f03c;
-    font-weight: bold;
-}
-
-.stats-progress-bar {
-    width: 100%;
-    height: 6px;
-    background: rgba(var(--primary-color-rgb), 0.1);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.stats-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    border-radius: 3px;
-    transition: width 0.3s ease;
-}
-
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-        padding: 10px;
+// Função para lidar com o botão de importação
+function handleImportButton() {
+    const fileInput = document.getElementById('importFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        document.getElementById('importStatus').innerHTML = `
+            <div class="import-error">
+                <h3>Erro</h3>
+                <p>Por favor, selecione um arquivo Excel (.xlsx) para importar.</p>
+            </div>
+        `;
+        return;
     }
     
-    .stats-grid-inner {
-        grid-template-columns: 1fr;
+    if (!file.name.endsWith('.xlsx')) {
+        document.getElementById('importStatus').innerHTML = `
+            <div class="import-error">
+                <h3>Erro</h3>
+                <p>O arquivo deve ser no formato Excel (.xlsx).</p>
+            </div>
+        `;
+        return;
     }
     
-    .stats-card {
-        margin-bottom: 15px;
+    performImport(file);
+}
+
+// Função para realizar a exportação
+function performExport() {
+    const exportOption = document.querySelector('input[name="exportOption"]:checked').value;
+    const filename = document.getElementById('filename').value || 'Anotacoes_Jogo';
+    
+    const dataToExport = exportOption === 'all' ? notes : filteredNotes;
+
+    // Garantir que o ID seja a primeira coluna no Excel
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport, {
+        header: ['id', 'teamName', 'prediction', 'ftScore', 'htScore', 'firstGoal', 'firstGoalFTTime', 'datetime', 'status']
+    });
+
+    // Adicionar aviso sobre a coluna ID
+    XLSX.utils.sheet_add_aoa(worksheet, [
+        ['ATENÇÃO: NÃO MODIFIQUE A COLUNA ID!'],
+        ['Esta coluna é usada para identificação interna dos registros.']
+    ], { origin: -1 });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Anotacoes');
+    
+    XLSX.writeFile(workbook, `${filename}.xlsx`);
+    
+    hideExportModal();
+}
+
+// Função para realizar a importação
+function performImport(file) {
+    const reader = new FileReader();
+    const statusDiv = document.getElementById('importStatus');
+    
+    reader.onload = function(e) {
+        try {
+            statusDiv.innerHTML = 'Processando arquivo...';
+            
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const importedNotes = XLSX.utils.sheet_to_json(worksheet);
+
+            // Criar mapa das notas atuais
+            const currentNotesMap = new Map(notes.map(note => [note.id, note]));
+            const importedIds = new Set();
+            const mergedNotes = [];
+            let updatedCount = 0;
+            let newCount = 0;
+            let skippedCount = 0;
+            let invalidCount = 0;
+            let deletedCount = 0;
+
+            // Processar notas importadas
+            importedNotes.forEach(importedNote => {
+                // Pular linhas de aviso
+                if (importedNote.id === 'ATENÇÃO: NÃO MODIFIQUE A COLUNA ID!') {
+                    return;
+                }
+
+                // Validar nota importada
+                if (!importedNote.id || !importedNote.teamName || !importedNote.datetime) {
+                    console.warn('Nota inválida encontrada:', importedNote);
+                    invalidCount++;
+                    return;
+                }
+
+                importedIds.add(importedNote.id);
+
+                // Verificar se a nota está marcada como excluída
+                if (importedNote.status === 'deleted') {
+                    if (currentNotesMap.has(importedNote.id)) {
+                        deletedCount++;
+                        currentNotesMap.delete(importedNote.id);
+                    }
+                    return;
+                }
+
+                if (currentNotesMap.has(importedNote.id)) {
+                    // Atualizar nota existente
+                    Object.assign(currentNotesMap.get(importedNote.id), importedNote);
+                    updatedCount++;
+                } else {
+                    // Adicionar nova nota
+                    mergedNotes.push(importedNote);
+                    newCount++;
+                }
+            });
+
+            // Manter notas que não foram importadas
+            notes.forEach(note => {
+                if (!importedIds.has(note.id)) {
+                    mergedNotes.push(note);
+                    skippedCount++;
+                } else if (currentNotesMap.has(note.id)) {
+                    mergedNotes.push(currentNotesMap.get(note.id));
+                }
+            });
+
+            // Atualizar notas
+            notes = sortNotesByDate(mergedNotes);
+            saveNotesToStorage();
+            renderNotes();
+            updateCounters();
+
+            // Exibir relatório
+            statusDiv.innerHTML = `
+                <div class="import-report">
+                    <h3>Importação Concluída</h3>
+                    <p>✅ ${updatedCount} notas atualizadas</p>
+                    <p>➕ ${newCount} notas novas adicionadas</p>
+                    <p>📝 ${skippedCount} notas mantidas sem alteração</p>
+                    ${deletedCount > 0 ? `<p>🗑️ ${deletedCount} notas excluídas sincronizadas</p>` : ''}
+                    ${invalidCount > 0 ? `<p>⚠️ ${invalidCount} notas inválidas ignoradas</p>` : ''}
+                    <p>Total: ${mergedNotes.length} notas após importação</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Erro na importação:', error);
+            statusDiv.innerHTML = `
+                <div class="import-error">
+                    <h3>Erro na Importação</h3>
+                    <p>❌ ${error.message}</p>
+                    <p>Por favor, verifique se o arquivo está no formato correto.</p>
+                </div>
+            `;
+        }
+    };
+
+    reader.onerror = function() {
+        statusDiv.innerHTML = `
+            <div class="import-error">
+                <h3>Erro na Leitura do Arquivo</h3>
+                <p>❌ Não foi possível ler o arquivo.</p>
+            </div>
+        `;
+    };
+
+    statusDiv.innerHTML = 'Lendo arquivo...';
+    reader.readAsArrayBuffer(file);
+}
+
+// Função para mostrar o modal de IA
+function showIAModal() {
+    document.getElementById('iaOverlay').classList.add('active');
+}
+
+// Função para esconder o modal de IA
+function hideIAModal() {
+    document.getElementById('iaOverlay').classList.remove('active');
+}
+
+// Função para gerar relatório de IA
+function generateAIReport() {
+    const reportLoading = document.getElementById('reportLoading');
+    const aiReport = document.getElementById('aiReport');
+    
+    reportLoading.style.display = 'block';
+    aiReport.innerHTML = '';
+    
+    setTimeout(() => {
+        // Simulação de geração de relatório
+        const reportContent = `
+            Relatório de Análise Inteligente:
+            - Total de Partidas: ${notes.length}
+            - Total de Vitórias: ${notes.filter(note => note.prediction === 'Vitória').length}
+            - Total de Empates: ${notes.filter(note => note.prediction === 'Empate').length}
+            - Total de Derrotas: ${notes.filter(note => note.prediction === 'Derrota').length}
+        `;
+        
+        aiReport.innerHTML = reportContent;
+        reportLoading.style.display = 'none';
+    }, 2000);
+}
+
+// Função para gerar gráfico
+function generateChart() {
+    const chartType = document.getElementById('chartType').value;
+    const chartLoading = document.getElementById('chartLoading');
+    const iaChart = document.getElementById('iaChart');
+    
+    chartLoading.style.display = 'block';
+    iaChart.style.display = 'none';
+    
+    setTimeout(() => {
+        let chartConfig;
+        
+        switch (chartType) {
+            case 'prediction':
+                chartConfig = generatePredictionChart();
+                break;
+            case 'firstGoal':
+                chartConfig = generateFirstGoalChart();
+                break;
+            case 'scoreAnalysis':
+                chartConfig = generateScoreAnalysisChart();
+                break;
+            case 'predictionAccuracy':
+                chartConfig = generatePredictionAccuracyChart();
+                break;
+            case 'timeScoring':
+                chartConfig = generateTimeScoringChart();
+                break;
+            case 'teamComparison':
+                chartConfig = generateTeamComparisonChart();
+                break;
+            case 'combinedAnalysis':
+                chartConfig = generateCombinedAnalysisChart();
+                break;
+            default:
+                chartConfig = generatePredictionChart();
+        }
+        
+        new Chart(iaChart, chartConfig);
+        
+        chartLoading.style.display = 'none';
+        iaChart.style.display = 'block';
+    }, 2000);
+}
+
+// Função para selecionar o momento do primeiro gol FT
+function selectFirstGoalFTTime(button) {
+    // Remove active class somente dos botões do grupo específico do Momento do 1º Gol FT
+    button.closest('.first-goal-section').querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona active class ao botão selecionado
+    button.classList.add('active');
+    
+    // Atualiza o valor do input hidden
+    document.getElementById('firstGoalFTTime').value = button.dataset.value;
+}
+
+// Função para selecionar o momento do primeiro gol HT
+function selectTimeHT(button) {
+    // Remove active class de todos os botões no mesmo grupo
+    button.closest('.first-goal-section').querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona active class ao botão clicado
+    button.classList.add('active');
+    
+    // Atualiza o campo hidden
+    document.getElementById('firstGoalHTTime').value = button.getAttribute('data-value');
+    
+    // Log no console
+    console.log("Intervalo HT selecionado:", button.getAttribute('data-value'));
+}
+
+// Função para adicionar ou atualizar uma anotação
+function addOrUpdateNote() {
+    const teamNameA = document.getElementById('teamNameA').value.trim();
+    const teamNameB = document.getElementById('teamNameB').value.trim();
+    const prediction = document.getElementById('prediction').value;
+    const ftScoreHome = document.getElementById('ftScoreHome').textContent;
+    const ftScoreAway = document.getElementById('ftScoreAway').textContent;
+    const htScoreHome = document.getElementById('htScoreHome').textContent;
+    const htScoreAway = document.getElementById('htScoreAway').textContent;
+    const firstGoalTime = document.getElementById('firstGoalTime').value;
+    const firstGoalTeam = document.getElementById('firstGoalTeam').value;
+    const datetime = document.getElementById('datetime').value;
+
+    // Validação dos campos obrigatórios
+    if (!teamNameA || !teamNameB || !prediction || !datetime) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+    }
+
+    // Determinar o valor de firstGoal
+    let firstGoalValue;
+    if (firstGoalTeam === 'Nenhum') {
+        firstGoalValue = 'N/A | Nenhum';
+    } else if (firstGoalTime && firstGoalTeam) {
+        firstGoalValue = `${firstGoalTime} | ${firstGoalTeam}`;
+    } else {
+        firstGoalValue = 'Aguardando';
+    }
+
+    const gameData = {
+        teamName: `${teamNameA} vs ${teamNameB}`,
+        prediction,
+        ftScore: `${ftScoreHome}-${ftScoreAway}`,
+        htScore: `${htScoreHome}-${htScoreAway}`,
+        firstGoal: firstGoalValue,
+        firstGoalFTTime: document.getElementById('firstGoalTeam').value === 'Nenhum' ? '' : document.getElementById('firstGoalFTTime').value,
+        firstGoalHTTime: document.getElementById('firstGoalHTTime').value,
+        datetime,
+        status: 'active'
+    };
+
+    if (editingNoteIndex >= 0 && editingNoteIndex < notes.length) {
+        // Atualizar nota existente - Manter o ID original
+        gameData.id = notes[editingNoteIndex].id;
+        notes[editingNoteIndex] = gameData;
+        console.log('Atualizando nota:', gameData);
+    } else {
+        // Adicionar nova nota - Gerar novo ID
+        gameData.id = crypto.randomUUID();
+        notes.push(gameData);
+        console.log('Adicionando nova nota:', gameData);
+    }
+
+    // Ordenar notas por data após adicionar/atualizar
+    notes = sortNotesByDate(notes);
+    
+    saveNotesToStorage();
+    renderNotes(notes);
+    updateCounters();
+    
+    // Limpar formulário e estados
+    resetForm();
+    editingNoteIndex = -1;
+    document.querySelector('.add-button').textContent = 'Adicionar';
+    
+    // Rolar até o card atualizado depois de um breve delay
+    setTimeout(() => {
+        const cards = document.querySelectorAll('.game-card');
+        if (cards.length > 0) {
+            cards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
+}
+
+// Função auxiliar para resetar o formulário
+function resetForm() {
+    // Limpar campos de input e select
+    document.getElementById('teamNameA').value = '';
+    document.getElementById('teamNameB').value = '';
+    document.getElementById('prediction').value = 'BTTS'; // Ou o valor padrão desejado
+    document.getElementById('datetime').value = new Date().toISOString().slice(0, 16); // Resetar para data/hora atual
+
+    // Resetar placares para '0'
+    document.getElementById('ftScoreHome').textContent = '0';
+    document.getElementById('ftScoreAway').textContent = '0';
+    document.getElementById('htScoreHome').textContent = '0';
+    document.getElementById('htScoreAway').textContent = '0';
+
+    // Limpar seleção de primeiro gol (inputs hidden e botões)
+    document.getElementById('firstGoalTime').value = '';
+    document.getElementById('firstGoalTeam').value = '';
+    document.getElementById('firstGoalFTTime').value = '';
+
+    // Limpar seleção dos botões do primeiro gol (HT/FT)
+    document.querySelectorAll('.first-goal-group:first-child .time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Limpar seleção dos botões de time
+    document.querySelectorAll('.team-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Limpar seleção dos botões do Momento do 1º Gol FT
+    // Limpar seleções dos botões
+    document.querySelectorAll('.time-button, .team-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Limpar campos ocultos
+    document.getElementById('firstGoalTime').value = '';
+    document.getElementById('firstGoalTeam').value = '';
+    document.getElementById('firstGoalFTTime').value = '';
+    document.getElementById('firstGoalHTTime').value = '';
+
+    // Remover a classe disabled-section de todas as seções
+    const timeButtons = document.querySelector('.first-goal-group:first-child');
+    const firstGoalFTSection = document.querySelector('.first-goal-section:nth-of-type(2)');
+    timeButtons.classList.remove('disabled-section');
+    firstGoalFTSection.classList.remove('disabled-section');
+
+    // Resetar estado de edição
+    editingNoteIndex = -1;
+    document.querySelector('.add-button').textContent = 'Adicionar';
+}
+
+// Função para renderizar as anotações
+function renderNotes(filteredNotes = notes) {
+    console.log('Iniciando renderização de notas');
+    const notesList = document.getElementById('notesList');
+
+    if (!notesList) {
+        console.error('Elemento notesList não encontrado');
+        return;
+    }
+
+    // Verifica se há notas para renderizar
+    if (!filteredNotes || filteredNotes.length === 0) {
+        console.log('Nenhuma nota para renderizar');
+        notesList.innerHTML = '<div class="no-notes">Nenhuma partida registrada</div>';
+        return;
+    }
+
+    console.log(`Renderizando ${filteredNotes.length} notas`);
+    notesList.innerHTML = '';
+    
+    // Renderizar todas as notas
+    filteredNotes.forEach((note, index) => {
+        try {
+            // Extrair informação do primeiro gol de forma segura
+            let displayValue = '-';
+            if (note.firstGoal === 'Aguardando') {
+                displayValue = 'Aguardando';
+            } else if (note.firstGoal && note.firstGoal.includes('|')) {
+                const parts = note.firstGoal.split('|');
+                displayValue = parts.length > 1 ? parts[1].trim() : '-';
+            }
+
+            const gameData = {
+                match: note.teamName,
+                prediction: note.prediction,
+                ft: note.ftScore,
+                ht: note.htScore,
+                firstGoalMinute: displayValue,
+                firstGoalFTTime: note.firstGoalFTTime,
+                firstGoalHTTime: note.firstGoalHTTime,
+                dateTime: note.datetime
+            };
+            
+            const card = createGameCard(gameData);
+            if (!card.classList.contains('game-card')) {
+                console.error('O elemento criado não possui a classe "game-card". Verifique a função createGameCard.');
+            }
+            notesList.appendChild(card);
+        } catch (error) {
+            console.error(`Erro ao renderizar nota ${index}:`, error, note);
+        }
+    });
+
+    console.log('Renderização de notas concluída');
+}
+
+// Função para salvar anotações no armazenamento local
+function saveNotesToStorage() {
+    localStorage.setItem('notes', JSON.stringify(notes));
+}
+
+// Função para ordenar notas por data (mais recente primeiro)
+function sortNotesByDate(notesArray) {
+    return notesArray.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+}
+
+// Função para carregar anotações do armazenamento local
+function loadNotesFromStorage() {
+    console.log('Iniciando carregamento de notas do localStorage');
+    const storedNotes = localStorage.getItem('notes');
+    
+    try {
+        if (storedNotes) {
+            notes = JSON.parse(storedNotes);
+            console.log(`${notes.length} notas carregadas do localStorage`);
+            
+            // Verificar e adicionar IDs para notas que não possuem
+            let needsSave = false;
+            notes = notes.map(note => {
+                if (!note.id) {
+                    note.id = crypto.randomUUID();
+                    needsSave = true;
+                }
+                return note;
+            });
+
+            if (needsSave) {
+                console.log('Adicionando IDs únicos para notas existentes');
+                localStorage.setItem('notes', JSON.stringify(notes));
+            }
+            
+            // Ordenar notas por data
+            notes = sortNotesByDate(notes);
+
+            // Atualizar contadores
+            updateCounters();
+        } else {
+            console.log('Nenhuma nota encontrada no localStorage');
+            notes = [];
+            localStorage.setItem('notes', '[]');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar notas:', error);
+        notes = [];
+        localStorage.setItem('notes', '[]');
+    }
+}
+
+// Função para calcular estatísticas
+function calcularEstatisticas() {
+    const total = notes.length;
+    if (total === 0) return {
+        vitoriasCasaFT: '0/0 (0%)',
+        vitoriasForaFT: '0/0 (0%)',
+        vitoriasCasaHT: '0/0 (0%)',
+        vitoriasForaHT: '0/0 (0%)',
+        acertosGolsFT: '0/0 (0%)',
+        predicaoOver05HTOver15FT: '0/0 (0%)',
+        predicaoHT2FT05: '0/0 (0%)',
+        firstGoalBefore75: '0/0 (0%)',
+        firstGoalAfter75: '0/0 (0%)',
+        predicaoGols75Ultimas15Antes: '0/0 (0%)',
+        predicaoGols75Ultimas15Depois: '0/0 (0%)',
+        golHT_0_14: '0/0 (0%)',
+        golHT_15_29: '0/0 (0%)',
+        golHT_30_45: '0/0 (0%)'
+    };
+
+    // Contadores FT
+    let vitoriasCasaFT = 0;
+    let vitoriasForaFT = 0;
+    
+    // Contadores HT
+    let vitoriasCasaHT = 0;
+    let vitoriasForaHT = 0;
+    let over05HT_over15FT_total = 0;
+    let over05HT_over15FT_sucesso = 0;
+    let empatesHT = 0; // Contador para empates HT
+    let ht2ft05_total = 0; // Contador para HT 2+ -> FT 0.5+
+    let ht2ft05_sucesso = 0;
+    // Contadores de gols e momentos
+    let golsAntes75 = 0;
+    let golsApos75 = 0;
+    let totalGolsFTMomento = 0;
+    let jogosComGols = 0;
+    let totalJogosComGols = 0;
+
+    // Novos contadores para minutos do gol no HT
+    let golHT_0_14 = 0;
+    let golHT_15_29 = 0;
+    let golHT_30_45 = 0;
+    let totalGolHT = 0;
+
+    // Análise das últimas 15 partidas
+    let ultimas15 = notes.slice(-15);
+    let gols75Ultimas15 = {
+        antes: 0,
+        depois: 0,
+        total: 0
+    };
+
+    notes.forEach(note => {
+        // Análise FT (Tempo Final)
+        if (note.ftScore && note.ftScore.includes('-')) {
+            const [golsCasaFT, golsForaFT] = note.ftScore.split('-').map(Number);
+            
+            // Contagem de vitórias FT
+            if (golsCasaFT > golsForaFT) vitoriasCasaFT++;
+            if (golsForaFT > golsCasaFT) vitoriasForaFT++;
+
+            // Verificação de gols na partida
+            totalJogosComGols++;
+            if (golsCasaFT + golsForaFT > 0) jogosComGols++;
+
+            // Análise para Over 0.5 HT -> Over 1.5 FT
+            if (note.htScore && note.htScore.includes('-')) {
+                const [golsCasaHT, golsForaHT] = note.htScore.split('-').map(Number);
+                const totalGolsHT = golsCasaHT + golsForaHT;
+                const totalGolsFT = golsCasaFT + golsForaFT;
+                const golsSegundoTempo = totalGolsFT - totalGolsHT;
+
+                // Análise Over 0.5 HT -> Over 1.5 FT
+                if (totalGolsHT > 0) {
+                    over05HT_over15FT_total++;
+                    if (totalGolsFT > 1) {
+                        over05HT_over15FT_sucesso++;
+                    }
+                }
+
+                // Análise HT 2+ -> FT 0.5+
+                if (totalGolsHT >= 2) {
+                    ht2ft05_total++;
+                    if (golsSegundoTempo >= 1) {
+                        ht2ft05_sucesso++;
+                    }
+                }
+            }
+        }
+
+        // Análise HT (Primeiro Tempo)
+        if (note.htScore && note.htScore.includes('-')) {
+            const [golsCasaHT, golsForaHT] = note.htScore.split('-').map(Number);
+            
+            // Contagem de vitórias HT
+            if (golsCasaHT > golsForaHT) vitoriasCasaHT++;
+            if (golsForaHT > golsCasaHT) vitoriasForaHT++;
+            if (golsCasaHT === golsForaHT) empatesHT++; // Incrementa em caso de empate HT
+        }
+    });
+
+    // Cálculo das porcentagens
+    const percentCasaFT = ((vitoriasCasaFT / total) * 100).toFixed(1);
+    const percentForaFT = ((vitoriasForaFT / total) * 100).toFixed(1);
+    const percentCasaHT = ((vitoriasCasaHT / total) * 100).toFixed(1);
+    const percentForaHT = ((vitoriasForaHT / total) * 100).toFixed(1);
+    const percentEmpatesHT = ((empatesHT / total) * 100).toFixed(1); // Calcula porcentagem de empates HT
+    const percentGols = ((jogosComGols / totalJogosComGols) * 100).toFixed(1);
+
+    // Calcular total de vitórias FT
+    const totalVitoriasFT = vitoriasCasaFT + vitoriasForaFT;
+    const percentTotalVitoriasFT = ((totalVitoriasFT / total) * 100).toFixed(1);
+
+    // Contadores BTTS
+    let bttsSim = 0;
+    let bttsTotal = 0;
+
+    notes.forEach(note => {
+        if (note.ftScore && note.ftScore !== 'Aguardando') {
+            bttsTotal++;
+            if (checkBTTS(note.ftScore)) {
+                bttsSim++;
+            }
+        }
+    });
+
+    const percentBTTSSim = bttsTotal > 0 ? ((bttsSim / bttsTotal) * 100).toFixed(1) : 0;
+    const percentBTTSNao = bttsTotal > 0 ? (((bttsTotal - bttsSim) / bttsTotal) * 100).toFixed(1) : 0;
+
+    // Contar gols antes/depois do minuto 75
+    notes.forEach(note => {
+        if (note.firstGoalTeam !== 'Nenhum' && note.firstGoalFTTime) {
+            totalGolsFTMomento++;
+            if (note.firstGoalFTTime === 'before75') {
+                golsAntes75++;
+            } else if (note.firstGoalFTTime === 'after75') {
+                golsApos75++;
+            }
+        }
+    });
+
+    // Calcular porcentagens dos momentos dos gols
+    const percentAntes75 = totalGolsFTMomento > 0 ? ((golsAntes75 / totalGolsFTMomento) * 100).toFixed(1) : 0;
+    const percentApos75 = totalGolsFTMomento > 0 ? ((golsApos75 / totalGolsFTMomento) * 100).toFixed(1) : 0;
+
+    // Análise das últimas 15 partidas
+    ultimas15.forEach(note => {
+        if (note.firstGoalTeam !== 'Nenhum' && note.firstGoalFTTime) {
+            gols75Ultimas15.total++;
+            if (note.firstGoalFTTime === 'before75') {
+                gols75Ultimas15.antes++;
+            } else if (note.firstGoalFTTime === 'after75') {
+                gols75Ultimas15.depois++;
+            }
+        }
+    });
+
+    // Novos cálculos para minutos do gol no HT
+    notes.forEach(note => {
+        if (note.firstGoalHTTime) {
+            totalGolHT++;
+            if (note.firstGoalHTTime === "0-14") golHT_0_14++;
+            else if (note.firstGoalHTTime === "15-29") golHT_15_29++;
+            else if (note.firstGoalHTTime === "30-45") golHT_30_45++;
+        }
+    });
+
+    // Calcular porcentagens para minutos do gol no HT
+    const percentGolHT_0_14 = totalGolHT > 0 ? ((golHT_0_14 / totalGolHT) * 100).toFixed(1) : 0;
+    const percentGolHT_15_29 = totalGolHT > 0 ? ((golHT_15_29 / totalGolHT) * 100).toFixed(1) : 0;
+    const percentGolHT_30_45 = totalGolHT > 0 ? ((golHT_30_45 / totalGolHT) * 100).toFixed(1) : 0;
+
+    // Calcular porcentagens para últimas 15
+    const percent75Antes15 = gols75Ultimas15.total > 0 ?
+        ((gols75Ultimas15.antes / gols75Ultimas15.total) * 100).toFixed(1) : 0;
+    const percent75Depois15 = gols75Ultimas15.total > 0 ?
+        ((gols75Ultimas15.depois / gols75Ultimas15.total) * 100).toFixed(1) : 0;
+
+    return {
+        vitoriasCasaFT: `${vitoriasCasaFT}/${total} (${percentCasaFT}%)`,
+        vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
+        vitoriasCasaHT: `${vitoriasCasaHT}/${total} (${percentCasaHT}%)`,
+        vitoriasForaHT: `${vitoriasForaHT}/${total} (${percentForaHT}%)`,
+        empatesHT: `${empatesHT}/${total} (${percentEmpatesHT}%)`,
+        acertosGolsFT: `${jogosComGols}/${totalJogosComGols} (${percentGols}%)`,
+        totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
+        bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
+        bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
+        predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
+        predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
+        firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${percentAntes75}%)`,
+        firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`,
+        predicaoGols75Ultimas15Antes: `${gols75Ultimas15.antes}/${gols75Ultimas15.total} (${percent75Antes15}%)`,
+        predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${percent75Depois15}%)`,
+        golHT_0_14: `${golHT_0_14}/${totalGolHT} (${percentGolHT_0_14}%)`,
+        golHT_15_29: `${golHT_15_29}/${totalGolHT} (${percentGolHT_15_29}%)`,
+        golHT_30_45: `${golHT_30_45}/${totalGolHT} (${percentGolHT_30_45}%)`
+    };
+}
+
+// Função para extrair porcentagem de uma string estatística
+function extrairPorcentagem(estatistica) {
+    const match = estatistica.match(/\((\d+\.?\d*)%\)/);
+    return match ? parseFloat(match[1]) : 0;
+}
+
+// Função para atualizar contadores
+function updateCounters() {
+    const totalCount = document.getElementById('totalCount');
+    const total = notes.length;
+    totalCount.textContent = total;
+
+    // Atualizar estatísticas
+    const stats = calcularEstatisticas();
+
+    // Atualizar blocos de predição customizados
+    if (document.getElementById('predicaoOver05HTOver15FT')) {
+        document.getElementById('predicaoOver05HTOver15FT').textContent = stats.predicaoOver05HTOver15FT;
+        const percent1 = extrairPorcentagem(stats.predicaoOver05HTOver15FT);
+        document.getElementById('predicaoOver05HTOver15FTBar').style.width = percent1 + '%';
+    }
+    if (document.getElementById('predicaoHT2FT05')) {
+        document.getElementById('predicaoHT2FT05').textContent = stats.predicaoHT2FT05;
+        const percent2 = extrairPorcentagem(stats.predicaoHT2FT05);
+        document.getElementById('predicaoHT2FT05Bar').style.width = percent2 + '%';
+    }
+
+    // Função auxiliar para atualizar elemento e barra de progresso
+    const atualizarElementoComProgresso = (elementId, valor) => {
+        const elemento = document.getElementById(elementId);
+        if (!elemento) return;
+
+        // Atualizar texto
+        elemento.textContent = valor;
+        
+        // Atualizar barra de progresso
+        const container = elemento.closest('.stats-item');
+        if (container) {
+            const progressBar = container.querySelector('.stats-progress-fill');
+            if (progressBar) {
+                const porcentagem = extrairPorcentagem(valor);
+                progressBar.style.width = `${porcentagem}%`;
+                
+                // Atualizar cores baseadas na porcentagem
+                if (porcentagem >= 90) {
+                    elemento.style.color = '#06f03c';
+                    progressBar.style.background = 'linear-gradient(90deg, #06f03c, #00ff44)';
+                } else if (porcentagem >= 70) {
+                    elemento.style.color = '#ffd700';
+                    progressBar.style.background = 'linear-gradient(90deg, #ffd700, #ffc800)';
+                } else {
+                    elemento.style.color = '#ffffff';
+                    progressBar.style.background = 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))';
+                }
+            }
+        }
+    };
+
+    // Atualizar todas as estatísticas
+    atualizarElementoComProgresso('vitoriasCasaFT', stats.vitoriasCasaFT);
+    atualizarElementoComProgresso('vitoriasForaFT', stats.vitoriasForaFT);
+    atualizarElementoComProgresso('vitoriasCasaHT', stats.vitoriasCasaHT);
+    atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
+    atualizarElementoComProgresso('empatesHT', stats.empatesHT);
+    atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
+    atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
+    atualizarElementoComProgresso('bttsSim', stats.bttsSim);
+    atualizarElementoComProgresso('bttsNao', stats.bttsNao);
+    atualizarElementoComProgresso('predicaoOver05HTOver15FT', stats.predicaoOver05HTOver15FT);
+    atualizarElementoComProgresso('predicaoHT2FT05', stats.predicaoHT2FT05);
+    atualizarElementoComProgresso('firstGoalBefore75', stats.firstGoalBefore75);
+    atualizarElementoComProgresso('firstGoalAfter75', stats.firstGoalAfter75);
+    atualizarElementoComProgresso('predicaoGols75Ultimas15Antes', stats.predicaoGols75Ultimas15Antes);
+    atualizarElementoComProgresso('predicaoGols75Ultimas15Depois', stats.predicaoGols75Ultimas15Depois);
+    // Novas estatísticas de minutos do gol no HT
+    atualizarElementoComProgresso('golHT_0_14', stats.golHT_0_14);
+    atualizarElementoComProgresso('golHT_15_29', stats.golHT_15_29);
+    atualizarElementoComProgresso('golHT_30_45', stats.golHT_30_45);
+
+    // Calcular score de performance para cada card
+    const statsCards = Array.from(document.querySelectorAll('.stats-card'));
+    const cardScores = statsCards.map(card => {
+        const progressBars = card.querySelectorAll('.stats-progress-fill');
+        let totalScore = 0;
+        let totalMetrics = 0;
+
+        progressBars.forEach(bar => {
+            const width = parseFloat(bar.style.width) || 0;
+            if (width > 0) {
+                totalScore += width;
+                totalMetrics++;
+            }
+        });
+
+        return {
+            card,
+            score: totalMetrics > 0 ? totalScore / totalMetrics : 0
+        };
+    });
+
+    // Ordenar e reorganizar cards
+    cardScores.sort((a, b) => b.score - a.score);
+    const statsGrid = document.querySelector('.stats-grid');
+    statsCards.forEach(card => card.classList.add('reordering'));
+    
+    setTimeout(() => {
+        cardScores.forEach(({ card }) => {
+            statsGrid.appendChild(card);
+        });
+        
+        setTimeout(() => {
+            statsCards.forEach(card => card.classList.remove('reordering'));
+        }, 300);
+    }, 50);
+}
+
+// Função para criar um card de jogo
+function checkBTTS(ftScore) {
+    if (!ftScore || !ftScore.includes('-') || ftScore === 'Aguardando') return false;
+    const [homeGoals, awayGoals] = ftScore.split('-').map(Number);
+    return homeGoals > 0 && awayGoals > 0;
+}
+
+function createGameCard(gameData) {
+    const card = document.createElement('div');
+    card.className = 'bg-card-bg rounded-lg shadow-md p-3 game-card';
+
+    const hasBTTS = checkBTTS(gameData.ft);
+    const bttsClass = hasBTTS ? 'btts-green-badge' : 'btts-red-text';
+    const bttsText = hasBTTS ? 'GREEN' : 'RED';
+
+    const formattedDate = formatDateTime(gameData.dateTime).split(' ')[0];
+
+    let firstGoalDisplay = 'N/A';
+    if (gameData.firstGoalMinute && gameData.firstGoalMinute !== 'Nenhum' && gameData.firstGoalMinute !== 'Aguardando') {
+        const parts = gameData.firstGoalMinute.split('|');
+        firstGoalDisplay = parts.length > 1 ? parts[1].trim() : gameData.firstGoalMinute.trim();
+    } else if (gameData.firstGoalMinute === 'Aguardando') {
+        firstGoalDisplay = 'Aguardando';
+    }
+
+    // Calcula a predição de HT usando a nova função
+    const htPrediction = checkOverHalfTimePrediction(gameData.ht);
+    
+    // Formatar texto do momento do primeiro gol FT
+    let firstGoalFTDisplay = '';
+    if (gameData.firstGoalFTTime === 'before75') {
+        firstGoalFTDisplay = 'Antes do 75\'';
+    } else if (gameData.firstGoalFTTime === 'after75') {
+        firstGoalFTDisplay = 'Após o 75\'';
+    }
+
+    // Formatar texto do momento do primeiro gol HT
+    let firstGoalHTDisplay = gameData.firstGoalHTTime ? `${gameData.firstGoalHTTime} min` : '-';
+
+    card.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+            <h2 class="text-base font-semibold">${gameData.match}</h2>
+            <span class="text-xs text-gray-400">${formattedDate}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1 stat-grid text-xs mb-2">
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">BTTS</span>
+                <span class="${bttsClass}">${bttsText}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">FT</span>
+                <span class="font-semibold">${gameData.ft}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">HT</span>
+                <span class="font-semibold">${gameData.ht}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">HT Pred.</span>
+                <span class="font-semibold">${htPrediction}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">1º GOL</span>
+                <span class="font-semibold">${firstGoalDisplay}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">Momento 1º Gol FT</span>
+                <span class="font-semibold">${firstGoalFTDisplay}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">Momento 1º Gol HT</span>
+                <span class="font-semibold">${firstGoalHTDisplay}</span>
+            </div>
+        </div>
+        <div class="buttons-container">
+            <button class="card-button edit-button" onclick="handleEditGameCard(this)">
+                Editar
+            </button>
+            <button class="card-button delete-button" onclick="handleDeleteGameCard(this)">
+                Excluir
+            </button>
+        </div>
+    `;
+    return card;
+}
+
+function checkOverHalfTimePrediction(htScore) {
+    if (typeof htScore !== 'string' || !htScore || htScore === 'Aguardando') {
+        return '-';
+    }
+
+    if (!htScore.includes('-')) {
+        return '-';
+    }
+
+    const scores = htScore.split('-');
+    if (scores.length !== 2) {
+        return '-';
+    }
+
+    const homeGoals = parseInt(scores[0]);
+    const awayGoals = parseInt(scores[1]);
+
+    if (isNaN(homeGoals) || isNaN(awayGoals) || homeGoals < 0 || awayGoals < 0) {
+        return '-';
+    }
+
+    const totalGoalsHT = homeGoals + awayGoals;
+
+    if (totalGoalsHT > 0) {
+        return 'Chance Over 1.5 FT';
+    } else {
+        return '-';
+    }
+}
+// Chave extra removida
+
+// Função para controlar a visibilidade da lista de notas
+function toggleNotesList() {
+    console.log('Alternando visibilidade da lista de notas');
+    const notesList = document.getElementById('notesList');
+    const toggleBtn = document.getElementById('toggleNotes');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const toggleText = toggleBtn.querySelector('span:last-child');
+
+    if (!notesList) {
+        console.error('Elemento notesList não encontrado');
+        return;
+    }
+
+    const isMinimized = notesList.classList.toggle('minimized');
+    console.log('Estado minimizado:', isMinimized);
+    
+    // Atualiza o ícone e texto do botão com animação
+    toggleIcon.style.transform = isMinimized ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleText.textContent = isMinimized ? 'Maximizar' : 'Minimizar';
+    
+    // Força re-renderização das notas se estiver maximizando
+    if (!isMinimized) {
+        console.log('Re-renderizando notas após maximizar');
+        renderNotes(notes);
     }
     
-    .stats-value-container {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 5px;
+    // Salva o estado no localStorage
+    localStorage.setItem('notesListMinimized', isMinimized);
+    console.log('Estado salvo no localStorage:', isMinimized);
+}
+
+// Função para restaurar o estado da lista de notas
+function restoreNotesListState() {
+    console.log('Restaurando estado da lista de notas');
+    const isMinimized = localStorage.getItem('notesListMinimized') === 'true';
+    const notesList = document.getElementById('notesList');
+    const toggleBtn = document.getElementById('toggleNotes');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const toggleText = toggleBtn.querySelector('span:last-child');
+    
+    if (!notesList || !toggleBtn || !toggleIcon || !toggleText) {
+        console.error('Elementos necessários não encontrados');
+        return;
+    }
+
+    console.log('Estado minimizado anterior:', isMinimized);
+    
+    if (isMinimized) {
+        notesList.classList.add('minimized');
+        toggleIcon.style.transform = 'rotate(-90deg)';
+        toggleText.textContent = 'Maximizar';
+    } else {
+        notesList.classList.remove('minimized');
+        toggleIcon.style.transform = 'rotate(0deg)';
+        toggleText.textContent = 'Minimizar';
+        // Garante que as notas sejam renderizadas se não estiver minimizado
+        renderNotes(notes);
     }
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: all 0.3s ease;
-}
-
-.container {
-    width: 95vw;
-    margin: 0 auto;
-    background: var(--bg-color);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: var(--card-shadow);
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: var(--primary-color);
-}
-
-.filters {
-    margin-bottom: 20px;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.filters-title {
-    width: 100%;
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.filters input, .filters select {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    flex: 1;
-    min-width: 180px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.action-button {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 120px;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.25);
-}
-
-.action-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.35);
-    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
-}
-
-.btn-filter {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-export {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.btn-export:hover, .btn-filter:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Removido .form-row e estilos associados */
-
-.input-container { /* Mantido para compatibilidade, mas pode ser removido se não usado em outro lugar */
-    width: 100%;
-    background: rgba(var(--primary-color-rgb), 0.05);
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Removido .score-section antigo */
-
-/* Removido .form-row:hover */
-
-/* Removido .form-title antigo */
-
-.form-group { /* Mantido para compatibilidade, mas pode ser removido se não usado em outro lugar */
-    flex: 1;
-    min-width: 280px;
-    margin-bottom: 25px;
-    position: relative;
-    transition: transform 0.3s ease;
-}
-
-.form-group:hover { /* Mantido para compatibilidade */
-    transform: translateY(-2px);
-}
-
-.form-label { /* Mantido para compatibilidade, mas sobrescrito por .form-section .form-label */
-    display: block;
-    margin-bottom: 12px;
-    font-weight: 600;
-    font-size: 0.95em;
-    color: var(--text-color);
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    opacity: 0.9;
-}
-
-/* Removido .form-row input, .form-row select e seus :focus */
-
-/* Removido .score-section antigo */
-
-.score-group { /* Mantido para compatibilidade, mas pode ser removido se não usado em outro lugar */
-    padding: 15px;
-    background: rgba(var(--primary-color-rgb), 0.03);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
-    width: 100%;
-}
-
-.score-inputs { /* Mantido para compatibilidade, mas pode ser removido se não usado em outro lugar */
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-top: 15px;
-    background: var(--bg-color);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-
-.header-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 0.8fr 0.8fr 1fr 1.2fr 1fr;
-    gap: 10px;
-    padding: 10px;
-    background-color: var(--header-bg);
-    color: white;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    font-weight: 600;
-    font-size: 0.95em;
-}
-
-.notes-list {
-    margin-top: 15px;
-    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    max-height: 2000px;
-    opacity: 1;
-    overflow-y: auto; /* Alterado para permitir rolagem vertical */
-    scrollbar-width: thin; /* Para Firefox */
-    -ms-overflow-style: -ms-autohiding-scrollbar; /* Para IE e Edge */
-}
-
-.notes-list.minimized {
-    max-height: 0;
-    opacity: 0;
-}
-/* Estilos da barra de rolagem (WebKit - Chrome, Safari) */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #1f2937;
-    border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #6b7280;
-    border-radius: 20px;
-    border: 2px solid #1f2937;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-}
-
-.toggle-notes-btn {
-    transition: transform 0.3s ease;
-    color: var(--warning-color) !important;
-}
-
-.toggle-notes-btn.minimized #toggleIcon {
-    transform: rotate(-90deg);
-}
-
-.note-item {
-    display: grid;
-    grid-template-columns: 2fr 1fr 0.8fr 0.8fr 1fr 1.2fr 1fr;
-    gap: 10px;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-radius: 4px;
-    align-items: center;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
-    font-size: 0.9em;
-}
-
-/* Alinhamento de texto para cada coluna */
-.header-row > span:nth-child(1),
-.note-item > span:nth-child(1) {
-    text-align: left;
-}
-
-.header-row > span:nth-child(2),
-.note-item > span:nth-child(2) {
-    text-align: center;
-}
-
-.header-row > span:nth-child(3),
-.header-row > span:nth-child(4),
-.note-item > span:nth-child(3),
-.note-item > span:nth-child(4) {
-    text-align: center;
-    font-family: 'Consolas', monospace;
-}
-
-.header-row > span:nth-child(5),
-.note-item > span:nth-child(5) {
-    text-align: center;
-}
-
-.header-row > span:nth-child(6),
-.note-item > span:nth-child(6) {
-    text-align: center;
-    font-size: 0.85em;
-}
-
-.note-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.action-buttons-container {
-    display: flex;
-    gap: 4px;
-    justify-content: flex-end;
-}
-
-.delete-btn, .edit-btn, .duplicate-btn {
-    padding: 6px 8px;
-    cursor: pointer;
-    border: none;
-    border-radius: 3px;
-    color: white;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    font-size: 0.85em;
-    min-width: 28px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.delete-btn {
-    background-color: var(--danger-color);
-}
-
-/* Estilos para o Card de Resultado do Jogo */
-.game-card {
-    width: 100%;
-    max-width: 420px;
-    margin: 15px auto;
-    background: var(--bg-color);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: var(--card-shadow);
-    border: 1px solid var(--border-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.game-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(var(--primary-color-rgb), 0.15);
-}
-
-.game-card-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.game-title {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: var(--text-color);
-    margin: 0;
-}
-
-.game-info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.game-info-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    background: rgba(var(--primary-color-rgb), 0.05);
-    border-radius: 8px;
-}
-
-.game-info-item .info-label {
-    font-weight: 600;
-    color: var(--text-color);
-    opacity: 0.8;
-    margin-right: 8px;
-}
-
-.game-info-item .info-value {
-    color: var(--text-color);
-}
-
-.btts-result {
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-.btts-green {
-    background-color: #06f03c;
-    color: white;
-}
-
-.btts-red {
-    background-color: #FC5C65;
-    color: white;
-}
-
-.game-info-item.date-time {
-    grid-column: 1 / -1;
-    justify-content: center;
-}
-
-.game-card-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
-    margin-top: 15px;
-}
-
-.game-card-footer button {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.game-card-footer .edit-btn {
-    background: var(--warning-color);
-    color: var(--bg-color);
-}
-
-.game-card-footer .delete-btn {
-    background: var(--danger-color);
-    color: var(--bg-color);
-}
-
-.game-card-footer button:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-.game-card-footer button:active {
-    transform: translateY(0);
-}
-
-.edit-btn {
-    background-color: var(--warning-color);
-    color: #000;
-}
-
-.duplicate-btn {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.delete-btn:hover, .edit-btn:hover, .duplicate-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.export-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    visibility: hidden;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.export-overlay.active {
-    visibility: visible;
-    opacity: 1;
-}
-
-.export-modal {
-    background-color: var(--bg-color);
-    padding: 30px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.export-modal h2 {
-    margin-top: 0;
-    color: var(--primary-color);
-}
-
-.export-options {
-    margin: 20px 0;
-}
-
-.export-option {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.export-option input {
-    margin-right: 10px;
-}
-
-.export-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-}
-
-.export-filename {
-    width: 100%;
-    padding: 10px;
-    margin: 15px 0;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-}
-
-.export-confirm-btn {
-    background-color: var(--secondary-color);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.export-cancel-btn {
-    background-color: var(--danger-color);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.export-progress {
-    margin-top: 15px;
-    display: none;
-}
-
-.export-progress-bar {
-    height: 10px;
-    background-color: #e9ecef;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.export-progress-fill {
-    height: 100%;
-    background-color: var(--secondary-color);
-    width: 0%;
-    transition: width 0.3s ease;
-}
-
-.export-status {
-    text-align: center;
-    margin-top: 8px;
-    font-weight: bold;
-}
-
-.notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    background-color: var(--secondary-color);
-    color: white;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-
-.notification.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-/* Estilos para o modal de IA */
-.ia-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    visibility: hidden;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.ia-overlay.active {
-    visibility: visible;
-    opacity: 1;
-}
-
-.ia-modal {
-    background-color: var(--bg-color);
-    padding: 30px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.ia-modal h2 {
-    margin-top: 0;
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.ia-modal h2 svg {
-    width: 24px;
-    height: 24px;
-}
-
-.ia-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
-}
-
-.ia-tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    font-weight: bold;
-}
-
-.ia-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-}
-
-.ia-tab-content {
-    display: none;
-}
-
-.ia-tab-content.active {
-    display: block;
-}
-
-.ia-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.ia-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.ia-button-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.ia-button-cancel {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.ia-loading {
-    text-align: center;
-    padding: 20px;
-    display: none;
-}
-
-.ia-loading-spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left: 4px solid var(--primary-color);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 15px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.ia-report {
-    background-color: rgba(0, 0, 0, 0.03);
-    padding: 20px;
-    border-radius: 4px;
-    margin-top: 20px;
-    white-space: pre-line;
-    line-height: 1.5;
-}
-
-.ia-charts-container {
-    width: 100%;
-    min-height: 300px;
-    margin-top: 20px;
-}
-
-.ai-btn {
-    background-color: #8e44ad;
-    color: white;
-}
-
-.ai-btn:hover {
-    background-color: #7d3c98;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .container {
-        padding: 10px;
-        margin: 10px;
-        width: auto;
-        border-radius: 4px;
-    }
-
-    .header-row {
-        display: none;
+// Função para formatar data e hora
+function formatDateTime(dateTime) {
+    const date = new Date(dateTime);
+    return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Função para adicionar um novo card
+function addGameCard(gameData) {
+    const notesList = document.getElementById('notesList');
+    const card = createGameCard(gameData);
+    notesList.appendChild(card);
+    
+    // Adiciona aos dados existentes
+    notes.push(gameData);
+    saveNotesToStorage();
+    updateCounters();
+}
+
+// Função para editar um card
+function handleEditGameCard(button) {
+    const card = button.closest('.game-card');
+    if (!card) {
+        console.error('Card não encontrado para edição.');
+        return;
     }
     
-    .note-item {
-        grid-template-columns: 1fr;
-        padding: 15px;
+    const notesList = document.getElementById('notesList');
+    const index = Array.from(notesList.children).indexOf(card);
+    const gameData = notes[index];
+    
+    if (!gameData) {
+        console.error('Dados do jogo não encontrados para o índice:', index);
+        return;
     }
     
-    .note-item span {
-        padding: 5px 0;
-        display: flex;
-        justify-content: space-between;
+    // Preenche o formulário com os dados atuais
+    const teamNames = gameData.teamName.split(' vs ');
+    document.getElementById('teamNameA').value = teamNames[0] || '';
+    document.getElementById('teamNameB').value = teamNames[1] || '';
+    document.getElementById('prediction').value = gameData.prediction || 'BTTS';
+    
+    // Atualiza os placares (usando textContent para spans)
+    const ftScores = gameData.ftScore.split('-');
+    const htScores = gameData.htScore.split('-');
+    
+    document.getElementById('ftScoreHome').textContent = ftScores[0] || '0';
+    document.getElementById('ftScoreAway').textContent = ftScores[1] || '0';
+    document.getElementById('htScoreHome').textContent = htScores[0] || '0';
+    document.getElementById('htScoreAway').textContent = htScores[1] || '0';
+    
+    // Processa primeiro gol
+    const firstGoalParts = gameData.firstGoal ? gameData.firstGoal.split(' | ') : ['', ''];
+    const firstGoalTime = firstGoalParts[0] || '';
+    const firstGoalTeam = firstGoalParts[1] || '';
+    
+    // Atualiza os botões de primeiro gol
+    document.querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-value') === firstGoalTime) {
+            btn.classList.add('active');
+        }
+    });
+    
+    document.querySelectorAll('.team-button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-value') === firstGoalTeam) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Atualiza os campos hidden
+    document.getElementById('firstGoalTime').value = firstGoalTime;
+    document.getElementById('firstGoalTeam').value = firstGoalTeam;
+    
+    // Atualiza a data
+    document.getElementById('datetime').value = gameData.datetime;
+    
+    // Marca o índice para atualização
+    editingNoteIndex = index;
+    document.querySelector('.add-button').textContent = 'Atualizar';
+    
+    // Rola a página até o formulário
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Função para excluir um card
+// Função para verificar placares e atualizar estado da seção de tempo
+function checkScoresAndUpdateTimeSection() {
+    const ftHome = document.getElementById('ftScoreHome').textContent;
+    const ftAway = document.getElementById('ftScoreAway').textContent;
+    const htHome = document.getElementById('htScoreHome').textContent;
+    const htAway = document.getElementById('htScoreAway').textContent;
+    const selectedTeam = document.getElementById('firstGoalTeam').value;
+
+    const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
+    const timeButtons = document.querySelector('.first-goal-group:first-child');
+
+    if (selectedTeam === 'Nenhum' && isZeroZero) {
+        timeButtons.classList.add('disabled-section');
+        document.querySelectorAll('.time-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById('firstGoalTime').value = '';
+    } else if (selectedTeam === 'Nenhum') {
+        timeButtons.classList.remove('disabled-section');
+    }
+}
+
+// Função para atualizar o placar
+function updateScore(elementId, delta) {
+    const el = document.getElementById(elementId);
+    let val = parseInt(el.textContent || '0');
+    val = Math.max(0, val + delta);
+    el.textContent = val.toString();
+
+    // Verifica os placares após cada atualização
+    checkScoresAndUpdateTimeSection();
+}
+
+function handleDeleteGameCard(button) {
+    const card = button.closest('.game-card');
+    if (!card) {
+        console.error('Card não encontrado para exclusão.');
+        return;
+    }
+    const index = Array.from(card.parentElement.children).indexOf(card);
+    
+    if (index < 0 || index >= notes.length) {
+        console.error('Índice inválido para exclusão:', index);
+        return;
     }
     
-    .note-item span::before {
-        content: attr(data-label);
-        font-weight: bold;
-        margin-right: 10px;
+    if (confirm('Tem certeza que deseja excluir este registro?')) {
+        // Marcar a nota como excluída em vez de removê-la
+        notes[index].status = 'deleted';
+        // Remover da visualização
+        notes.splice(index, 1);
+        saveNotesToStorage();
+        renderNotes(notes);
+        updateCounters();
+    }
+}
+
+// Função para carregar dados de demonstração
+function loadDemoData() {
+    if (notes.length === 0) {
+        notes = [
+            {
+                teamName: 'Time A vs Time B',
+                prediction: 'Vitória',
+                ftScore: '2-1',
+                htScore: '1-0',
+                firstGoal: 'HT | Casa',
+                firstGoalFTTime: 'before75',
+                datetime: '2023-01-01T12:00'
+            },
+            {
+                teamName: 'Time C vs Time D',
+                prediction: 'Empate',
+                ftScore: '1-1',
+                htScore: '0-0',
+                firstGoal: 'FT | Fora',
+                firstGoalFTTime: 'after75',
+                datetime: '2023-01-02T15:00'
+            },
+            {
+                teamName: 'Time E vs Time F',
+                prediction: 'BTTS',
+                ftScore: '2-1',
+                htScore: '1-1',
+                firstGoal: 'HT | Casa',
+                firstGoalFTTime: 'before75',
+                datetime: '2023-01-03T16:30'
+            }
+        ];
+        saveNotesToStorage();
+        renderNotes(); // Renderizar as notas
+        updateCounters(); // Atualizar contadores e estatísticas
+    }
+}
+
+// Função para atualizar opções de palpites no filtro
+function updateFilterPredictionOptions() {
+    const filterPrediction = document.getElementById('filterPrediction');
+    filterPrediction.innerHTML = `
+        <option value="">Todos os Palpites</option>
+        <option value="Vitória">Vitória</option>
+        <option value="Empate">Empate</option>
+        <option value="Derrota">Derrota</option>
+        <option value="BTTS">BTTS</option>
+    `;
+}
+
+// Função para verificar o resultado do palpite
+function checkPredictionResult(prediction, ftScore) {
+    if (!ftScore || !ftScore.includes('-')) return 'Gray';
+    
+    const [home, away] = ftScore.split('-').map(Number);
+    
+    if (prediction === 'BTTS') {
+        return (home > 0 && away > 0) ? 'Green' : 'Red';
     }
     
-    /* Ajustes para o novo formulário em telas menores */
-    .form-container {
-        max-width: 95%;
-        padding: 15px;
-    }
+    if (prediction === 'Vitória' && home > away) return 'Green';
+    if (prediction === 'Empate' && home === away) return 'Green';
+    if (prediction === 'Derrota' && home < away) return 'Green';
+    
+    return 'Red';
+}
 
-    .form-container input[type="text"],
-    .form-container input[type="datetime-local"],
-    .form-container select {
-        padding: 10px;
-        font-size: 0.9em;
-    }
+// Função para gerar gráfico de distribuição de palpites
+function generatePredictionChart() {
+    const predictionCounts = {
+        'Vitória': 0,
+        'Empate': 0,
+        'Derrota': 0
+    };
+    
+    notes.forEach(note => {
+        if (note.prediction) {
+            predictionCounts[note.prediction]++;
+        }
+    });
+    
+    return {
+        type: 'pie',
+        data: {
+            labels: ['Vitória', 'Empate', 'Derrota'],
+            datasets: [{
+                data: [
+                    predictionCounts['Vitória'],
+                    predictionCounts['Empate'],
+                    predictionCounts['Derrota']
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Distribuição de Palpites'
+                }
+            }
+        }
+    };
+}
 
-    .score-controls {
-        flex-direction: column; /* Empilhar controles de placar */
-        align-items: stretch;
-    }
+// Função para gerar gráfico de análise do primeiro gol
+function generateFirstGoalChart() {
+    // Contar ocorrências de cada equipe que marcou o primeiro gol
+    const firstGoalData = {
+        'Casa': 0,
+        'Fora': 0,
+        'Nenhum': 0,
+        'HT': 0,
+        'FT': 0
+    };
+    
+    notes.forEach(note => {
+        if (!note.firstGoal) return;
+        
+        const parts = note.firstGoal.split('|').map(p => p.trim());
+        if (parts.length >= 2) {
+            const time = parts[0];
+            const team = parts[1];
+            
+            firstGoalData[time] = (firstGoalData[time] || 0) + 1;
+            firstGoalData[team] = (firstGoalData[team] || 0) + 1;
+        }
+    });
+    
+    // Criar dois conjuntos de dados para o gráfico
+    return {
+        type: 'bar',
+        data: {
+            labels: ['Casa', 'Fora', 'Nenhum', 'HT', 'FT'],
+            datasets: [{
+                label: 'Frequência',
+                data: [
+                    firstGoalData['Casa'] || 0,
+                    firstGoalData['Fora'] || 0, 
+                    firstGoalData['Nenhum'] || 0,
+                    firstGoalData['HT'] || 0,
+                    firstGoalData['FT'] || 0
+                ],
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Análise do Primeiro Gol'
+                }
+            }
+        }
+    };
+}
 
-    .score-team {
-        width: 100%;
-    }
+// Função para gerar gráfico de análise de placar
+function generateScoreAnalysisChart() {
+    // Contar ocorrências de cada tipo de resultado
+    const results = {
+        'Vitória Casa': 0,
+        'Empate': 0,
+        'Vitória Fora': 0
+    };
+    
+    // Contar gols totais por tempo
+    const goals = {
+        'HT Casa': 0,
+        'HT Fora': 0,
+        'FT Casa': 0,
+        'FT Fora': 0
+    };
+    
+    notes.forEach(note => {
+        // Processar placar final
+        if (note.ftScore && note.ftScore.includes('-')) {
+            const [home, away] = note.ftScore.split('-').map(Number);
+            goals['FT Casa'] += home;
+            goals['FT Fora'] += away;
+            
+            // Determinar resultado
+            if (home > away) results['Vitória Casa']++;
+            else if (home < away) results['Vitória Fora']++;
+            else results['Empate']++;
+        }
+        
+        // Processar placar do primeiro tempo
+        if (note.htScore && note.htScore.includes('-')) {
+            const [home, away] = note.htScore.split('-').map(Number);
+            goals['HT Casa'] += home;
+            goals['HT Fora'] += away;
+        }
+    });
+    
+    return {
+        type: 'bar',
+        data: {
+            labels: ['Vitória Casa', 'Empate', 'Vitória Fora', 'Gols HT Casa', 'Gols HT Fora', 'Gols FT Casa', 'Gols FT Fora'],
+            datasets: [{
+                label: 'Contagem',
+                data: [
+                    results['Vitória Casa'],
+                    results['Empate'],
+                    results['Vitória Fora'],
+                    goals['HT Casa'],
+                    goals['HT Fora'],
+                    goals['FT Casa'],
+                    goals['FT Fora']
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 99, 132, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Análise de Resultados e Gols'
+                }
+            }
+        }
+    };
+}
 
-    .score-separator {
-        display: none; /* Ocultar 'X' em telas pequenas */
-    }
-
-    .first-goal-controls {
-        align-items: stretch;
-    }
-
-    .button-group {
-        flex-wrap: wrap; /* Permitir que botões quebrem linha */
-    }
-
-    .time-button, .team-button {
-        font-size: 0.85em;
-        padding: 8px;
-    }
-
-    .add-button {
-        padding: 12px 20px;
-        font-size: 1em;
+// Função auxiliar para gerar cores para os gráficos
+function generateChartColors(count) {
+    const baseColors = [
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(199, 199, 199, 0.7)',
+        'rgba(83, 102, 255, 0.7)',
+        'rgba(255, 99, 255, 0.7)',
+        'rgba(255, 159, 182, 0.7)'
+    ];
+    
+    // Se temos cores suficientes na base, use-as
+    if (count <= baseColors.length) {
+        return baseColors.slice(0, count);
     }
     
-    .filters {
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
+    // Caso contrário, gere cores adicionais de forma aleatória
+    const colors = [...baseColors];
+    for (let i = baseColors.length; i < count; i++) {
+        const r = Math.floor(Math.random() * 255);
+        const g = Math.floor(Math.random() * 255);
+        const b = Math.floor(Math.random() * 255);
+        colors.push(`rgba(${r}, ${g}, ${b}, 0.7)`);
+    }
+    return colors;
+}
+
+// Função para gerar gráfico de taxa de acerto de palpites
+function generatePredictionAccuracyChart() {
+    // Contador para acertos e erros de palpites
+    let acertos = 0;
+    let erros = 0;
+    let semResultado = 0;
+    
+    // Calcular por palpite
+    const palpitesData = {};
+    
+    notes.forEach(note => {
+        const status = checkPredictionResult(note.prediction, note.ftScore);
+        
+        // Incrementar contadores gerais
+        if (status === 'Green') acertos++;
+        else if (status === 'Red') erros++;
+        else semResultado++;
+        
+        // Incrementar contadores por tipo de palpite
+        if (!palpitesData[note.prediction]) {
+            palpitesData[note.prediction] = { total: 0, acertos: 0, erros: 0 };
+        }
+        
+        palpitesData[note.prediction].total++;
+        if (status === 'Green') palpitesData[note.prediction].acertos++;
+        else if (status === 'Red') palpitesData[note.prediction].erros++;
+    });
+    
+    // Preparar dados para o gráfico
+    const palpites = Object.keys(palpitesData);
+    const acertosPorPalpite = palpites.map(p => palpitesData[p].acertos);
+    const errosPorPalpite = palpites.map(p => palpitesData[p].erros);
+    
+    return {
+        type: 'bar',
+        data: {
+            labels: ['Taxa de Acerto Geral', ...palpites],
+            datasets: [
+                {
+                    label: 'Acertos',
+                    data: [acertos, ...acertosPorPalpite],
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Erros',
+                    data: [erros, ...errosPorPalpite],
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Taxa de Acerto de Palpites'
+                },
+                tooltip: {
+                    callbacks: {
+                        footer: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            const label = tooltipItems[0].label;
+                            
+                            if (index === 0) { // Taxa geral
+                                const total = acertos + erros;
+                                const taxa = total > 0 ? ((acertos / total) * 100).toFixed(1) : 0;
+                                return `Taxa de acerto: ${taxa}%`;
+                            } else {
+                                const palpite = label;
+                                const total = palpitesData[palpite].total;
+                                const txAcerto = total > 0 ? ((palpitesData[palpite].acertos / total) * 100).toFixed(1) : 0;
+                                return `Taxa de acerto: ${txAcerto}%`;
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Palpites'
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Função para gerar gráfico de gols por tempo de jogo
+function generateTimeScoringChart() {
+    // Contagem de gols por tempo (HT vs FT)
+    const golsHT = { casa: 0, fora: 0 };
+    const golsFT = { casa: 0, fora: 0 };
+    
+    notes.forEach(note => {
+        // Gols no primeiro tempo (HT)
+        if (note.htScore && note.htScore.includes('-')) {
+            const [home, away] = note.htScore.split('-').map(Number);
+            golsHT.casa += home;
+            golsHT.fora += away;
+        }
+        
+        // Gols no jogo inteiro (FT)
+        if (note.ftScore && note.ftScore.includes('-')) {
+            const [home, away] = note.ftScore.split('-').map(Number);
+            golsFT.casa += home;
+            golsFT.fora += away;
+        }
+    });
+    
+    // Calcular gols no segundo tempo (FT - HT)
+    const golsST = { 
+        casa: golsFT.casa - golsHT.casa, 
+        fora: golsFT.fora - golsHT.fora 
+    };
+    
+    return {
+        type: 'radar',
+        data: {
+            labels: ['Gols Casa 1º Tempo', 'Gols Fora 1º Tempo', 'Gols Casa 2º Tempo', 'Gols Fora 2º Tempo'],
+            datasets: [
+                {
+                    label: 'Distribuição de Gols',
+                    data: [golsHT.casa, golsHT.fora, golsST.casa, golsST.fora],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                r: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribuição de Gols por Tempo de Jogo'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Função para gerar gráfico de comparação de times
+function generateTeamComparisonChart() {
+    // Coletar estatísticas por time
+    const teams = {};
+    const allTeams = [];
+    
+    // Extrair todos os times únicos e inicializar suas estatísticas
+    notes.forEach(note => {
+        if (!note.teamName || !note.teamName.includes('vs')) return;
+        
+        const [teamA, teamB] = note.teamName.split(' vs ');
+        
+        if (!allTeams.includes(teamA)) allTeams.push(teamA);
+        if (!allTeams.includes(teamB)) allTeams.push(teamB);
+        
+        // Inicializar estatísticas se ainda não existirem
+        if (!teams[teamA]) {
+            teams[teamA] = { jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0 };
+        }
+        
+        if (!teams[teamB]) {
+            teams[teamB] = { jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0 };
+        }
+        
+        // Contar estatísticas para cada jogo
+        if (note.ftScore && note.ftScore.includes('-')) {
+            const [homeGoals, awayGoals] = note.ftScore.split('-').map(Number);
+            
+            // Contabilizar para o time A (casa)
+            teams[teamA].jogos++;
+            teams[teamA].golsPro += homeGoals;
+            teams[teamA].golsContra += awayGoals;
+            
+            if (homeGoals > awayGoals) teams[teamA].vitorias++;
+            else if (homeGoals < awayGoals) teams[teamA].derrotas++;
+            else teams[teamA].empates++;
+            
+            // Contabilizar para o time B (fora)
+            teams[teamB].jogos++;
+            teams[teamB].golsPro += awayGoals;
+            teams[teamB].golsContra += homeGoals;
+            
+            if (homeGoals < awayGoals) teams[teamB].vitorias++;
+            else if (homeGoals > awayGoals) teams[teamB].derrotas++;
+            else teams[teamB].empates++;
+        }
+    });
+    
+    // Limitar para os 5 times com mais jogos para não sobrecarregar o gráfico
+    const topTeams = allTeams
+        .sort((a, b) => (teams[b]?.jogos || 0) - (teams[a]?.jogos || 0))
+        .slice(0, 5);
+    
+    // Preparar dados para o gráfico
+    const datasets = [
+        {
+            label: 'Vitórias',
+            data: topTeams.map(team => teams[team].vitorias),
+            backgroundColor: 'rgba(75, 192, 192, 0.7)'
+        },
+        {
+            label: 'Empates',
+            data: topTeams.map(team => teams[team].empates),
+            backgroundColor: 'rgba(153, 102, 255, 0.7)'
+        },
+        {
+            label: 'Derrotas',
+            data: topTeams.map(team => teams[team].derrotas),
+            backgroundColor: 'rgba(255, 99, 132, 0.7)'
+        },
+        {
+            label: 'Gols Pró',
+            data: topTeams.map(team => teams[team].golsPro),
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }
+    ];
+    
+    return {
+        type: 'bar',
+        data: {
+            labels: topTeams,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Comparação de Desempenho por Time'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantidade'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Times'
+                    }
+                }
+            }
+        }
+    };
+}
+
+// Função para gerar gráfico de análise combinada
+function generateCombinedAnalysisChart() {
+    // Combinação de várias métricas em um gráfico único
+    // Acertos de palpites por resultado de jogo
+    
+    const data = {
+        'Vitória Casa': { acertos: 0, erros: 0 },
+        'Empate': { acertos: 0, erros: 0 },
+        'Vitória Fora': { acertos: 0, erros: 0 }
+    };
+    
+    const golsMarcados = {
+        'HT': 0,
+        'FT': 0,
+        'Total': 0
+    };
+    
+    notes.forEach(note => {
+        if (!note.ftScore || !note.ftScore.includes('-')) return;
+        
+        // Determinar resultado da partida
+        const [home, away] = note.ftScore.split('-').map(Number);
+        let resultado;
+        
+        if (home > away) resultado = 'Vitória Casa';
+        else if (home < away) resultado = 'Vitória Fora';
+        else resultado = 'Empate';
+        
+        // Verificar acerto do palpite
+        const status = checkPredictionResult(note.prediction, note.ftScore);
+        
+        // Incrementar contadores
+        if (status === 'Green') data[resultado].acertos++;
+        else if (status === 'Red') data[resultado].erros++;
+        
+        // Contar gols
+        golsMarcados.Total += home + away;
+        
+        // Contar gols HT se disponível
+        if (note.htScore && note.htScore.includes('-')) {
+            const [htHome, htAway] = note.htScore.split('-').map(Number);
+            golsMarcados.HT += htHome + htAway;
+        }
+    });
+    
+    // Calcular gols do segundo tempo
+    golsMarcados.FT = golsMarcados.Total - golsMarcados.HT;
+    
+    return {
+        type: 'polarArea',
+        data: {
+            labels: [
+                'Acertos Casa', 'Erros Casa', 
+                'Acertos Empate', 'Erros Empate',
+                'Acertos Fora', 'Erros Fora',
+                'Gols 1º Tempo', 'Gols 2º Tempo'
+            ],
+            datasets: [{
+                data: [
+                    data['Vitória Casa'].acertos,
+                    data['Vitória Casa'].erros,
+                    data['Empate'].acertos,
+                    data['Empate'].erros,
+                    data['Vitória Fora'].acertos,
+                    data['Vitória Fora'].erros,
+                    golsMarcados.HT,
+                    golsMarcados.FT
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 205, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(54, 162, 235, 0.5)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: true,
+                    text: 'Análise Combinada'
+                }
+            }
+        }
+    };
+}
+
+// Funções para selecionar o primeiro gol com botões
+function selectFirstGoalTime(button) {
+    // Remove a classe ativa de todos os botões de tempo
+    document.querySelectorAll('.time-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona classe ativa ao botão clicado
+    button.classList.add('active');
+    
+    // Atualiza o valor no campo hidden
+    document.getElementById('firstGoalTime').value = button.getAttribute('data-value');
+}
+
+function selectFirstGoalTeam(button) {
+    // Remove a classe ativa de todos os botões de equipe
+    document.querySelectorAll('.team-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona classe ativa ao botão clicado
+    button.classList.add('active');
+    
+    // Atualiza o valor no campo hidden
+    const selectedTeam = button.getAttribute('data-value');
+    document.getElementById('firstGoalTeam').value = selectedTeam;
+
+    // Verifica se é "Nenhum" e os placares são 0-0
+    const ftHome = document.getElementById('ftScoreHome').textContent;
+    const ftAway = document.getElementById('ftScoreAway').textContent;
+    const htHome = document.getElementById('htScoreHome').textContent;
+    const htAway = document.getElementById('htScoreAway').textContent;
+
+    const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
+    const timeButtons = document.querySelector('.first-goal-group:first-child');
+    const firstGoalFTSection = document.querySelector('.first-goal-section:nth-of-type(2)');
+
+    if (selectedTeam === 'Nenhum') {
+        // Desabilita a seção de tempo do primeiro gol e do momento do gol FT
+        timeButtons.classList.add('disabled-section');
+        firstGoalFTSection.classList.add('disabled-section');
+        
+        // Limpa as seleções
+        document.querySelectorAll('.time-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById('firstGoalTime').value = '';
+        document.getElementById('firstGoalFTTime').value = '';
+    } else {
+        // Habilita ambas as seções
+        timeButtons.classList.remove('disabled-section');
+        firstGoalFTSection.classList.remove('disabled-section');
+    }
+}
+
+// Variável global para armazenar o índice da nota sendo editada
+let editingNoteIndex = -1;
+
+// Função para editar uma nota
+function editNote(index) {
+    const note = notes[index];
+    editingNoteIndex = index;
+
+    // Separar os nomes dos times
+    const [teamA, teamB] = note.teamName.split(' vs ');
+    
+    // Preencher os campos do formulário
+    document.getElementById('teamNameA').value = teamA;
+    document.getElementById('teamNameB').value = teamB;
+    document.getElementById('prediction').value = note.prediction;
+    
+    // Separar os placares
+    const [ftScoreHome, ftScoreAway] = note.ftScore.split('-');
+    const [htScoreHome, htScoreAway] = note.htScore.split('-');
+
+    // Corrigido para usar textContent para os spans de placar
+    document.getElementById('ftScoreHome').textContent = ftScoreHome;
+    document.getElementById('ftScoreAway').textContent = ftScoreAway;
+    document.getElementById('htScoreHome').textContent = htScoreHome;
+    document.getElementById('htScoreAway').textContent = htScoreAway;
+
+    // Separar informações do primeiro gol
+    const [firstGoalTime, firstGoalTeam] = note.firstGoal.split(' | ');
+    
+    // Atualizar os botões de primeiro gol HT/FT
+    document.querySelectorAll('.first-goal-group:first-child .time-button').forEach(btn => {
+        if (btn.getAttribute('data-value') === firstGoalTime) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Atualizar os botões de time
+    document.querySelectorAll('.team-button').forEach(btn => {
+        if (btn.getAttribute('data-value') === firstGoalTeam) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Atualizar os botões do Momento do 1º Gol FT
+    document.querySelectorAll('.first-goal-section:nth-of-type(2) .time-button').forEach(btn => {
+        if (btn.getAttribute('data-value') === note.firstGoalFTTime) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    document.getElementById('firstGoalFTTime').value = note.firstGoalFTTime || '';
+
+    document.getElementById('firstGoalTime').value = firstGoalTime;
+    document.getElementById('firstGoalTeam').value = firstGoalTeam;
+    
+    // Atualizar a data
+    document.getElementById('datetime').value = note.datetime;
+    
+    // Mudar o texto do botão de adicionar
+    const addButton = document.querySelector('.add-button');
+    addButton.textContent = 'Atualizar';
+
+    // Rolar até o formulário (corrigido para .form-container)
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Função para deletar uma nota
+function deleteNote(index) {
+    if (confirm('Tem certeza que deseja excluir esta anotação?')) {
+        notes.splice(index, 1);
+        saveNotesToStorage();
+        renderNotes();
+        updateCounters();
+    }
+}
+
+// Função para inicializar o select de prediction
+function initializePredictionSelect() {
+    const predictionSelect = document.getElementById('prediction');
+    predictionSelect.innerHTML = `
+        <option value="BTTS">BTTS</option>
+        <option value="Vitória">Vitória</option>
+        <option value="Empate">Empate</option>
+        <option value="Derrota">Derrota</option>
+    `;
+    predictionSelect.value = 'BTTS';
+}
+
+// Função para controlar a visibilidade do menu de filtros
+function toggleFilterMenu() {
+    const filterMenu = document.getElementById('filterMenuContainer');
+    if (filterMenu) {
+        filterMenu.classList.toggle('visible');
+    }
+}
+
+// Navegação entre tabs do modal de IA e Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    // Remover qualquer elemento de paginação existente
+    const paginationElement = document.querySelector('.pagination');
+    if (paginationElement) {
+        paginationElement.remove();
     }
     
-    .filters input, .filters select {
-        min-width: 100%;
+    // Setup das abas da IA
+    const tabs = document.querySelectorAll('.ia-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            // Add active class to current tab
+            this.classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.ia-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show corresponding tab content
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId + 'Tab').classList.add('active');
+        });
+    });
+    
+    // Expandir as opções de tipos de gráficos
+    const chartTypeSelect = document.getElementById('chartType');
+    if (chartTypeSelect) {
+        chartTypeSelect.innerHTML = `
+            <option value="prediction">Distribuição de Palpites</option>
+            <option value="firstGoal">Análise do Primeiro Gol</option>
+            <option value="scoreAnalysis">Análise de Placar</option>
+            <option value="predictionAccuracy">Taxa de Acerto de Palpites</option>
+            <option value="timeScoring">Gols por Tempo de Jogo</option>
+            <option value="teamComparison">Comparação de Desempenho</option>
+            <option value="combinedAnalysis">Análise Combinada</option>
+        `;
     }
     
-    .action-buttons {
-        justify-content: center;
-    }
+    // Definir a data atual no campo de data/hora
+    document.getElementById('datetime').value = new Date().toISOString().slice(0, 16);
     
-    .action-button {
-        flex: 1;
-    }
+    // Carregar anotações do armazenamento
+    loadNotesFromStorage();
     
-    .theme-toggle {
-        top: 10px;
-        right: 10px;
-        padding: 8px 16px;
-        font-size: 14px;
-    }
+    // Inicializar select de prediction com BTTS como padrão
+    initializePredictionSelect();
     
-    .export-modal {
-        width: 95%;
-        padding: 20px;
-    }
-
-    .ia-modal {
-        width: 95%;
-        padding: 15px;
-    }
+    // Carregar dados de demonstração se não houver dados
+    loadDemoData();
     
-    .ia-tabs {
-        flex-wrap: wrap;
-    }
+    // Renderizar as anotações iniciais
+    renderNotes();
+
+    // Observar mudanças no DOM para remover paginação se for recriada
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+                // Verifica se o nó adicionado é um elemento e tem a classe 'pagination'
+                if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('pagination')) {
+                    console.log('Elemento de paginação detectado e removido dinamicamente.');
+                    node.remove();
+                }
+            });
+        });
+    });
+
+    // Observa o body e seus descendentes
+    observer.observe(document.body, {
+        childList: true, // Observa adição/remoção de filhos diretos
+        subtree: true    // Observa todos os descendentes
+    });
     
-    .ia-tab {
-        flex: 1;
-        text-align: center;
-        padding: 10px;
-    }
+    // Atualizar o filtro de palpites também
+    updateFilterPredictionOptions();
     
-    .ia-actions {
-        flex-direction: column;
-    }
+    // Atualizar contadores
+    updateCounters();
     
-    .ia-button {
-        width: 100%;
-    }
-}
-
-/* --- Estilos para o Formulário Reestruturado --- */
-
-.form-container {
-    background: var(--form-bg, rgba(18, 18, 18, 0.95)); /* Fundo escuro como na imagem */
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow, 0 8px 32px rgba(0, 0, 0, 0.2));
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
-    max-width: 450px; /* Largura similar à imagem */
-    margin: 30px auto; /* Centralizar */
-    color: var(--text-color, #e0e0e0); /* Cor do texto padrão */
-}
-
-.form-container .form-title {
-    text-align: center;
-    color: var(--text-color, #e0e0e0); /* Título branco/claro */
-    font-size: 1.5em; /* Tamanho ajustado */
-    margin-bottom: 25px;
-    font-weight: bold;
-}
-
-.form-section {
-    margin-bottom: 20px;
-}
-
-.form-section .form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 0.9em;
-    color: var(--text-color, #e0e0e0);
-}
-
-.form-container input[type="text"],
-.form-container input[type="datetime-local"],
-.form-container select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.05); /* Fundo do input levemente transparente */
-    color: var(--text-color, #e0e0e0);
-    font-size: 1em;
-    box-sizing: border-box; /* Para incluir padding/border na largura */
-}
-
-.form-container input[type="text"]::placeholder {
-    color: rgba(224, 224, 224, 0.6); /* Placeholder mais claro */
-}
-
-/* Estilos específicos para Palpite */
-.form-section-palpite .palpite-input-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.form-section-palpite select {
-    flex-grow: 1; /* Select ocupa o espaço restante */
-}
-
-.btn-manage-predictions {
-    padding: 8px 12px;
-    background-color: #ff9800; /* Laranja como na imagem */
-    color: #1a1a1a; /* Texto escuro para contraste */
-    border: none;
-    border-radius: 50%; /* Botão redondo */
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.1em;
-    line-height: 1;
-    width: 30px; /* Tamanho fixo */
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Estilos para Seções de Placar (FT e HT) */
-.score-section {
-    background-color: #1a2a45; /* Azul escuro */
-    border-radius: 10px;
-    padding: 0;
-    margin-bottom: 20px;
-    overflow: hidden;
-}
-
-.score-header {
-    background-color: #00bcd4; /* Azul claro */
-    color: #1a1a1a;
-    text-align: center;
-    padding: 8px;
-    border-radius: 0;
-    font-weight: bold;
-    margin-bottom: 0;
-    font-size: 0.9em;
-    text-transform: uppercase;
-}
-
-.score-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-}
-
-.score-team {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-}
-
-.team-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.dot-casa {
-    background-color: #00bcd4; /* Azul */
-}
-
-.dot-fora {
-    background-color: #e91e63; /* Rosa */
-}
-
-.score-team label {
-    font-size: 0.9em;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: white;
-    letter-spacing: 0.5px;
-}
-
-.score-input {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.score-btn {
-    background-color: #424242;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    font-size: 1.4em;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    transition: all 0.2s ease;
-}
-
-.score-btn:hover {
-    background-color: #616161;
-    transform: translateY(-1px);
-}
-
-.score-value {
-    background-color: #424242;
-    color: white;
-    font-size: 1.4em;
-    font-weight: bold;
-    min-width: 40px;
-    padding: 4px 8px;
-    text-align: center;
-    border-radius: 4px;
-}
-
-.score-separator {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: var(--text-color, #e0e0e0);
-}
-
-/* Estilos para Seção Primeiro Gol */
-.first-goal-section {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-.first-goal-header {
-    background-color: #00bcd4; /* Mesmo azul ciano */
-    color: #1a1a1a;
-    text-align: center;
-    padding: 8px;
-    border-radius: 6px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-size: 0.9em;
-    text-transform: uppercase;
-}
-
-.first-goal-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.first-goal-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Estilos para form-group.mt-2 similar ao first-goal-group */
-.form-group.mt-2 {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group.mt-2 label {
-    font-size: 0.8em;
-    font-weight: bold;
-    color: var(--text-color, #e0e0e0);
-}
-
-.first-goal-group label {
-    font-size: 0.8em;
-    font-weight: bold;
-    color: var(--text-color, #e0e0e0);
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
-}
-
-.time-button, .team-button {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-color, #e0e0e0);
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    text-align: center;
-    transition: all 0.2s ease;
-    font-size: 0.9em;
-}
-
-.time-button:hover, .team-button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.time-button.active, .team-button.active {
-    background-color: var(--primary-color, #5C9CE6) !important; /* Cor primária quando ativo */
-    color: white !important;
-    border-color: var(--primary-color, #5C9CE6) !important;
-}
-
-/* Estilos para Data e Hora */
-.form-container input[type="datetime-local"] {
-    /* Estilos específicos se necessário, mas herda os gerais */
-}
-
-/* Estilos para Botão Adicionar */
-.add-button-container {
-    text-align: center;
-    margin-top: 25px;
-}
-
-.add-button {
-    background-color: #00bcd4; /* Azul ciano */
-    color: #1a1a1a; /* Texto escuro */
-    padding: 12px 30px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.1em;
-    text-transform: uppercase;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.add-button:hover {
-    background-color: #00acc1; /* Tom mais escuro no hover */
-    transform: translateY(-2px);
-}
-
-.add-button:active {
-    transform: translateY(0);
-}
-
-/* --- Fim dos Estilos para o Formulário Reestruturado --- */
-
-/* --- Estilos para o Menu de Filtros --- */
-
-#toggleFilterMenuBtn {
-    /* Pode herdar de .action-button, mas podemos adicionar algo específico se necessário */
-    /* Exemplo: background-color: var(--warning-color); */
-}
-
-.filter-menu {
-    display: none; /* Começa oculto */
-    position: absolute; /* Ou relative, dependendo do contexto */
-    top: 100%; /* Posiciona abaixo do botão (ajustar conforme necessário) */
-    left: 0; /* Alinha com a esquerda do container pai (ajustar) */
-    background-color: var(--form-bg, rgba(25, 25, 25, 0.98)); /* Fundo similar ao form */
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: var(--card-shadow);
-    z-index: 10; /* Garante que fique acima de outros elementos */
-    min-width: 300px; /* Largura mínima */
-    margin-top: 5px; /* Espaço entre o botão e o menu */
-}
-
-.filter-menu.visible {
-    display: block; /* Mostra o menu */
-}
-
-/* Ajustes para os filtros dentro do menu */
-.filter-menu .filters {
-    flex-direction: column; /* Empilha os filtros verticalmente */
-    align-items: stretch; /* Faz os itens ocuparem a largura total */
-    margin-bottom: 0; /* Remove margem inferior padrão */
-}
-
-.filter-menu .filters-title {
-    margin-bottom: 15px; /* Ajusta espaço do título */
-    text-align: center;
-}
-
-.filter-menu .filters input,
-.filter-menu .filters select {
-    min-width: 100%; /* Ocupa toda a largura */
-    margin-bottom: 10px; /* Espaço entre os filtros */
-}
-
-.filter-menu .btn-filter {
-    margin-top: 15px; /* Espaço acima do botão Aplicar Filtros */
-    width: 100%; /* Botão ocupa largura total */
-}
-
-/* --- Fim dos Estilos para o Menu de Filtros --- */
-
-/* Estilo para seção desabilitada */
-.disabled-section {
-    opacity: 0.5;
-    pointer-events: none;
-    cursor: not-allowed;
-    filter: grayscale(100%);
-    transition: all 0.3s ease;
-}
-
-/* --- Estilos das Abas do Modal de Exportação/Importação --- */
-.modal-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 10px;
-}
-
-.modal-tab {
-    padding: 8px 16px;
-    border: none;
-    background: none;
-    color: var(--text-color);
-    cursor: pointer;
-    font-size: 1em;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.modal-tab.active {
-    color: var(--primary-color);
-}
-
-.modal-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: var(--primary-color);
-}
-
-/* Conteúdo das abas */
-.modal-content {
-    display: none;
-}
-
-.modal-content.active {
-    display: block;
-}
-
-/* Estilos específicos para importação */
-.import-instructions {
-    margin-bottom: 20px;
-    padding: 15px;
-    background-color: rgba(var(--primary-color-rgb), 0.05);
-    border-radius: 5px;
-}
-
-.import-instructions .warning {
-    color: var(--warning-color);
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-.import-form {
-    margin: 20px 0;
-}
-
-.import-file-input {
-    display: none;
-}
-
-.import-file-label {
-    display: inline-block;
-    padding: 10px 20px;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    width: 100%;
-}
-
-.import-file-label:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(var(--primary-color-rgb), 0.3);
-}
-
-.import-status {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.import-report {
-    background-color: rgba(var(--primary-color-rgb), 0.05);
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 15px;
-}
-
-.import-report h3 {
-    color: var(--primary-color);
-    margin-bottom: 10px;
-}
-
-.import-report p {
-    margin: 5px 0;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.import-error {
-    background-color: rgba(255, 0, 0, 0.1);
-    color: #ff5252;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 15px;
-}
-
-.import-error h3 {
-    color: #ff5252;
-    margin-bottom: 10px;
-}
-
-/* Responsividade para o modal de importação/exportação */
-@media (max-width: 768px) {
-    .modal-tabs {
-        flex-direction: column;
-        gap: 5px;
+    // Restaurar estado da lista de notas
+    restoreNotesListState();
+    
+    // Load theme
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.dataset.theme = 'dark';
     }
 
-    .modal-tab {
-        width: 100%;
-        text-align: center;
+    // Adicionar event listener para o botão do menu de filtros
+    const toggleFilterBtn = document.getElementById('toggleFilterMenuBtn');
+    if (toggleFilterBtn) {
+        toggleFilterBtn.addEventListener('click', toggleFilterMenu);
     }
 
-    .modal-tab.active::after {
-        bottom: -2px;
+    // Setup do input de arquivo de importação
+    const importFileInput = document.getElementById('importFile');
+    const importFileLabel = document.querySelector('.import-file-label');
+    
+    if (importFileInput && importFileLabel) {
+        importFileInput.addEventListener('change', function() {
+            const fileName = this.files[0]?.name || 'Nenhum arquivo selecionado';
+            importFileLabel.textContent = fileName;
+            // Limpar status anterior
+            document.getElementById('importStatus').innerHTML = '';
+        });
     }
-
-    .import-file-label {
-        padding: 15px;
-        font-size: 0.9em;
-    }
-
-    .import-report, .import-error {
-        padding: 10px;
-        font-size: 0.9em;
-    }
-}
-/* ======================================== */
-/* Estilos para o Novo Card Compacto        */
-/* ======================================== */
-
-/* Variáveis de Cor (Baseadas no Tailwind Config do HTML original) */
-:root {
-  --card-bg: #1f2937;
-  --stat-box-bg: #374151;
-  --edit-btn-bg: #f97316;
-  --edit-btn-hover-bg: #ea580c;
-  --delete-btn-bg: #ef4444;
-  --delete-btn-hover-bg: #dc2626;
-  --btts-green-color: #22c55e;
-  --btts-red-color: #ef4444;
-  --text-gray-400: #9ca3af; /* Cor padrão do Tailwind gray-400 */
-  --text-white: #ffffff;
-}
-
-/* Estilos base do card (sobrescrevem/complementam .game-card existente se necessário) */
-/* Usamos alta especificidade para garantir que estes estilos se apliquem */
-.notes-list > .game-card {
-  background-color: var(--card-bg) !important; /* Garante a sobreposição */
-  border-radius: 0.5rem !important; /* rounded-lg */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; /* shadow-md */
-  padding: 0.75rem !important; /* p-3 */
-  color: var(--text-color) !important; /* Usa a cor de texto padrão definida no :root */
-  border: none !important; /* Remove borda padrão se houver */
-  margin-bottom: 0.75rem !important; /* Adiciona um espaçamento entre cards */
-  display: block !important; /* Garante que não seja grid item se .game-card for usado em grid */
-  /* Resetar flex/grid properties do estilo antigo se necessário */
-  display: block;
-}
-
-/* Cabeçalho do Card */
-.game-card .flex.justify-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem; /* mb-2 */
-}
-
-.game-card h2.text-base {
-  font-size: 1rem; /* text-base */
-  line-height: 1.5rem;
-  font-weight: 600; /* font-semibold */
-  color: var(--text-white); /* Garante branco no título */
-  margin: 0; /* Reset de margem */
-}
-
-.game-card span.text-xs {
-  font-size: 0.75rem; /* text-xs */
-  line-height: 1rem;
-}
-
-.game-card span.text-gray-400 {
-  color: var(--text-gray-400);
-}
-
-/* Grid de Estatísticas dentro do Card */
-.game-card .stat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* grid-cols-2 */
-  gap: 0.25rem; /* gap-1 */
-  font-size: 0.75rem; /* text-xs */
-  margin-bottom: 0.5rem; /* mb-2 */
-}
-
-.game-card .bg-stat-box-bg {
-  background-color: var(--stat-box-bg);
-  padding: 0.375rem; /* p-1.5 */
-  border-radius: 0.25rem; /* rounded */
-  text-align: center; /* text-center */
-}
-
-.game-card .text-\[0\.6rem\] { /* text-[0.6rem] */
-  font-size: 0.6rem;
-  display: block; /* Para garantir espaçamento */
-  margin-bottom: 0.125rem;
-  color: var(--text-gray-400); /* Cor mais suave para o label */
-}
-
-.game-card .font-semibold {
-  font-weight: 600; /* font-semibold */
-  color: var(--text-white); /* Garante branco no valor */
-}
-
-/* Estilos BTTS */
-.game-card .btts-green-badge {
-  background-color: var(--btts-green-color);
-  color: var(--text-white);
-  padding: 0.125rem 0.5rem;
-  border-radius: 0.125rem;
-  font-size: 0.625rem;
-  margin-left: 0.25rem;
-  display: inline-block; /* Para o padding funcionar corretamente */
-  line-height: 1; /* Ajuste fino */
-  vertical-align: middle; /* Alinhamento */
-  font-weight: normal; /* Resetar font-weight se herdado */
-}
-
-.game-card .btts-red-text {
-  color: var(--btts-red-color);
-  font-size: 0.75rem; /* text-xs */
-  font-weight: 600; /* Adiciona um pouco de peso */
-}
-
-/* Rodapé com Botões */
-.buttons-container {
-   display: flex;
-   gap: 0.5rem;
-   margin-top: 0.5rem;
-}
-
-.card-button {
-   flex: 1 1 0%;
-   color: var(--text-white);
-   font-size: 0.65rem;
-   padding: 0.25rem 0.5rem;
-   border-radius: 0.25rem;
-   border: none;
-   cursor: pointer;
-   transition: all 0.3s ease;
-}
-
-.edit-button {
-   background-color: var(--edit-btn-bg);
-}
-
-.edit-button:hover {
-   background-color: var(--edit-btn-hover-bg);
-   transform: translateY(-1px);
-}
-
-.delete-button {
-   background-color: var(--delete-btn-bg);
-}
-
-.delete-button:hover {
-   background-color: var(--delete-btn-hover-bg);
-   transform: translateY(-1px);
-}
-
-/* Estilo base para os botões DENTRO do novo card */
-.game-card button.flex-1 {
-  color: var(--text-white);
-  font-size: 0.65rem; /* text-[0.65rem] */
-  padding-top: 0.25rem; /* py-1 */
-  padding-bottom: 0.25rem; /* py-1 */
-  padding-left: 0.5rem; /* px-2 */
-  padding-right: 0.5rem; /* px-2 */
-  border-radius: 0.25rem; /* rounded */
-  transition: background-color 0.2s ease-in-out; /* transition */
-  border: none; /* Remove borda padrão */
-  cursor: pointer;
-  text-align: center;
-  line-height: normal; /* Reset line-height */
-  font-weight: normal; /* Reset font-weight */
-}
-
-.game-card button.bg-edit-btn {
-  background-color: var(--edit-btn-bg);
-}
-
-.game-card button.bg-edit-btn:hover {
-  background-color: var(--edit-btn-hover-bg);
-}
-
-.game-card button.bg-delete-btn {
-  background-color: var(--delete-btn-bg);
-}
-
-.game-card button.bg-delete-btn:hover {
-  background-color: var(--delete-btn-hover-bg);
-}
-
-/* Limpar/Sobrescrever estilos antigos conflitantes do .game-card */
-/* Estas regras garantem que os estilos antigos não interfiram */
-.game-card .game-card-header,
-.game-card .game-card-body,
-.game-card .game-card-footer,
-.game-card .game-info-grid,
-.game-card .game-info-item,
-.game-card .info-label,
-.game-card .info-value {
-  display: none !important; /* Esconde elementos da estrutura antiga */
-}
-
-/* Resetar estilos dos botões antigos se ainda existirem no DOM por algum motivo */
-.game-card .edit-btn,
-.game-card .delete-btn {
-   /* Se estes botões ainda estiverem sendo gerados pela função antiga (o que não deveria acontecer), escondê-los */
-   /* display: none !important; */
-   /* Ou resetar estilos para não conflitarem com os novos botões */
-   background: none !important;
-   padding: 0 !important;
-   border: none !important;
-   color: inherit !important;
-   font-size: inherit !important;
-}
+});

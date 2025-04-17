@@ -141,6 +141,21 @@
                 </div>
             </div>
 
+            <!-- Seção Time Favorito -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Time Favorito</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <div class="button-group">
+                            <button type="button" class="team-button" data-value="Casa" onclick="selectFavoriteTeam(this)">Casa</button>
+                            <button type="button" class="team-button" data-value="Fora" onclick="selectFavoriteTeam(this)">Fora</button>
+                        </div>
+                    </div>
+                    <!-- Campo oculto para armazenar o valor selecionado -->
+                    <input type="hidden" id="favoriteTeam" value="">
+                </div>
+            </div>
+
             <!-- Seção Momento do 1º Gol HT -->
             <div class="form-section first-goal-section">
                 <div class="first-goal-header">Momento do 1º Gol (HT)</div>
@@ -218,7 +233,7 @@
             <!-- Card Vitórias FT -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Estatísticas Tempo Final (FT)</h3>
+                    <h3>SE for - card-6</h3>
                 </div>
                 <!-- Predições FT inseridas por IA - início -->
                 <div class="score-blocks-container">
@@ -236,63 +251,18 @@
                       <div id="predicaoHT2FT05Bar" style="height:100%;width:0%;background:linear-gradient(90deg,#06f03c,#00ff44);"></div>
                     </div>
                   </div>
+                  <div class="score-block">
+                    <div style="font-weight:bold;font-size:1.08em;text-align:center;">1º Gol Casa HT -&gt; Casa Vence FT</div>
+                    <div id="predicaoGolHTCasaVenceFT" style="color:#06f03c;font-weight:bold;font-size:1.35em;text-align:center;margin:8px 0 2px 0;">0/0 (0%)</div>
+                    <div class="score-progress-bar" style="height:6px;background:#222c44;border-radius:4px;overflow:hidden;margin:0 12px 0 12px;">
+                      <div id="predicaoGolHTCasaVenceFTBar" style="height:100%;width:0%;background:linear-gradient(90deg,#06f03c,#00ff44);"></div>
+                    </div>
+                  </div>
                 </div>
                 <!-- Predições FT inseridas por IA - fim -->
 <div class="stats-card-content">
-    <div class="stats-grid-inner">
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Vitórias Casa</span>
-                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Vitórias Fora</span>
-                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-
-
-
-        <!-- Novas estatísticas: Minuto do gol no HT -->
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Gol HT 0-14'</span>
-                <span id="golHT_0_14" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Gol HT 15-29'</span>
-                <span id="golHT_15_29" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-        <div class="stats-item">
-            <div class="stats-value-container">
-                <span class="stats-label">Gol HT 30-45'</span>
-                <span id="golHT_30_45" class="stats-value">0/0 (0%)</span>
-            </div>
-            <div class="stats-progress-bar">
-                <div class="stats-progress-fill" style="width: 0%"></div>
-            </div>
-        </div>
-        <!-- Fim das novas estatísticas -->
     </div>
 </div>
-
 
 
                     </div>
@@ -302,7 +272,7 @@
             <!-- Card Estatísticas +0,5 Gol FT -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Estatísticas +0,5 Gol FT</h3>
+                    <h3>Estatísticas Over Gols - card-1</h3>
                 </div>
                 <div class="stats-card-content">
                     <div class="stats-item">
@@ -314,19 +284,19 @@
                             <div class="stats-progress-fill" style="width: 0%"></div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Card Total de Vitórias FT -->
-            <div class="stats-card">
-                <div class="stats-card-header">
-                    <h3>Total de Vitórias (FT)</h3>
-                </div>
-                <div class="stats-card-content">
                     <div class="stats-item">
                         <div class="stats-value-container">
-                            <span class="stats-label">Total de Vitórias FT</span>
-                            <span id="totalVitoriasFT" class="stats-value">0/0 (0%)</span>
+                            <span class="stats-label">Over 1.5 gols FT (Geral)</span>
+                            <span id="over15GolsFTGeral" class="stats-value">0/0 (0%)</span>
+                        </div>
+                        <div class="stats-progress-bar">
+                            <div class="stats-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-value-container">
+                            <span class="stats-label">Over 1.5 gols FT (Últimos 10)</span>
+                            <span id="over15GolsFTUltimos10" class="stats-value">0/0 (0%)</span>
                         </div>
                         <div class="stats-progress-bar">
                             <div class="stats-progress-fill" style="width: 0%"></div>
@@ -335,10 +305,47 @@
                 </div>
             </div>
 
+            <!-- Card Total de Vitórias FT -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>Total de Vitórias (FT) - card-3</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-grid-inner">
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Total de Vitórias FT</span>
+                                <span id="totalVitoriasFT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Casa</span>
+                                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Fora</span>
+                                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
             <!-- Card Estatísticas BTTS -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Estatísticas BTTS</h3>
+                    <h3>Estatísticas BTTS - card-2</h3>
                 </div>
                 <div class="stats-card-content">
                     <div class="stats-grid-inner">
@@ -355,7 +362,7 @@
                         <!-- Card Outras Estatísticas -->
                         <div class="stats-card">
                             <div class="stats-card-header">
-                                <h3>Outras Estatísticas</h3>
+                                <h3>Minuto 75' FT - card-5</h3>
                             </div>
                             <div class="stats-card-content">
                                 <div class="stats-grid-inner">
@@ -407,6 +414,42 @@
                                 <div class="stats-progress-fill" style="width: 0%"></div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Momento Gols HT -->
+        <div class="stats-card">
+            <div class="stats-card-header">
+                <h3>Momento Gols HT - card-4</h3>
+            </div>
+            <div class="stats-card-content">
+                <div class="stats-item">
+                    <div class="stats-value-container">
+                        <span class="stats-label">Gol HT 0-14'</span>
+                        <span id="golHT_0_14" class="stats-value" style="color: rgb(255, 255, 255);">0/2 (0.0%)</span>
+                    </div>
+                    <div class="stats-progress-bar">
+                        <div class="stats-progress-fill" style="width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));"></div>
+                    </div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value-container">
+                        <span class="stats-label">Gol HT 15-29'</span>
+                        <span id="golHT_15_29" class="stats-value" style="color: rgb(255, 255, 255);">1/2 (50.0%)</span>
+                    </div>
+                    <div class="stats-progress-bar">
+                        <div class="stats-progress-fill" style="width: 50%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));"></div>
+                    </div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value-container">
+                        <span class="stats-label">Gol HT 30-45'</span>
+                        <span id="golHT_30_45" class="stats-value" style="color: rgb(255, 255, 255);">1/2 (50.0%)</span>
+                    </div>
+                    <div class="stats-progress-bar">
+                        <div class="stats-progress-fill" style="width: 50%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));"></div>
                     </div>
                 </div>
             </div>

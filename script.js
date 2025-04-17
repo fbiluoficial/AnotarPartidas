@@ -373,6 +373,7 @@ function addOrUpdateNote() {
         firstGoal: firstGoalValue,
         firstGoalFTTime: document.getElementById('firstGoalTeam').value === 'Nenhum' ? '' : document.getElementById('firstGoalFTTime').value,
         firstGoalHTTime: document.getElementById('firstGoalHTTime').value,
+        favoriteTeam: document.getElementById('favoriteTeam').value,
         datetime,
         status: 'active'
     };
@@ -450,6 +451,7 @@ function resetForm() {
     document.getElementById('firstGoalTeam').value = '';
     document.getElementById('firstGoalFTTime').value = '';
     document.getElementById('firstGoalHTTime').value = '';
+    document.getElementById('favoriteTeam').value = '';
 
     // Remover a classe disabled-section de todas as seções
     const timeButtons = document.querySelector('.first-goal-group:first-child');
@@ -581,13 +583,16 @@ function calcularEstatisticas() {
         acertosGolsFT: '0/0 (0%)',
         predicaoOver05HTOver15FT: '0/0 (0%)',
         predicaoHT2FT05: '0/0 (0%)',
+        predicaoGolHTCasaVenceFT: '0/0 (0%)',
         firstGoalBefore75: '0/0 (0%)',
         firstGoalAfter75: '0/0 (0%)',
         predicaoGols75Ultimas15Antes: '0/0 (0%)',
         predicaoGols75Ultimas15Depois: '0/0 (0%)',
         golHT_0_14: '0/0 (0%)',
         golHT_15_29: '0/0 (0%)',
-        golHT_30_45: '0/0 (0%)'
+        golHT_30_45: '0/0 (0%)',
+        over15FTGeral: '0/0 (0%)',
+        over15FTUltimos10: '0/0 (0%)'
     };
 
     // Contadores FT
@@ -602,6 +607,8 @@ function calcularEstatisticas() {
     let empatesHT = 0; // Contador para empates HT
     let ht2ft05_total = 0; // Contador para HT 2+ -> FT 0.5+
     let ht2ft05_sucesso = 0;
+    let golHTCasaVenceFT_total = 0; // Contador para 1º Gol Casa HT -> Casa Vence FT
+    let golHTCasaVenceFT_sucesso = 0;
     // Contadores de gols e momentos
     let golsAntes75 = 0;
     let golsApos75 = 0;
@@ -662,13 +669,22 @@ function calcularEstatisticas() {
         }
 
         // Análise HT (Primeiro Tempo)
-        if (note.htScore && note.htScore.includes('-')) {
+        if (note.htScore && note.htScore.includes('-') && note.ftScore && note.ftScore.includes('-')) {
             const [golsCasaHT, golsForaHT] = note.htScore.split('-').map(Number);
+            const [golsCasaFT, golsForaFT] = note.ftScore.split('-').map(Number);
             
             // Contagem de vitórias HT
             if (golsCasaHT > golsForaHT) vitoriasCasaHT++;
             if (golsForaHT > golsCasaHT) vitoriasForaHT++;
             if (golsCasaHT === golsForaHT) empatesHT++; // Incrementa em caso de empate HT
+
+            // Verificar se o primeiro gol foi da casa no HT e se ela venceu no FT
+            if (golsCasaHT > 0 && golsForaHT === 0) {
+                golHTCasaVenceFT_total++;
+                if (golsCasaFT > golsForaFT) {
+                    golHTCasaVenceFT_sucesso++;
+                }
+            }
         }
     });
 
@@ -749,6 +765,42 @@ function calcularEstatisticas() {
     const percent75Depois15 = gols75Ultimas15.total > 0 ?
         ((gols75Ultimas15.depois / gols75Ultimas15.total) * 100).toFixed(1) : 0;
 
+    // Cálculo para Over 1.5 gols FT (geral)
+    let over15FTGeralTotal = 0;
+    let over15FTGeralAcertos = 0;
+    
+    // Cálculo para Over 1.5 gols FT (últimos 10)
+    const ultimas10 = notes.slice(0, 10);
+    let over15FTUltimos10Total = ultimas10.length;
+    let over15FTUltimos10Acertos = 0;
+    
+    notes.forEach(note => {
+        if (note.ftScore && note.ftScore.includes('-')) {
+            const [golsCasa, golsFora] = note.ftScore.split('-').map(Number);
+            const totalGols = golsCasa + golsFora;
+            
+            // Contagem geral
+            over15FTGeralTotal++;
+            if (totalGols > 1.5) {
+                over15FTGeralAcertos++;
+            }
+        }
+    });
+    
+    // Contagem últimos 10 jogos
+    ultimas10.forEach(note => {
+        if (note.ftScore && note.ftScore.includes('-')) {
+            const [golsCasa, golsFora] = note.ftScore.split('-').map(Number);
+            const totalGols = golsCasa + golsFora;
+            if (totalGols > 1.5) {
+                over15FTUltimos10Acertos++;
+            }
+        }
+    });
+    
+    const percentOver15FTGeral = over15FTGeralTotal > 0 ? ((over15FTGeralAcertos / over15FTGeralTotal) * 100).toFixed(1) : 0;
+    const percentOver15FTUltimos10 = over15FTUltimos10Total > 0 ? ((over15FTUltimos10Acertos / over15FTUltimos10Total) * 100).toFixed(1) : 0;
+
     return {
         vitoriasCasaFT: `${vitoriasCasaFT}/${total} (${percentCasaFT}%)`,
         vitoriasForaFT: `${vitoriasForaFT}/${total} (${percentForaFT}%)`,
@@ -761,13 +813,16 @@ function calcularEstatisticas() {
         bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
         predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
         predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
+        predicaoGolHTCasaVenceFT: `${golHTCasaVenceFT_sucesso}/${golHTCasaVenceFT_total} (${golHTCasaVenceFT_total > 0 ? ((golHTCasaVenceFT_sucesso/golHTCasaVenceFT_total) * 100).toFixed(1) : 0}%)`,
         firstGoalBefore75: `${golsAntes75}/${totalGolsFTMomento} (${percentAntes75}%)`,
         firstGoalAfter75: `${golsApos75}/${totalGolsFTMomento} (${percentApos75}%)`,
         predicaoGols75Ultimas15Antes: `${gols75Ultimas15.antes}/${gols75Ultimas15.total} (${percent75Antes15}%)`,
         predicaoGols75Ultimas15Depois: `${gols75Ultimas15.depois}/${gols75Ultimas15.total} (${percent75Depois15}%)`,
         golHT_0_14: `${golHT_0_14}/${totalGolHT} (${percentGolHT_0_14}%)`,
         golHT_15_29: `${golHT_15_29}/${totalGolHT} (${percentGolHT_15_29}%)`,
-        golHT_30_45: `${golHT_30_45}/${totalGolHT} (${percentGolHT_30_45}%)`
+        golHT_30_45: `${golHT_30_45}/${totalGolHT} (${percentGolHT_30_45}%)`,
+        over15FTGeral: `${over15FTGeralAcertos}/${over15FTGeralTotal} (${percentOver15FTGeral}%)`,
+        over15FTUltimos10: `${over15FTUltimos10Acertos}/${over15FTUltimos10Total} (${percentOver15FTUltimos10}%)`
     };
 }
 
@@ -779,6 +834,7 @@ function extrairPorcentagem(estatistica) {
 
 // Função para atualizar contadores
 function updateCounters() {
+    // Calcular estatísticas
     const totalCount = document.getElementById('totalCount');
     const total = notes.length;
     totalCount.textContent = total;
@@ -786,16 +842,45 @@ function updateCounters() {
     // Atualizar estatísticas
     const stats = calcularEstatisticas();
 
-    // Atualizar blocos de predição customizados
-    if (document.getElementById('predicaoOver05HTOver15FT')) {
-        document.getElementById('predicaoOver05HTOver15FT').textContent = stats.predicaoOver05HTOver15FT;
-        const percent1 = extrairPorcentagem(stats.predicaoOver05HTOver15FT);
-        document.getElementById('predicaoOver05HTOver15FTBar').style.width = percent1 + '%';
+    // Função para determinar a classe de cor baseada na porcentagem
+    function determinarClasseCor(porcentagem) {
+        if (porcentagem >= 90) return 'high-percentage';
+        if (porcentagem >= 70) return 'medium-percentage';
+        return '';
     }
+
+    // Atualizar blocos de predição customizados com cores dinâmicas
+    if (document.getElementById('predicaoOver05HTOver15FT')) {
+        const percent1 = extrairPorcentagem(stats.predicaoOver05HTOver15FT);
+        const elemento = document.getElementById('predicaoOver05HTOver15FT');
+        const elementoBar = document.getElementById('predicaoOver05HTOver15FTBar');
+        
+        elemento.textContent = stats.predicaoOver05HTOver15FT;
+        elemento.className = `stats-value ${determinarClasseCor(percent1)}`;
+        elementoBar.style.width = percent1 + '%';
+        elementoBar.className = determinarClasseCor(percent1);
+    }
+
     if (document.getElementById('predicaoHT2FT05')) {
-        document.getElementById('predicaoHT2FT05').textContent = stats.predicaoHT2FT05;
         const percent2 = extrairPorcentagem(stats.predicaoHT2FT05);
-        document.getElementById('predicaoHT2FT05Bar').style.width = percent2 + '%';
+        const elemento = document.getElementById('predicaoHT2FT05');
+        const elementoBar = document.getElementById('predicaoHT2FT05Bar');
+        
+        elemento.textContent = stats.predicaoHT2FT05;
+        elemento.className = `stats-value ${determinarClasseCor(percent2)}`;
+        elementoBar.style.width = percent2 + '%';
+        elementoBar.className = determinarClasseCor(percent2);
+    }
+
+    if (document.getElementById('predicaoGolHTCasaVenceFT')) {
+        const percent3 = extrairPorcentagem(stats.predicaoGolHTCasaVenceFT);
+        const elemento = document.getElementById('predicaoGolHTCasaVenceFT');
+        const elementoBar = document.getElementById('predicaoGolHTCasaVenceFTBar');
+        
+        elemento.textContent = stats.predicaoGolHTCasaVenceFT;
+        elemento.className = `stats-value ${determinarClasseCor(percent3)}`;
+        elementoBar.style.width = percent3 + '%';
+        elementoBar.className = determinarClasseCor(percent3);
     }
 
     // Função auxiliar para atualizar elemento e barra de progresso
@@ -814,17 +899,10 @@ function updateCounters() {
                 const porcentagem = extrairPorcentagem(valor);
                 progressBar.style.width = `${porcentagem}%`;
                 
-                // Atualizar cores baseadas na porcentagem
-                if (porcentagem >= 90) {
-                    elemento.style.color = '#06f03c';
-                    progressBar.style.background = 'linear-gradient(90deg, #06f03c, #00ff44)';
-                } else if (porcentagem >= 70) {
-                    elemento.style.color = '#ffd700';
-                    progressBar.style.background = 'linear-gradient(90deg, #ffd700, #ffc800)';
-                } else {
-                    elemento.style.color = '#ffffff';
-                    progressBar.style.background = 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))';
-                }
+                // Atualizar cores baseadas na porcentagem usando classes CSS
+                const classe = determinarClasseCor(porcentagem);
+                elemento.className = `stats-value ${classe}`;
+                progressBar.className = `stats-progress-fill ${classe}`;
             }
         }
     };
@@ -841,10 +919,15 @@ function updateCounters() {
     atualizarElementoComProgresso('bttsNao', stats.bttsNao);
     atualizarElementoComProgresso('predicaoOver05HTOver15FT', stats.predicaoOver05HTOver15FT);
     atualizarElementoComProgresso('predicaoHT2FT05', stats.predicaoHT2FT05);
+    atualizarElementoComProgresso('predicaoGolHTCasaVenceFT', stats.predicaoGolHTCasaVenceFT);
     atualizarElementoComProgresso('firstGoalBefore75', stats.firstGoalBefore75);
     atualizarElementoComProgresso('firstGoalAfter75', stats.firstGoalAfter75);
     atualizarElementoComProgresso('predicaoGols75Ultimas15Antes', stats.predicaoGols75Ultimas15Antes);
     atualizarElementoComProgresso('predicaoGols75Ultimas15Depois', stats.predicaoGols75Ultimas15Depois);
+    
+    // Atualizar elementos das novas estatísticas
+    atualizarElementoComProgresso('over15GolsFTGeral', stats.over15FTGeral);
+    atualizarElementoComProgresso('over15GolsFTUltimos10', stats.over15FTUltimos10);
     // Novas estatísticas de minutos do gol no HT
     atualizarElementoComProgresso('golHT_0_14', stats.golHT_0_14);
     atualizarElementoComProgresso('golHT_15_29', stats.golHT_15_29);
@@ -887,6 +970,20 @@ function updateCounters() {
     }, 50);
 }
 
+// Função para selecionar o time favorito
+function selectFavoriteTeam(button) {
+    // Remove a classe ativa de todos os botões de time favorito
+    document.querySelectorAll('.first-goal-section .team-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adiciona classe ativa ao botão clicado
+    button.classList.add('active');
+    
+    // Atualiza o valor no campo hidden
+    document.getElementById('favoriteTeam').value = button.getAttribute('data-value');
+}
+
 // Função para criar um card de jogo
 function checkBTTS(ftScore) {
     if (!ftScore || !ftScore.includes('-') || ftScore === 'Aguardando') return false;
@@ -901,6 +998,12 @@ function createGameCard(gameData) {
     const hasBTTS = checkBTTS(gameData.ft);
     const bttsClass = hasBTTS ? 'btts-green-badge' : 'btts-red-text';
     const bttsText = hasBTTS ? 'GREEN' : 'RED';
+    
+    // Adiciona classe para time favorito se existir
+    const favoriteTeamClass = gameData.favoriteTeam ? `favorite-team-${gameData.favoriteTeam.toLowerCase()}` : '';
+    if (favoriteTeamClass) {
+        card.classList.add(favoriteTeamClass);
+    }
 
     const formattedDate = formatDateTime(gameData.dateTime).split(' ')[0];
 

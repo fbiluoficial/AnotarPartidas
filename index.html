@@ -216,46 +216,9 @@
         <!-- Container de Estatísticas -->
         <div class="stats-grid">
             <!-- Card Vitórias FT -->
-            <!-- Card Momento Gols HT - card-6 -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Momento Gols HT - card-6</h3>
-                </div>
-                <div class="stats-card-content">
-                    <div class="stats-grid-inner">
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Gol HT 0-14'</span>
-                                <span id="golHT_0_14" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Gol HT 15-29'</span>
-                                <span id="golHT_15_29" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">Gol HT 30-45'</span>
-                                <span id="golHT_30_45" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="stats-card">
-                <div class="stats-card-header">
-                    <h3>Estatísticas (FT) - card-4</h3>
+                    <h3>Estatísticas Tempo Final (FT)</h3>
                 </div>
                 <!-- Predições FT inseridas por IA - início -->
                 <div class="score-blocks-container">
@@ -277,11 +240,56 @@
                 <!-- Predições FT inseridas por IA - fim -->
 <div class="stats-card-content">
     <div class="stats-grid-inner">
-        <!-- Os blocos de predição foram movidos para o card Total de Vitórias (FT) -->
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Vitórias Casa</span>
+                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Vitórias Fora</span>
+                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
 
 
 
-
+        <!-- Novas estatísticas: Minuto do gol no HT -->
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Gol HT 0-14'</span>
+                <span id="golHT_0_14" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Gol HT 15-29'</span>
+                <span id="golHT_15_29" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="stats-item">
+            <div class="stats-value-container">
+                <span class="stats-label">Gol HT 30-45'</span>
+                <span id="golHT_30_45" class="stats-value">0/0 (0%)</span>
+            </div>
+            <div class="stats-progress-bar">
+                <div class="stats-progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        <!-- Fim das novas estatísticas -->
     </div>
 </div>
 
@@ -294,44 +302,25 @@
             <!-- Card Estatísticas +0,5 Gol FT -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Estatísticas Over Gols - card-1</h3>
+                    <h3>Estatísticas +0,5 Gol FT</h3>
                 </div>
                 <div class="stats-card-content">
                     <div class="stats-item">
-    <div class="stats-value-container">
-        <span class="stats-label">Acerto +0,5 Gol FT</span>
-        <span id="acertosGolsFT" class="stats-value">0/0 (0%)</span>
-    </div>
-    <div class="stats-progress-bar">
-        <div class="stats-progress-fill" style="width: 0%"></div>
-    </div>
-</div>
-<!-- NOVAS PREDIÇÕES OVER GOLS -->
-<div class="stats-item">
-    <div class="stats-value-container">
-        <span class="stats-label">Over 1.5 gols FT</span>
-        <span id="over15GolsFT" class="stats-value">0/0 (0%)</span>
-    </div>
-    <div class="stats-progress-bar">
-        <div class="stats-progress-fill" style="width: 0%"></div>
-    </div>
-</div>
-<div class="stats-item">
-    <div class="stats-value-container">
-        <span class="stats-label">Over 1.5 gols FT / últimos 10 jogos</span>
-        <span id="over15GolsFTUlt10" class="stats-value">0/0 (0%)</span>
-    </div>
-    <div class="stats-progress-bar">
-        <div class="stats-progress-fill" style="width: 0%"></div>
-    </div>
-</div>
+                        <div class="stats-value-container">
+                            <span class="stats-label">Acerto +0,5 Gol FT</span>
+                            <span id="acertosGolsFT" class="stats-value">0/0 (0%)</span>
+                        </div>
+                        <div class="stats-progress-bar">
+                            <div class="stats-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Card Total de Vitórias FT -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Total de Vitórias (FT) - card-3</h3>
+                    <h3>Total de Vitórias (FT)</h3>
                 </div>
                 <div class="stats-card-content">
                     <div class="stats-item">
@@ -343,32 +332,13 @@
                             <div class="stats-progress-fill" style="width: 0%"></div>
                         </div>
                     </div>
-                    <!-- Blocos de predição movidos para dentro deste card -->
-                    <div class="stats-item">
-                        <div class="stats-value-container">
-                            <span class="stats-label">Vitórias Casa</span>
-                            <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
-                        </div>
-                        <div class="stats-progress-bar">
-                            <div class="stats-progress-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stats-item">
-                        <div class="stats-value-container">
-                            <span class="stats-label">Vitórias Fora</span>
-                            <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
-                        </div>
-                        <div class="stats-progress-bar">
-                            <div class="stats-progress-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <!-- Card Estatísticas BTTS -->
             <div class="stats-card">
                 <div class="stats-card-header">
-                    <h3>Estatísticas BTTS - card-2</h3>
+                    <h3>Estatísticas BTTS</h3>
                 </div>
                 <div class="stats-card-content">
                     <div class="stats-grid-inner">
@@ -381,20 +351,11 @@
                                 <div class="stats-progress-fill" style="width: 0%"></div>
                             </div>
                         </div>
-                        <div class="stats-item">
-                            <div class="stats-value-container">
-                                <span class="stats-label">BTTS Não</span>
-                                <span id="bttsNao" class="stats-value">0/0 (0%)</span>
-                            </div>
-                            <div class="stats-progress-bar">
-                                <div class="stats-progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
                 
                         <!-- Card Outras Estatísticas -->
                         <div class="stats-card">
                             <div class="stats-card-header">
-                                <h3>Minuto 75' FT - card-5</h3>
+                                <h3>Outras Estatísticas</h3>
                             </div>
                             <div class="stats-card-content">
                                 <div class="stats-grid-inner">
@@ -437,7 +398,15 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">BTTS Não</span>
+                                <span id="bttsNao" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -42,6 +42,9 @@
     --border-color: rgba(255, 255, 255, 0.05);
     --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     --form-bg: rgba(18, 18, 18, 0.95);
+    /* Novas variáveis para cores de porcentagem */
+    --success-color: #06f03c;
+    --high-warning-color: #FFD700;
 }
 
 /* Estilos do Grid de Estatísticas */
@@ -244,6 +247,32 @@
 }
 /* ====== FIM PLACAR CUSTOM ====== */
 
+/* Estilos para Time Favorito */
+.favorite-team {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-top: 8px;
+    display: inline-block;
+}
+
+.favorite-team-casa {
+    border-left: 4px solid #00cfff;
+}
+
+.favorite-team-fora {
+    border-left: 4px solid #ff2d7a;
+}
+
+/* Estilo para botões de time favorito ativos */
+.team-button.active {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
 /* Estilos para títulos de seção */
 /* Estilo Futurista para o Título */
 .cyber-title {
@@ -427,6 +456,23 @@
     font-weight: bold;
 }
 
+/* Classes para diferentes estados de porcentagem */
+.stats-value.high-percentage {
+    color: var(--success-color) !important;
+}
+
+.stats-value.medium-percentage {
+    color: var(--high-warning-color) !important;
+}
+
+.score-progress-bar div.high-percentage {
+    background: linear-gradient(90deg, var(--success-color), #00ff44) !important;
+}
+
+.score-progress-bar div.medium-percentage {
+    background: linear-gradient(90deg, var(--high-warning-color), #ffa500) !important;
+}
+
 .stats-progress-bar {
     width: 100%;
     height: 6px;
@@ -440,6 +486,32 @@
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
     border-radius: 3px;
     transition: width 0.3s ease;
+}
+
+/* Estilos específicos para o card-6 */
+.stats-card:nth-child(6) .score-progress-bar div {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transition: background 0.3s ease;
+}
+
+.stats-card:nth-child(6) .score-progress-bar div.high-percentage {
+    background: linear-gradient(90deg, var(--success-color), #00ff44) !important;
+}
+
+.stats-card:nth-child(6) .score-progress-bar div.medium-percentage {
+    background: linear-gradient(90deg, var(--high-warning-color), #ffa500) !important;
+}
+
+.stats-card:nth-child(6) .stats-value {
+    transition: color 0.3s ease;
+}
+
+.stats-card:nth-child(6) .stats-value.high-percentage {
+    color: var(--success-color) !important;
+}
+
+.stats-card:nth-child(6) .stats-value.medium-percentage {
+    color: var(--high-warning-color) !important;
 }
 
 @media (max-width: 768px) {

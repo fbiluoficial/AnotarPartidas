@@ -452,25 +452,38 @@
 }
 
 .stats-value {
-    color: #06f03c;
+    color: var(--text-color);
     font-weight: bold;
 }
 
 /* Classes para diferentes estados de porcentagem */
-.stats-value.high-percentage {
-    color: var(--success-color) !important;
+.stats-card[data-card="Total de Vitórias (FT)"] .stats-value.success,
+.stats-value.success {
+    color: #06f03c !important;
 }
 
-.stats-value.medium-percentage {
-    color: var(--high-warning-color) !important;
+.stats-card[data-card="Total de Vitórias (FT)"] .stats-value.warning,
+.stats-value.warning {
+    color: #f0d806 !important;
 }
 
-.score-progress-bar div.high-percentage {
-    background: linear-gradient(90deg, var(--success-color), #00ff44) !important;
+.stats-card[data-card="Total de Vitórias (FT)"] .stats-progress-fill.success,
+.stats-progress-fill.success {
+    background: #06f03c !important;
 }
 
-.score-progress-bar div.medium-percentage {
-    background: linear-gradient(90deg, var(--high-warning-color), #ffa500) !important;
+.stats-card[data-card="Total de Vitórias (FT)"] .stats-progress-fill.warning,
+.stats-progress-fill.warning {
+    background: #f0d806 !important;
+}
+
+.stats-progress-fill {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+/* Estilos específicos para o card Total de Vitórias (FT) */
+.stats-card h3:contains("Total de Vitórias (FT)") ~ .stats-card-content .stats-progress-fill {
+    transition: background 0.3s ease;
 }
 
 .stats-progress-bar {

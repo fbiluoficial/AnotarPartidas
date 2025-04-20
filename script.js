@@ -504,7 +504,8 @@ function renderNotes(filteredNotes = notes) {
                 firstGoalMinute: displayValue,
                 firstGoalFTTime: note.firstGoalFTTime,
                 firstGoalHTTime: note.firstGoalHTTime,
-                dateTime: note.datetime
+                dateTime: note.datetime,
+                favoriteTeam: note.favoriteTeam || ''
             };
             
             const card = createGameCard(gameData);
@@ -843,10 +844,19 @@ function updateCounters() {
     const stats = calcularEstatisticas();
 
     // Função para determinar a classe de cor baseada na porcentagem
-    function determinarClasseCor(porcentagem) {
-        if (porcentagem >= 90) return 'high-percentage';
-        if (porcentagem >= 70) return 'medium-percentage';
-        return '';
+    // Função para determinar a classe de cor baseada na porcentagem
+    function determinarClasseCor(porcentagem, usarEstiloOver15 = false) {
+        if (usarEstiloOver15) {
+            // Para o card Total de Vitórias (FT), usar porcentagem direta
+            if (porcentagem >= 90) return 'success';
+            if (porcentagem >= 70 && porcentagem < 90) return 'warning';
+            return 'default'; // Retorna classe default para cor branca
+        } else {
+            // Para outros cards, manter comportamento original
+            if (porcentagem >= 90) return 'success';
+            if (porcentagem >= 70 && porcentagem < 90) return 'warning';
+            return 'default';
+        }
     }
 
     // Atualizar blocos de predição customizados com cores dinâmicas
@@ -884,7 +894,7 @@ function updateCounters() {
     }
 
     // Função auxiliar para atualizar elemento e barra de progresso
-    const atualizarElementoComProgresso = (elementId, valor) => {
+    const atualizarElementoComProgresso = (elementId, valor, usarEstiloOver15 = false) => {
         const elemento = document.getElementById(elementId);
         if (!elemento) return;
 
@@ -899,8 +909,8 @@ function updateCounters() {
                 const porcentagem = extrairPorcentagem(valor);
                 progressBar.style.width = `${porcentagem}%`;
                 
-                // Atualizar cores baseadas na porcentagem usando classes CSS
-                const classe = determinarClasseCor(porcentagem);
+                // Usar a porcentagem do próprio elemento para determinar a cor
+                const classe = determinarClasseCor(porcentagem, usarEstiloOver15);
                 elemento.className = `stats-value ${classe}`;
                 progressBar.className = `stats-progress-fill ${classe}`;
             }
@@ -908,13 +918,14 @@ function updateCounters() {
     };
 
     // Atualizar todas as estatísticas
-    atualizarElementoComProgresso('vitoriasCasaFT', stats.vitoriasCasaFT);
-    atualizarElementoComProgresso('vitoriasForaFT', stats.vitoriasForaFT);
+    // Atualizar todas as estatísticas do card Total de Vitórias (FT) com o mesmo estilo
+    atualizarElementoComProgresso('vitoriasCasaFT', stats.vitoriasCasaFT, true);
+    atualizarElementoComProgresso('vitoriasForaFT', stats.vitoriasForaFT, true);
     atualizarElementoComProgresso('vitoriasCasaHT', stats.vitoriasCasaHT);
     atualizarElementoComProgresso('vitoriasForaHT', stats.vitoriasForaHT);
     atualizarElementoComProgresso('empatesHT', stats.empatesHT);
     atualizarElementoComProgresso('acertosGolsFT', stats.acertosGolsFT);
-    atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT);
+    atualizarElementoComProgresso('totalVitoriasFT', stats.totalVitoriasFT, true);
     atualizarElementoComProgresso('bttsSim', stats.bttsSim);
     atualizarElementoComProgresso('bttsNao', stats.bttsNao);
     atualizarElementoComProgresso('predicaoOver05HTOver15FT', stats.predicaoOver05HTOver15FT);
@@ -1062,6 +1073,10 @@ function createGameCard(gameData) {
             <div class="bg-stat-box-bg p-1.5 rounded text-center">
                 <span class="text-[0.6rem]">Momento 1º Gol HT</span>
                 <span class="font-semibold">${firstGoalHTDisplay}</span>
+            </div>
+            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+                <span class="text-[0.6rem]">Time Favorito</span>
+                <span class="font-semibold">${gameData.favoriteTeam || '-'}</span>
             </div>
         </div>
         <div class="buttons-container">

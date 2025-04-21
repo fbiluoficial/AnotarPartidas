@@ -307,16 +307,22 @@ function generateChart() {
 
 // Função para selecionar o momento do primeiro gol FT
 function selectFirstGoalFTTime(button) {
+    // Encontra a seção pai do botão clicado
+    const currentSection = button.closest('.first-goal-section');
+
     // Remove active class somente dos botões do grupo específico do Momento do 1º Gol FT
-    button.closest('.first-goal-section').querySelectorAll('.time-button').forEach(btn => {
+    currentSection.querySelectorAll('.time-button').forEach(btn => {
         btn.classList.remove('active');
     });
     
     // Adiciona active class ao botão selecionado
     button.classList.add('active');
     
-    // Atualiza o valor do input hidden
-    document.getElementById('firstGoalFTTime').value = button.dataset.value;
+    // Atualiza o valor do input hidden dentro da seção correta
+    const hiddenInput = currentSection.querySelector('#firstGoalFTTime');
+    if (hiddenInput) {
+        hiddenInput.value = button.dataset.value;
+    }
 }
 
 // Função para selecionar o momento do primeiro gol HT
@@ -707,27 +713,37 @@ function calcularEstatisticas() {
     // Contadores BTTS
     let bttsSim = 0;
     let bttsTotal = 0;
-    let bttsSequenciasEncontradas = 0;
+    let bttsSequenciasAcertos = 0;
+    let bttsSequenciasTentativas = 0;
     let encontrouRed = false;
     let contadorSequencia = 0;
+    let sequenciaIniciada = false;
 
     notes.forEach((note, index) => {
         if (note.ftScore && note.ftScore !== 'Aguardando') {
             bttsTotal++;
             const hasBTTS = checkBTTS(note.ftScore);
+            
             if (hasBTTS) {
                 bttsSim++;
                 if (encontrouRed) {
+                    if (!sequenciaIniciada) {
+                        bttsSequenciasTentativas++;
+                        sequenciaIniciada = true;
+                    }
                     contadorSequencia++;
                     if (contadorSequencia >= 2) {
-                        bttsSequenciasEncontradas++;
+                        bttsSequenciasAcertos++;
                         encontrouRed = false;
                         contadorSequencia = 0;
+                        sequenciaIniciada = false;
                     }
                 }
             } else {
-                if (contadorSequencia > 0 && contadorSequencia < 2) {
+                if (encontrouRed && contadorSequencia > 0 && contadorSequencia < 2) {
+                    // Reset da sequência sem sucesso
                     contadorSequencia = 0;
+                    sequenciaIniciada = false;
                 }
                 encontrouRed = true;
             }
@@ -832,7 +848,7 @@ function calcularEstatisticas() {
         totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
         bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
         bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
-        bttsSequenciasAposRed: `${bttsSequenciasEncontradas}/${bttsSequenciasEncontradas} (100%)`,
+        bttsSequenciasAposRed: `${bttsSequenciasAcertos}/${bttsSequenciasTentativas} (${bttsSequenciasTentativas > 0 ? ((bttsSequenciasAcertos/bttsSequenciasTentativas) * 100).toFixed(1) : 0}%)`,
         predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
         predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
         predicaoGolHTCasaVenceFT: `${golHTCasaVenceFT_sucesso}/${golHTCasaVenceFT_total} (${golHTCasaVenceFT_total > 0 ? ((golHTCasaVenceFT_sucesso/golHTCasaVenceFT_total) * 100).toFixed(1) : 0}%)`,
@@ -1005,16 +1021,23 @@ function updateCounters() {
 
 // Função para selecionar o time favorito
 function selectFavoriteTeam(button) {
-    // Remove a classe ativa de todos os botões de time favorito
-    document.querySelectorAll('.first-goal-section .team-button').forEach(btn => {
+    // Encontra a seção pai do botão clicado
+    const currentSection = button.closest('.first-goal-section');
+    
+    // Remove a classe ativa apenas dos botões dentro da mesma seção
+    currentSection.querySelectorAll('.team-button').forEach(btn => {
         btn.classList.remove('active');
     });
     
     // Adiciona classe ativa ao botão clicado
     button.classList.add('active');
     
-    // Atualiza o valor no campo hidden
-    document.getElementById('favoriteTeam').value = button.getAttribute('data-value');
+    // Atualiza o valor no campo hidden dentro da seção correta
+    const selectedTeam = button.getAttribute('data-value');
+    const hiddenInput = currentSection.querySelector('#favoriteTeam');
+    if (hiddenInput) {
+        hiddenInput.value = selectedTeam;
+    }
 }
 
 // Função para criar um card de jogo
@@ -1362,7 +1385,7 @@ function loadDemoData() {
                 prediction: 'Vitória',
                 ftScore: '2-1',
                 htScore: '1-0',
-                firstGoal: 'HT | Casa',
+                firstGoal: 'HT | Mandante',
                 firstGoalFTTime: 'before75',
                 datetime: '2023-01-01T12:00'
             },
@@ -1371,7 +1394,7 @@ function loadDemoData() {
                 prediction: 'Empate',
                 ftScore: '1-1',
                 htScore: '0-0',
-                firstGoal: 'FT | Fora',
+                firstGoal: 'FT | Visitante',
                 firstGoalFTTime: 'after75',
                 datetime: '2023-01-02T15:00'
             },
@@ -1380,7 +1403,7 @@ function loadDemoData() {
                 prediction: 'BTTS',
                 ftScore: '2-1',
                 htScore: '1-1',
-                firstGoal: 'HT | Casa',
+                firstGoal: 'HT | Mandante',
                 firstGoalFTTime: 'before75',
                 datetime: '2023-01-03T16:30'
             }
@@ -1476,8 +1499,8 @@ function generatePredictionChart() {
 function generateFirstGoalChart() {
     // Contar ocorrências de cada equipe que marcou o primeiro gol
     const firstGoalData = {
-        'Casa': 0,
-        'Fora': 0,
+        'Mandante': 0,
+        'Visitante': 0,
         'Nenhum': 0,
         'HT': 0,
         'FT': 0
@@ -1500,12 +1523,12 @@ function generateFirstGoalChart() {
     return {
         type: 'bar',
         data: {
-            labels: ['Casa', 'Fora', 'Nenhum', 'HT', 'FT'],
+            labels: ['Mandante', 'Visitante', 'Nenhum', 'HT', 'FT'],
             datasets: [{
                 label: 'Frequência',
                 data: [
-                    firstGoalData['Casa'] || 0,
-                    firstGoalData['Fora'] || 0, 
+                    firstGoalData['Mandante'] || 0,
+                    firstGoalData['Visitante'] || 0,
                     firstGoalData['Nenhum'] || 0,
                     firstGoalData['HT'] || 0,
                     firstGoalData['FT'] || 0
@@ -2042,30 +2065,42 @@ function generateCombinedAnalysisChart() {
 
 // Funções para selecionar o primeiro gol com botões
 function selectFirstGoalTime(button) {
-    // Remove a classe ativa de todos os botões de tempo
-    document.querySelectorAll('.time-button').forEach(btn => {
+    // Encontra a seção pai do botão clicado
+    const currentSection = button.closest('.first-goal-section');
+    
+    // Remove a classe ativa apenas dos botões de tempo dentro da mesma seção
+    currentSection.querySelectorAll('.time-button').forEach(btn => {
         btn.classList.remove('active');
     });
     
     // Adiciona classe ativa ao botão clicado
     button.classList.add('active');
     
-    // Atualiza o valor no campo hidden
-    document.getElementById('firstGoalTime').value = button.getAttribute('data-value');
+    // Atualiza o valor no campo hidden dentro da seção correta
+    const hiddenInput = currentSection.querySelector('#firstGoalTime');
+    if (hiddenInput) {
+        hiddenInput.value = button.getAttribute('data-value');
+    }
 }
 
 function selectFirstGoalTeam(button) {
-    // Remove a classe ativa de todos os botões de equipe
-    document.querySelectorAll('.team-button').forEach(btn => {
+    // Encontra a seção pai do botão clicado
+    const currentSection = button.closest('.first-goal-section');
+    
+    // Remove a classe ativa apenas dos botões de equipe dentro da mesma seção
+    currentSection.querySelectorAll('.team-button').forEach(btn => {
         btn.classList.remove('active');
     });
     
     // Adiciona classe ativa ao botão clicado
     button.classList.add('active');
     
-    // Atualiza o valor no campo hidden
+    // Atualiza o valor no campo hidden dentro da seção correta
     const selectedTeam = button.getAttribute('data-value');
-    document.getElementById('firstGoalTeam').value = selectedTeam;
+    const hiddenInput = currentSection.querySelector('#firstGoalTeam');
+    if (hiddenInput) {
+        hiddenInput.value = selectedTeam;
+    }
 
     // Verifica se é "Nenhum" e os placares são 0-0
     const ftHome = document.getElementById('ftScoreHome').textContent;
@@ -2074,24 +2109,52 @@ function selectFirstGoalTeam(button) {
     const htAway = document.getElementById('htScoreAway').textContent;
 
     const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
-    const timeButtons = document.querySelector('.first-goal-group:first-child');
-    const firstGoalFTSection = document.querySelector('.first-goal-section:nth-of-type(2)');
+    
+    // Encontra as seções relacionadas dentro do mesmo contexto
+    const timeButtons = currentSection.querySelector('.first-goal-group:first-child');
+    
+    // Busca as seções de momento do gol pelo texto do header
+    const allSections = Array.from(document.querySelectorAll('.form-section.first-goal-section'));
+    const firstGoalFTSection = allSections.find(section =>
+        section.querySelector('.first-goal-header')?.textContent === 'Momento do 1º Gol FT'
+    );
+    const firstGoalHTSection = allSections.find(section =>
+        section.querySelector('.first-goal-header')?.textContent === 'Momento do 1º Gol (HT)'
+    );
 
     if (selectedTeam === 'Nenhum') {
         // Desabilita a seção de tempo do primeiro gol e do momento do gol FT
-        timeButtons.classList.add('disabled-section');
-        firstGoalFTSection.classList.add('disabled-section');
+        if (timeButtons) {
+            timeButtons.classList.add('disabled-section');
+        }
+        if (firstGoalFTSection) {
+            firstGoalFTSection.classList.add('disabled-section');
+        }
+        if (firstGoalHTSection) {
+            firstGoalHTSection.classList.add('disabled-section');
+        }
         
-        // Limpa as seleções
-        document.querySelectorAll('.time-button').forEach(btn => {
+        // Limpa as seleções apenas dentro da seção atual
+        currentSection.querySelectorAll('.time-button').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.getElementById('firstGoalTime').value = '';
-        document.getElementById('firstGoalFTTime').value = '';
+        
+        const firstGoalTimeInput = document.getElementById('firstGoalTime');
+        const firstGoalFTTimeInput = document.getElementById('firstGoalFTTime');
+        
+        if (firstGoalTimeInput) firstGoalTimeInput.value = '';
+        if (firstGoalFTTimeInput) firstGoalFTTimeInput.value = '';
     } else {
         // Habilita ambas as seções
-        timeButtons.classList.remove('disabled-section');
-        firstGoalFTSection.classList.remove('disabled-section');
+        if (timeButtons) {
+            timeButtons.classList.remove('disabled-section');
+        }
+        if (firstGoalFTSection) {
+            firstGoalFTSection.classList.remove('disabled-section');
+        }
+        if (firstGoalHTSection) {
+            firstGoalHTSection.classList.remove('disabled-section');
+        }
     }
 }
 

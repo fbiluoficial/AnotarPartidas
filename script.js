@@ -577,6 +577,7 @@ function loadNotesFromStorage() {
 function calcularEstatisticas() {
     const total = notes.length;
     if (total === 0) return {
+        bttsSequenciasAposRed: '0/0 (0%)',
         vitoriasCasaFT: '0/0 (0%)',
         vitoriasForaFT: '0/0 (0%)',
         vitoriasCasaHT: '0/0 (0%)',
@@ -679,7 +680,9 @@ function calcularEstatisticas() {
             if (golsForaHT > golsCasaHT) vitoriasForaHT++;
             if (golsCasaHT === golsForaHT) empatesHT++; // Incrementa em caso de empate HT
 
-            // Verificar se o primeiro gol foi da casa no HT e se ela venceu no FT
+            // Estatística: Primeiro gol foi da casa no HT (golsCasaHT > 0 e golsForaHT == 0) e casa venceu no FT
+            // Incrementa total ao ter primeiro gol da casa no HT
+            // Incrementa sucesso se, além do primeiro gol no HT, a casa também venceu no FT
             if (golsCasaHT > 0 && golsForaHT === 0) {
                 golHTCasaVenceFT_total++;
                 if (golsCasaFT > golsForaFT) {
@@ -704,12 +707,29 @@ function calcularEstatisticas() {
     // Contadores BTTS
     let bttsSim = 0;
     let bttsTotal = 0;
+    let bttsSequenciasEncontradas = 0;
+    let encontrouRed = false;
+    let contadorSequencia = 0;
 
-    notes.forEach(note => {
+    notes.forEach((note, index) => {
         if (note.ftScore && note.ftScore !== 'Aguardando') {
             bttsTotal++;
-            if (checkBTTS(note.ftScore)) {
+            const hasBTTS = checkBTTS(note.ftScore);
+            if (hasBTTS) {
                 bttsSim++;
+                if (encontrouRed) {
+                    contadorSequencia++;
+                    if (contadorSequencia >= 2) {
+                        bttsSequenciasEncontradas++;
+                        encontrouRed = false;
+                        contadorSequencia = 0;
+                    }
+                }
+            } else {
+                if (contadorSequencia > 0 && contadorSequencia < 2) {
+                    contadorSequencia = 0;
+                }
+                encontrouRed = true;
             }
         }
     });
@@ -812,6 +832,7 @@ function calcularEstatisticas() {
         totalVitoriasFT: `${totalVitoriasFT}/${total} (${percentTotalVitoriasFT}%)`,
         bttsSim: `${bttsSim}/${bttsTotal} (${percentBTTSSim}%)`,
         bttsNao: `${bttsTotal - bttsSim}/${bttsTotal} (${percentBTTSNao}%)`,
+        bttsSequenciasAposRed: `${bttsSequenciasEncontradas}/${bttsSequenciasEncontradas} (100%)`,
         predicaoOver05HTOver15FT: `${over05HT_over15FT_sucesso}/${over05HT_over15FT_total} (${over05HT_over15FT_total > 0 ? ((over05HT_over15FT_sucesso/over05HT_over15FT_total) * 100).toFixed(1) : 0}%)`,
         predicaoHT2FT05: `${ht2ft05_sucesso}/${ht2ft05_total} (${ht2ft05_total > 0 ? ((ht2ft05_sucesso/ht2ft05_total) * 100).toFixed(1) : 0}%)`,
         predicaoGolHTCasaVenceFT: `${golHTCasaVenceFT_sucesso}/${golHTCasaVenceFT_total} (${golHTCasaVenceFT_total > 0 ? ((golHTCasaVenceFT_sucesso/golHTCasaVenceFT_total) * 100).toFixed(1) : 0}%)`,
@@ -938,6 +959,7 @@ function updateCounters() {
     
     // Atualizar elementos das novas estatísticas
     atualizarElementoComProgresso('over15GolsFTGeral', stats.over15FTGeral);
+    atualizarElementoComProgresso('bttsSequenciasAposRed', stats.bttsSequenciasAposRed);
     atualizarElementoComProgresso('over15GolsFTUltimos10', stats.over15FTUltimos10);
     // Novas estatísticas de minutos do gol no HT
     atualizarElementoComProgresso('golHT_0_14', stats.golHT_0_14);

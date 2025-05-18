@@ -1,3 +1,55 @@
+/* Cores para resultado do time favorito apenas no bloco do favorito */
+.favorite-team-stat.win {
+    background-color: var(--success-color) !important;
+    color: #222c44 !important;
+}
+.favorite-team-stat.loss {
+    background-color: var(--danger-color) !important;
+    color: #fff !important;
+}
+/* Cores para resultado do time favorito */
+.game-card.win {
+    background-color: var(--success-color) !important;
+    color: #222c44 !important;
+}
+.game-card.loss {
+    background-color: var(--danger-color) !important;
+    color: #fff !important;
+}
+/* Tooltip para ícones de informação nos cards de estatísticas */
+.info-tooltip {
+  display: inline-block;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 16px;
+  z-index: 2;
+}
+
+.info-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 180px;
+  background: #222;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px 10px;
+  position: absolute;
+  top: -8px;
+  right: 110%;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  pointer-events: none;
+}
+
+.info-tooltip:hover .tooltip-text,
+.info-tooltip:focus .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
 /* Estilos para o container de cards */
 .cards-container {
     display: grid;

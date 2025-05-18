@@ -238,27 +238,45 @@
                 <div class="stats-card-content">
                     <div class="stats-grid-inner">
                         <div class="stats-item">
-                            <div class="stats-value-container">
+                            <div class="stats-value-container" style="position:relative;">
                                 <span class="stats-label">Over 0.5 HT -> Over 1.5 FT</span>
                                 <span id="predicaoOver05HTOver15FT" class="stats-value">0/0 (0%)</span>
+                                <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        Quando o primeiro tempo termina com pelo menos 1 gol (Over 0.5 HT), existe uma tendência estatística de que o jogo termine com pelo menos 2 gols (Over 1.5 FT). Ou seja, se houver gols no primeiro tempo, a chance de sair mais 1 gol no segundo tempo.
+                                    </span>
+                                </span>
                             </div>
                             <div class="stats-progress-bar">
                                 <div id="predicaoOver05HTOver15FTBar" class="stats-progress-fill"></div>
                             </div>
                         </div>
                         <div class="stats-item">
-                            <div class="stats-value-container">
+                            <div class="stats-value-container" style="position:relative;">
                                 <span class="stats-label">HT 2+ Gols -> FT 0.5+ Gol</span>
                                 <span id="predicaoHT2FT05" class="stats-value">0/0 (0%)</span>
+                                <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        Se o primeiro tempo terminar com 2 ou mais gols (HT 2+ Gols), é muito provável que haja pelo menos mais 1 gol no segundo tempo, resultando em pelo menos 1 gol no total do segundo tempo (FT 0.5+ Gol).
+                                    </span>
+                                </span>
                             </div>
                             <div class="stats-progress-bar">
                                 <div id="predicaoHT2FT05Bar" class="stats-progress-fill"></div>
                             </div>
                         </div>
                         <div class="stats-item">
-                            <div class="stats-value-container">
+                            <div class="stats-value-container" style="position:relative;">
                                 <span class="stats-label">1º Gol HT (Casa) e Vitória FT (Casa)</span>
                                 <span id="predicaoGolHTCasaVenceFT" class="stats-value">0/0 (0%)</span>
+                                <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        Quando o time da casa marca o primeiro gol no primeiro tempo (HT) e vence a partida no final (FT), indica uma forte influência do gol inicial para garantir a vitória do mandante.
+                                    </span>
+                                </span>
                             </div>
                             <div class="stats-progress-bar">
                                 <div id="predicaoGolHTCasaVenceFTBar" class="stats-progress-fill"></div>

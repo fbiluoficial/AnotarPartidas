@@ -1050,6 +1050,19 @@ function checkBTTS(ftScore) {
 function createGameCard(gameData) {
     const card = document.createElement('div');
     card.className = 'bg-card-bg rounded-lg shadow-md p-3 game-card';
+    let resultadoFavorito = null;
+    if (gameData.favoriteTeam && gameData.ft) {
+        const [ftCasa, ftFora] = gameData.ft.split('-').map(x => parseInt(x.trim(), 10));
+        if (gameData.favoriteTeam === 'Mandante') {
+            if (ftCasa > ftFora) resultadoFavorito = 'win';
+            else if (ftCasa < ftFora) resultadoFavorito = 'loss';
+            else resultadoFavorito = 'draw';
+        } else if (gameData.favoriteTeam === 'Visitante') {
+            if (ftFora > ftCasa) resultadoFavorito = 'win';
+            else if (ftFora < ftCasa) resultadoFavorito = 'loss';
+            else resultadoFavorito = 'draw';
+        }
+    }
 
     const hasBTTS = checkBTTS(gameData.ft);
     const bttsClass = hasBTTS ? 'btts-green-badge' : 'btts-red-text';
@@ -1119,7 +1132,7 @@ function createGameCard(gameData) {
                 <span class="text-[0.6rem]">Momento 1º Gol HT</span>
                 <span class="font-semibold">${firstGoalHTDisplay}</span>
             </div>
-            <div class="bg-stat-box-bg p-1.5 rounded text-center">
+            <div class="bg-stat-box-bg p-1.5 rounded text-center favorite-team-stat">
                 <span class="text-[0.6rem]">Time Favorito</span>
                 <span class="font-semibold">${gameData.favoriteTeam || '-'}</span>
             </div>
@@ -1133,6 +1146,14 @@ function createGameCard(gameData) {
             </button>
         </div>
     `;
+
+    // Aplica cor apenas ao bloco do time favorito
+    if (resultadoFavorito) {
+        const blocoFavorito = card.querySelector('.favorite-team-stat');
+        if (blocoFavorito) {
+            blocoFavorito.classList.add(resultadoFavorito);
+        }
+    }
     return card;
 }
 

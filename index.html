@@ -623,3 +623,628 @@
     <script src="script.js"></script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anotações de partidas de CLASSICOS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Botão para abrir/fechar menu de filtros -->
+        <div class="action-buttons">
+            <button id="toggleFilterMenuBtn" class="action-button">Filtros ☰</button>
+            <button class="action-button btn-export" onclick="showExportModal()">
+                Exportar
+            </button>
+            <button class="action-button ai-btn" onclick="showIAModal()">
+                IA
+            </button>
+        </div>
+
+        <!-- Menu de Filtros (inicialmente oculto) -->
+        <div id="filterMenuContainer" class="filter-menu">
+            <div class="filters">
+                <div class="filters-title">Filtros:</div>
+                <input type="text" id="filterTeam" placeholder="Filtrar por Time">
+                <select id="filterPrediction">
+                    <option value="">Todos os Palpites</option>
+                    <option value="Vitória">Vitória</option>
+                    <option value="Empate">Empate</option>
+                    <option value="Derrota">Derrota</option>
+                </select>
+                <button class="action-button btn-filter" onclick="applyFilters()">
+                    Aplicar Filtros
+                </button>
+            </div>
+        </div>
+        
+        <!-- Container do Formulário Reestruturado -->
+        <div class="form-container"> <!-- Renomeado de form-row para form-container -->
+            <h2 class="form-title">Cadastro de Nova Partida!</h2>
+
+            <div class="form-section">
+                <label class="form-label">Partida:</label>
+                <input type="text" id="teamNameA" placeholder="Time A">
+                <input type="text" id="teamNameB" placeholder="Time B">
+            </div>
+
+            <div class="form-section form-section-palpite">
+                <label class="form-label" for="prediction">Palpite:</label>
+                <div class="palpite-input-group">
+                    <select id="prediction">
+                        <!-- Opções serão carregadas pelo JS -->
+                    </select>
+                    <button type="button" class="btn-manage-predictions" onclick="togglePredictionManager()">+</button>
+                </div>
+            </div>
+
+            <!-- Seção de Placar FT e HT organizadas visualmente -->
+            <div class="score-blocks-container">
+                <!-- FT - FINAL -->
+                <div class="score-block">
+                    <div class="score-block-header">FT - FINAL</div>
+                    <div class="score-block-row">
+                        <div class="score-block-team">
+                            <span class="dot dot-casa"></span>
+                            <span class="score-block-label">CASA</span>
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreHome', -1)">-</button>
+                            <span class="score-value" id="ftScoreHome">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('ftScoreHome', 1)">+</button>
+                        </div>
+                        <div class="score-block-team">
+                            <span class="dot dot-fora"></span>
+                            <span class="score-block-label">FORA</span>
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('ftScoreAway', -1)">-</button>
+                            <span class="score-value" id="ftScoreAway">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('ftScoreAway', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- HT - 1º TEMPO -->
+                <div class="score-block">
+                    <div class="score-block-header">HT - 1º TEMPO</div>
+                    <div class="score-block-row">
+                        <div class="score-block-team">
+                            <span class="score-block-label">CASA</span>
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('htScoreHome', -1)">-</button>
+                            <span class="score-value" id="htScoreHome">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('htScoreHome', 1)">+</button>
+                        </div>
+                        <div class="score-block-team">
+                            <span class="score-block-label">FORA</span>
+                            <button type="button" class="score-btn score-btn-minus" onclick="updateScore('htScoreAway', -1)">-</button>
+                            <span class="score-value" id="htScoreAway">0</span>
+                            <button type="button" class="score-btn score-btn-plus" onclick="updateScore('htScoreAway', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Seção Primeiro Gol -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Primeiro Gol</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <label>Tempo:</label>
+                        <div class="button-group">
+                            <button type="button" class="time-button" data-value="HT" onclick="selectFirstGoalTime(this)">1º Tempo</button>
+                            <button type="button" class="time-button" data-value="FT" onclick="selectFirstGoalTime(this)">2º Tempo</button>
+                        </div>
+                    </div>
+                    <div class="first-goal-group">
+                        <label>Quem Marcou:</label>
+                        <div class="button-group">
+                            <button type="button" class="team-button" data-value="Mandante" onclick="selectFirstGoalTeam(this)">Casa</button>
+                            <button type="button" class="team-button" data-value="Visitante" onclick="selectFirstGoalTeam(this)">Fora</button>
+                            <button type="button" class="team-button" data-value="Nenhum" onclick="selectFirstGoalTeam(this)">Nenhum</button>
+                        </div>
+                    </div>
+                    <!-- Campos ocultos para armazenar os valores selecionados -->
+                    <input type="hidden" id="firstGoalTime" value="">
+                    <input type="hidden" id="firstGoalTeam" value="">
+                </div>
+            </div>
+
+            <!-- Seção Momento do Primeiro Gol FT -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Momento do 1º Gol FT</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <div class="button-group">
+                            <button type="button" class="time-button" data-value="before75" onclick="selectFirstGoalFTTime(this)">Antes do min 75</button>
+                            <button type="button" class="time-button" data-value="after75" onclick="selectFirstGoalFTTime(this)">Após o min 75</button>
+                        </div>
+                    </div>
+                    <!-- Campo oculto para armazenar o valor selecionado -->
+                    <input type="hidden" id="firstGoalFTTime" value="">
+                </div>
+            </div>
+
+            <!-- Seção Time Favorito -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Time Favorito</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <div class="button-group">
+                            <button type="button" class="team-button" data-value="Mandante" onclick="selectFavoriteTeam(this)">Mandante</button>
+                            <button type="button" class="team-button" data-value="Visitante" onclick="selectFavoriteTeam(this)">Visitante</button>
+                        </div>
+                    </div>
+                    <!-- Campo oculto para armazenar o valor selecionado -->
+                    <input type="hidden" id="favoriteTeam" value="">
+                </div>
+            </div>
+
+            <!-- Seção Momento do 1º Gol HT -->
+            <div class="form-section first-goal-section">
+                <div class="first-goal-header">Momento do 1º Gol (HT)</div>
+                <div class="first-goal-controls">
+                    <div class="first-goal-group">
+                        <div class="button-group">
+                            <button type="button" class="time-button" data-value="0-14" onclick="selectTimeHT(this)">0-14 min</button>
+                            <button type="button" class="time-button" data-value="15-29" onclick="selectTimeHT(this)">15-29 min</button>
+                            <button type="button" class="time-button" data-value="30-45" onclick="selectTimeHT(this)">30-45 min</button>
+                        </div>
+                    </div>
+                    <!-- Campo oculto para armazenar o valor selecionado -->
+                    <input type="hidden" id="firstGoalHTTime" value="">
+                </div>
+            </div>
+
+            <div class="form-group mt-2">
+                <label class="first-goal-header block text-sm font-medium text-gray-300 mb-1">Resultado Over 1.5 FT (se HT > 0.5)?</label>
+                <div class="flex items-center space-x-4">
+                    <label><input type="radio" name="over15FtOutcome" value="yes"> Sim</label>
+                    <label><input type="radio" name="over15FtOutcome" value="no"> Não</label>
+                    <label><input type="radio" name="over15FtOutcome" value="na" checked> N/A</label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="datetime">Data e Hora:</label>
+                <input type="datetime-local" id="datetime" value="">
+            </div>
+
+            <div class="add-button-container">
+                <button class="add-button" onclick="addOrUpdateNote()">ADICIONAR</button>
+            </div>
+        </div>
+
+        <!-- Cabeçalho da Tabela -->
+        <div class="header-row">
+            <span>Time</span>
+            <span>Palpite</span>
+            <span>FT</span>
+            <span>HT</span>
+            <span>1º Gol</span>
+            <span>Data/Hora</span>
+            <span>Ações</span>
+        </div>
+
+        <!-- Lista de Anotações -->
+        <h2 class="cyber-title">
+            <span class="cyber-title__text">Histórico de Partidas</span>
+            <div class="cyber-title__tag">
+                <span class="cyber-title__count" id="totalCount">0</span>
+                <span class="cyber-title__label">partidas</span>
+            </div>
+            <div class="cyber-title__glitch"></div>
+        </h2>
+        
+        <!-- Container de Cards -->
+        <div class="cards-container">
+            <button id="toggleNotes" class="toggle-notes-btn" onclick="toggleNotesList()">
+                <span id="toggleIcon">▼</span>
+                <span>Minimizar</span>
+            </button>
+            <div id="notesList" class="notes-list">
+                <!-- Cards serão inseridos aqui dinamicamente -->
+            </div>
+        </div>
+        
+        <!-- Estatísticas -->
+        <h2 style="margin-top: 30px; margin-bottom: 15px; color: var(--primary-color); text-align: center;">
+            Estatísticas Detalhadas
+        </h2>
+        
+        <!-- Container de Estatísticas -->
+        <div class="stats-grid">
+            <!-- CONTE-SE - card-6 -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>CONTE-SE - card-6</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-grid-inner">
+                        <div class="stats-item">
+                            <div class="stats-value-container" style="position:relative;">
+                                <span class="stats-label">Over 0.5 HT -> Over 1.5 FT</span>
+                                <span id="predicaoOver05HTOver15FT" class="stats-value">0/0 (0%)</span>
+                                <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        Quando o primeiro tempo termina com pelo menos 1 gol (Over 0.5 HT), existe uma tendência estatística de que o jogo termine com pelo menos 2 gols (Over 1.5 FT). Ou seja, se houver gols no primeiro tempo, a chance de sair mais 1 gol no segundo tempo.
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div id="predicaoOver05HTOver15FTBar" class="stats-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container" style="position:relative;">
+                                <span class="stats-label">HT 2+ Gols -> FT 0.5+ Gol</span>
+                                <span id="predicaoHT2FT05" class="stats-value">0/0 (0%)</span>
+                                <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        Se o primeiro tempo terminar com 2 ou mais gols (HT 2+ Gols), é muito provável que haja pelo menos mais 1 gol no segundo tempo, resultando em pelo menos 1 gol no total do segundo tempo (FT 0.5+ Gol).
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div id="predicaoHT2FT05Bar" class="stats-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container" style="position:relative;">
+                                <span class="stats-label">1º Gol HT (Casa) e Vitória FT (Casa)</span>
+                                <span id="predicaoGolHTCasaVenceFT" class="stats-value">0/0 (0%)</span>
+                                <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+                                    ℹ️
+                                    <span class="tooltip-text">
+                                        Quando o time da casa marca o primeiro gol no primeiro tempo (HT) e vence a partida no final (FT), indica uma forte influência do gol inicial para garantir a vitória do mandante.
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div id="predicaoGolHTCasaVenceFTBar" class="stats-progress-fill"></div>
+                            </div>
+                        </div>
+<div class="stats-item">
+    <div class="stats-value-container" style="position:relative;">
+        <span class="stats-label">Sequência de Vitórias (Favorito)</span>
+        <span id="predicaoSequenciaVitoriasFavorito" class="stats-value">0/0 (0%)</span>
+        <span class="info-tooltip" tabindex="0" style="position:absolute;top:0;right:0;cursor:pointer;">
+            ℹ️
+            <span class="tooltip-text">
+                Mostra a sequência de vitórias do time favorito que vieram após outra vitória do favorito, em relação ao total de partidas do favorito.
+            </span>
+        </span>
+    </div>
+    <div class="stats-progress-bar">
+        <div id="predicaoSequenciaVitoriasFavoritoBar" class="stats-progress-fill"></div>
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Estatísticas +0,5 Gol FT -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>Estatísticas Over Gols - card-1</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-item">
+                        <div class="stats-value-container">
+                            <span class="stats-label">Acerto +0,5 Gol FT</span>
+                            <span id="acertosGolsFT" class="stats-value">0/0 (0%)</span>
+                        </div>
+                        <div class="stats-progress-bar">
+                            <div class="stats-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-value-container">
+                            <span class="stats-label">Over 1.5 gols FT (Geral)</span>
+                            <span id="over15GolsFTGeral" class="stats-value">0/0 (0%)</span>
+                        </div>
+                        <div class="stats-progress-bar">
+                            <div class="stats-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-value-container">
+                            <span class="stats-label">Over 1.5 gols FT (Últimos 10)</span>
+                            <span id="over15GolsFTUltimos10" class="stats-value">0/0 (0%)</span>
+                        </div>
+                        <div class="stats-progress-bar">
+                            <div class="stats-progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- stats-card" data-card="- card-3 -->
+            <div class="stats-card" data-card="- card-3">
+                <div class="stats-card-header">
+                    <h3>Total de Vitórias (FT)- card-3</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-grid-inner">
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Total de Vitórias FT</span>
+                                <span id="totalVitoriasFT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Casa</span>
+                                <span id="vitoriasCasaHT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Vitórias Fora</span>
+                                <span id="vitoriasForaHT" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <!-- Card Estatísticas BTTS -->
+            <div class="stats-card">
+                <div class="stats-card-header">
+                    <h3>Estatísticas BTTS - card-2</h3>
+                </div>
+                <div class="stats-card-content">
+                    <div class="stats-grid-inner">
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">BTTS Sim</span>
+                                <span id="bttsSim" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                
+                        <!-- Card Outras Estatísticas -->
+                        <div class="stats-card">
+                            <div class="stats-card-header">
+                                <h3>Minuto 75' FT - card-5</h3>
+                            </div>
+                            <div class="stats-card-content">
+                                <div class="stats-grid-inner">
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">Últimas 15: Gol Antes 75'</span>
+                                            <span id="predicaoGols75Ultimas15Antes" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">Últimas 15: Gol Após 75'</span>
+                                            <span id="predicaoGols75Ultimas15Depois" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">1º Gol FT Antes do 75'</span>
+                                            <span id="firstGoalBefore75" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="stats-item">
+                                        <div class="stats-value-container">
+                                            <span class="stats-label">1º Gol FT Após o 75'</span>
+                                            <span id="firstGoalAfter75" class="stats-value">0/0 (0%)</span>
+                                        </div>
+                                        <div class="stats-progress-bar">
+                                            <div class="stats-progress-fill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">BTTS Não</span>
+                                <span id="bttsNao" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-value-container">
+                                <span class="stats-label">Sequência BTTS após RED</span>
+                                <span id="bttsSequenciasAposRed" class="stats-value">0/0 (0%)</span>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="stats-progress-bar">
+                                <div class="stats-progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Momento Gols HT -->
+        <div class="stats-card">
+            <div class="stats-card-header">
+                <h3>Momento Gols HT - card-4</h3>
+            </div>
+            <div class="stats-card-content">
+                <div class="stats-item">
+                    <div class="stats-value-container">
+                        <span class="stats-label">Gol HT 0-14'</span>
+                        <span id="golHT_0_14" class="stats-value" style="color: rgb(255, 255, 255);">0/2 (0.0%)</span>
+                    </div>
+                    <div class="stats-progress-bar">
+                        <div class="stats-progress-fill" style="width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));"></div>
+                    </div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value-container">
+                        <span class="stats-label">Gol HT 15-29'</span>
+                        <span id="golHT_15_29" class="stats-value" style="color: rgb(255, 255, 255);">1/2 (50.0%)</span>
+                    </div>
+                    <div class="stats-progress-bar">
+                        <div class="stats-progress-fill" style="width: 50%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));"></div>
+                    </div>
+                </div>
+                <div class="stats-item">
+                    <div class="stats-value-container">
+                        <span class="stats-label">Gol HT 30-45'</span>
+                        <span id="golHT_30_45" class="stats-value" style="color: rgb(255, 255, 255);">1/2 (50.0%)</span>
+                    </div>
+                    <div class="stats-progress-bar">
+                        <div class="stats-progress-fill" style="width: 50%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal de Exportação/Importação -->
+    <div class="export-overlay" id="exportOverlay">
+        <div class="export-modal">
+            <div class="modal-tabs">
+                <button class="modal-tab active" onclick="switchModalTab('export')">Exportar</button>
+                <button class="modal-tab" onclick="switchModalTab('import')">Importar</button>
+            </div>
+
+            <!-- Aba de Exportação -->
+            <div id="exportTab" class="modal-content active">
+                <h2>Exportar Anotações</h2>
+                <div class="export-options">
+                    <div class="export-option">
+                        <input type="radio" id="exportAll" name="exportOption" value="all" checked>
+                        <label for="exportAll">Exportar todas as anotações</label>
+                    </div>
+                    <div class="export-option">
+                        <input type="radio" id="exportFiltered" name="exportOption" value="filtered">
+                        <label for="exportFiltered">Exportar apenas anotações filtradas</label>
+                    </div>
+                </div>
+                <div>
+                    <label for="filename">Nome do arquivo:</label>
+                    <input type="text" id="filename" class="export-filename" value="Anotacoes_Jogo">
+                </div>
+                <div class="export-progress" id="exportProgress">
+                    <div class="export-progress-bar">
+                        <div class="export-progress-fill" id="exportProgressFill"></div>
+                    </div>
+                    <div class="export-status" id="exportStatus">Preparando...</div>
+                </div>
+                <div class="export-buttons">
+                    <button class="export-cancel-btn" onclick="hideExportModal()">Cancelar</button>
+                    <button class="export-confirm-btn" onclick="performExport()">Exportar Excel</button>
+                </div>
+            </div>
+
+            <!-- Aba de Importação -->
+            <div id="importTab" class="modal-content">
+                <h2>Importar Anotações</h2>
+                <div class="import-instructions">
+                    <p>Selecione um arquivo Excel exportado anteriormente.</p>
+                    <p class="warning">⚠️ Importante: Não modifique a coluna ID do arquivo Excel!</p>
+                </div>
+                <div class="import-form">
+                    <input type="file" id="importFile" accept=".xlsx" class="import-file-input">
+                    <label for="importFile" class="import-file-label">Escolher arquivo</label>
+                </div>
+                <div id="importStatus" class="import-status"></div>
+                <div class="import-buttons">
+                    <button class="export-cancel-btn" onclick="hideExportModal()">Cancelar</button>
+                    <button class="export-confirm-btn" onclick="handleImportButton()">Importar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal da IA -->
+    <div class="ia-overlay" id="iaOverlay">
+        <div class="ia-modal">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                    <circle cx="12" cy="12" r="2"/>
+                </svg>
+                Análise Inteligente
+            </h2>
+            
+            <div class="ia-tabs">
+                <div class="ia-tab active" data-tab="report">Relatório de Análise</div>
+                <div class="ia-tab" data-tab="chart">Visualização de Dados</div>
+            </div>
+            
+            <div class="ia-tab-content active" id="reportTab">
+                <p>Gere um relatório de análise baseado em suas anotações. A IA analisará padrões, tendências e insights relacionados às partidas registradas.</p>
+                
+                <div class="ia-loading" id="reportLoading">
+                    <div class="ia-loading-spinner"></div>
+                    <p>Gerando análise inteligente...</p>
+                </div>
+                
+                <div class="ia-report" id="aiReport"></div>
+                
+                <div class="ia-actions">
+                    <button class="ia-button ia-button-primary" onclick="generateAIReport()">Gerar Relatório</button>
+                    <button class="ia-button ia-button-cancel" onclick="hideIAModal()">Fechar</button>
+                </div>
+            </div>
+            
+            <div class="ia-tab-content" id="chartTab">
+                <p>Visualize graficamente os dados das suas anotações. Selecione o tipo de gráfico desejado:</p>
+                
+                <select id="chartType" class="form-control" style="width: 100%; padding: 10px; margin: 10px 0;">
+                    <option value="prediction">Distribuição de Palpites</option>
+                    <option value="firstGoal">Análise do Primeiro Gol</option>
+                    <option value="scoreAnalysis">Análise de Placar</option>
+                </select>
+                
+                <div class="ia-loading" id="chartLoading">
+                    <div class="ia-loading-spinner"></div>
+                    <p>Gerando gráfico...</p>
+                </div>
+                
+                <div class="ia-charts-container">
+                    <canvas id="iaChart"></canvas>
+                </div>
+                
+                <div class="ia-actions">
+                    <button class="ia-button ia-button-primary" onclick="generateChart()">Gerar Gráfico</button>
+                    <button class="ia-button ia-button-cancel" onclick="hideIAModal()">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificação -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>

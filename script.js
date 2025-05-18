@@ -638,6 +638,36 @@ function calcularEstatisticas() {
         total: 0
     };
 
+    // Sequência de vitórias do favorito (corrigida)
+    let sequenciasCompletas = 0;
+    let sequenciaAtual = 0;
+    let totalPartidasFavorito = 0;
+    let vitoriaAnterior = false;
+    notes.forEach(note => {
+        if (note.favoriteTeam && note.ftScore && note.ftScore.includes('-')) {
+            totalPartidasFavorito++;
+            const [golsCasa, golsFora] = note.ftScore.split('-').map(Number);
+            let favoritoVenceu = false;
+            if (note.favoriteTeam === 'Mandante' && golsCasa > golsFora) favoritoVenceu = true;
+            if (note.favoriteTeam === 'Visitante' && golsFora > golsCasa) favoritoVenceu = true;
+            if (favoritoVenceu) {
+                if (vitoriaAnterior) {
+                    sequenciaAtual++;
+                    if (sequenciaAtual === 1) {
+                        sequenciasCompletas++;
+                    }
+                } else {
+                    sequenciaAtual = 0;
+                }
+                vitoriaAnterior = true;
+            } else {
+                sequenciaAtual = 0;
+                vitoriaAnterior = false;
+            }
+        }
+    });
+    let porcentagemSequencia = totalPartidasFavorito > 0 ? (sequenciasCompletas / totalPartidasFavorito) * 100 : 0;
+
     notes.forEach(note => {
         // Análise FT (Tempo Final)
         if (note.ftScore && note.ftScore.includes('-')) {
@@ -879,6 +909,16 @@ function updateCounters() {
 
     // Atualizar estatísticas
     const stats = calcularEstatisticas();
+
+    // Atualizar sequência de vitórias do favorito
+    if (document.getElementById('predicaoSequenciaVitoriasFavorito')) {
+        document.getElementById('predicaoSequenciaVitoriasFavorito').textContent =
+            `${stats.sequenciaVitoriasFavorito || '0'}/${stats.totalPartidasFavorito || '0'} (${(stats.porcentagemSequenciaFavorito || 0).toFixed(1)}%)`;
+        const bar = document.getElementById('predicaoSequenciaVitoriasFavoritoBar');
+        if (bar) {
+            bar.style.width = `${(stats.porcentagemSequenciaFavorito || 0).toFixed(1)}%`;
+        }
+    }
 
     // Função para determinar a classe de cor baseada na porcentagem
     // Função para determinar a classe de cor baseada na porcentagem
@@ -1342,23 +1382,37 @@ function handleEditGameCard(button) {
 // Função para excluir um card
 // Função para verificar placares e atualizar estado da seção de tempo
 function checkScoresAndUpdateTimeSection() {
-    const ftHome = document.getElementById('ftScoreHome').textContent;
-    const ftAway = document.getElementById('ftScoreAway').textContent;
-    const htHome = document.getElementById('htScoreHome').textContent;
-    const htAway = document.getElementById('htScoreAway').textContent;
+    const ftHome = parseInt(document.getElementById('ftScoreHome').textContent || '0', 10);
+    const ftAway = parseInt(document.getElementById('ftScoreAway').textContent || '0', 10);
+    const htHome = parseInt(document.getElementById('htScoreHome').textContent || '0', 10);
+    const htAway = parseInt(document.getElementById('htScoreAway').textContent || '0', 10);
     const selectedTeam = document.getElementById('firstGoalTeam').value;
 
-    const isZeroZero = ftHome === '0' && ftAway === '0' && htHome === '0' && htAway === '0';
-    const timeButtons = document.querySelector('.first-goal-group:first-child');
+    const isZeroZero = ftHome === 0 && ftAway === 0 && htHome === 0 && htAway === 0;
+    const timeButtonsGroup = document.querySelector('.first-goal-group:first-child');
+    const btnHT = timeButtonsGroup.querySelector('.time-button[data-value="HT"]');
+    const btnFT = timeButtonsGroup.querySelector('.time-button[data-value="FT"]');
 
+    // Lógica automática para marcar o botão de tempo conforme o placar
+    if ((htHome + htAway) > 0) {
+        // Marcar "1º Tempo"
+        selectFirstGoalTime(btnHT);
+    } else if ((ftHome + ftAway) > 0) {
+        // Marcar "2º Tempo"
+        selectFirstGoalTime(btnFT);
+    } else {
+        // Nenhum gol: desmarcar ambos e limpar campo oculto
+        [btnHT, btnFT].forEach(btn => btn.classList.remove('active'));
+        document.getElementById('firstGoalTime').value = '';
+    }
+
+    // Lógica original para habilitar/desabilitar seção conforme seleção de time
     if (selectedTeam === 'Nenhum' && isZeroZero) {
-        timeButtons.classList.add('disabled-section');
-        document.querySelectorAll('.time-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        timeButtonsGroup.classList.add('disabled-section');
+        [btnHT, btnFT].forEach(btn => btn.classList.remove('active'));
         document.getElementById('firstGoalTime').value = '';
     } else if (selectedTeam === 'Nenhum') {
-        timeButtons.classList.remove('disabled-section');
+        timeButtonsGroup.classList.remove('disabled-section');
     }
 }
 
@@ -1371,6 +1425,28 @@ function updateScore(elementId, delta) {
 
     // Verifica os placares após cada atualização
     checkScoresAndUpdateTimeSection();
+    updateOver15Outcome();
+}
+
+// Função para atualizar automaticamente o campo "Resultado Over 1.5 FT (se HT > 0.5)?"
+function updateOver15Outcome() {
+    const ftHome = parseInt(document.getElementById('ftScoreHome').textContent || '0', 10);
+    const ftAway = parseInt(document.getElementById('ftScoreAway').textContent || '0', 10);
+    const htHome = parseInt(document.getElementById('htScoreHome').textContent || '0', 10);
+    const htAway = parseInt(document.getElementById('htScoreAway').textContent || '0', 10);
+
+    const ftTotal = ftHome + ftAway;
+    const htTotal = htHome + htAway;
+
+    let valueToCheck = "na";
+    if (htTotal > 0) {
+        valueToCheck = (ftTotal > 1) ? "yes" : "no";
+    }
+
+    const radios = document.getElementsByName('over15FtOutcome');
+    radios.forEach(radio => {
+        radio.checked = (radio.value === valueToCheck);
+    });
 }
 
 function handleDeleteGameCard(button) {

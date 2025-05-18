@@ -890,7 +890,10 @@ function calcularEstatisticas() {
         golHT_15_29: `${golHT_15_29}/${totalGolHT} (${percentGolHT_15_29}%)`,
         golHT_30_45: `${golHT_30_45}/${totalGolHT} (${percentGolHT_30_45}%)`,
         over15FTGeral: `${over15FTGeralAcertos}/${over15FTGeralTotal} (${percentOver15FTGeral}%)`,
-        over15FTUltimos10: `${over15FTUltimos10Acertos}/${over15FTUltimos10Total} (${percentOver15FTUltimos10}%)`
+        over15FTUltimos10: `${over15FTUltimos10Acertos}/${over15FTUltimos10Total} (${percentOver15FTUltimos10}%)`,
+        sequenciaVitoriasFavorito: sequenciasCompletas,
+        totalPartidasFavorito: totalPartidasFavorito,
+        porcentagemSequenciaFavorito: porcentagemSequencia
     };
 }
 

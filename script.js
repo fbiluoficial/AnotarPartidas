@@ -638,35 +638,45 @@ function calcularEstatisticas() {
         total: 0
     };
 
-    // Sequência de vitórias do favorito (corrigida)
+    // Sequência de vitórias do favorito (corrigida v4)
     let sequenciasCompletas = 0;
+    let totalCasos = 0;
     let sequenciaAtual = 0;
-    let totalPartidasFavorito = 0;
-    let vitoriaAnterior = false;
+    let emSequencia = false;
     notes.forEach(note => {
         if (note.favoriteTeam && note.ftScore && note.ftScore.includes('-')) {
-            totalPartidasFavorito++;
             const [golsCasa, golsFora] = note.ftScore.split('-').map(Number);
             let favoritoVenceu = false;
             if (note.favoriteTeam === 'Mandante' && golsCasa > golsFora) favoritoVenceu = true;
             if (note.favoriteTeam === 'Visitante' && golsFora > golsCasa) favoritoVenceu = true;
             if (favoritoVenceu) {
-                if (vitoriaAnterior) {
-                    sequenciaAtual++;
-                    if (sequenciaAtual === 1) {
-                        sequenciasCompletas++;
-                    }
+                if (!emSequencia) {
+                    totalCasos++; // Novo bloco/caso de vitórias do favorito
+                    sequenciaAtual = 1;
+                    emSequencia = true;
                 } else {
-                    sequenciaAtual = 0;
+                    sequenciaAtual++;
                 }
-                vitoriaAnterior = true;
             } else {
+                if (emSequencia && sequenciaAtual >= 2) {
+                    sequenciasCompletas++;
+                }
                 sequenciaAtual = 0;
-                vitoriaAnterior = false;
+                emSequencia = false;
             }
+        } else {
+            if (emSequencia && sequenciaAtual >= 2) {
+                sequenciasCompletas++;
+            }
+            sequenciaAtual = 0;
+            emSequencia = false;
         }
     });
-    let porcentagemSequencia = totalPartidasFavorito > 0 ? (sequenciasCompletas / totalPartidasFavorito) * 100 : 0;
+    // Caso a última sequência termine no fim da lista
+    if (emSequencia && sequenciaAtual >= 2) {
+        sequenciasCompletas++;
+    }
+    let porcentagemSequencia = totalCasos > 0 ? (sequenciasCompletas / totalCasos) * 100 : 0;
 
     notes.forEach(note => {
         // Análise FT (Tempo Final)
@@ -892,7 +902,7 @@ function calcularEstatisticas() {
         over15FTGeral: `${over15FTGeralAcertos}/${over15FTGeralTotal} (${percentOver15FTGeral}%)`,
         over15FTUltimos10: `${over15FTUltimos10Acertos}/${over15FTUltimos10Total} (${percentOver15FTUltimos10}%)`,
         sequenciaVitoriasFavorito: sequenciasCompletas,
-        totalPartidasFavorito: totalPartidasFavorito,
+        totalPartidasFavorito: totalCasos,
         porcentagemSequenciaFavorito: porcentagemSequencia
     };
 }

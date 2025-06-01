@@ -638,6 +638,10 @@ function calcularEstatisticas() {
         total: 0
     };
 
+    // Contadores para nova predição: Visitante 1º FT → Casa 0.5+ Gol
+    let totalVisitantePrimeiroFT = 0;
+    let acertosVisitantePrimeiroFT05Casa = 0;
+
     // Sequência de vitórias do favorito (corrigida v4)
     let sequenciasCompletas = 0;
     let totalCasos = 0;
@@ -733,6 +737,26 @@ function calcularEstatisticas() {
                 golHTCasaVenceFT_total++;
                 if (golsCasaFT > golsForaFT) {
                     golHTCasaVenceFT_sucesso++;
+                }
+            }
+        }
+    });
+
+    // Nova predição: Visitante 1º FT → Casa 0.5+ Gol
+    notes.forEach(note => {
+        // Verifica se o primeiro gol foi do visitante (em qualquer tempo)
+        // Estrutura esperada: note.firstGoal = "HT | Visitante" ou "FT | Visitante"
+        if (
+            note.firstGoal &&
+            typeof note.firstGoal === "string" &&
+            note.firstGoal.includes("Visitante")
+        ) {
+            totalVisitantePrimeiroFT++;
+            // Verifica se a casa marcou pelo menos 1 gol no FT
+            if (note.ftScore && note.ftScore.includes('-')) {
+                const [golsCasa, ] = note.ftScore.split('-').map(Number);
+                if (golsCasa >= 1) {
+                    acertosVisitantePrimeiroFT05Casa++;
                 }
             }
         }
@@ -903,7 +927,8 @@ function calcularEstatisticas() {
         over15FTUltimos10: `${over15FTUltimos10Acertos}/${over15FTUltimos10Total} (${percentOver15FTUltimos10}%)`,
         sequenciaVitoriasFavorito: sequenciasCompletas,
         totalPartidasFavorito: totalCasos,
-        porcentagemSequenciaFavorito: porcentagemSequencia
+        porcentagemSequenciaFavorito: porcentagemSequencia,
+        predicaoVisitantePrimeiroFT05Casa: `${acertosVisitantePrimeiroFT05Casa}/${totalVisitantePrimeiroFT} (${totalVisitantePrimeiroFT > 0 ? ((acertosVisitantePrimeiroFT05Casa/totalVisitantePrimeiroFT)*100).toFixed(1) : 0}%)`
     };
 }
 
@@ -1034,6 +1059,9 @@ function updateCounters() {
     atualizarElementoComProgresso('golHT_0_14', stats.golHT_0_14);
     atualizarElementoComProgresso('golHT_15_29', stats.golHT_15_29);
     atualizarElementoComProgresso('golHT_30_45', stats.golHT_30_45);
+
+    // Nova predição: Visitante 1º FT → Casa 0.5+ Gol
+    atualizarElementoComProgresso('predicaoVisitantePrimeiroFT05Casa', stats.predicaoVisitantePrimeiroFT05Casa);
 
     // Calcular score de performance para cada card
     const statsCards = Array.from(document.querySelectorAll('.stats-card'));
